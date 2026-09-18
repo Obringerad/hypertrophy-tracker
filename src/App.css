@@ -467,3 +467,36 @@ button.primary:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  max-width: calc(100vw - 2rem);
+}
+
+.toast-action {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  padding: 0;
+}
+
+.toast-dismiss {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+}

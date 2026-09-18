@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import type { Exercise, WorkoutPlan, WorkoutSession } from './types'
 import { ExerciseManager } from './components/ExerciseManager'
@@ -7,10 +7,19 @@ import { HistoryView } from './components/HistoryView'
 import { PlanSetup } from './components/PlanSetup'
 import { PlansList } from './components/PlansList'
 import { PlanDetail } from './components/PlanDetail'
+import { Toast } from './components/Toast'
 import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
 import './App.css'
 
 type Tab = 'log' | 'history' | 'plans' | 'exercises'
+
+const UNDO_WINDOW_MS = 6000
+
+interface DeletedPlan {
+  plan: WorkoutPlan
+  index: number
+  wasActive: boolean
+}
 
 export default function App() {
   const [exercises, setExercises] = useLocalStorage<Exercise[]>('hypertrophy.exercises', [])
@@ -20,6 +29,8 @@ export default function App() {
   const [tab, setTab] = useState<Tab>(plans.length > 0 ? 'log' : 'plans')
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [creatingPlan, setCreatingPlan] = useState(plans.length === 0)
+  const [deletedPlan, setDeletedPlan] = useState<DeletedPlan | null>(null)
+  const undoTimeoutRef = useRef<number | null>(null)
 
   const activePlan = plans.find((p) => p.id === activePlanId) ?? null
   const selectedPlan = plans.find((p) => p.id === selectedPlanId) ?? null
@@ -54,9 +65,36 @@ export default function App() {
   }
 
   function deletePlan(planId: string) {
+    const index = plans.findIndex((p) => p.id === planId)
+    if (index === -1) return
+    const plan = plans[index]
+    if (!window.confirm(`Delete "${plan.name}"? This can't be undone.`)) return
+
+    const wasActive = activePlanId === planId
     setPlans((prev) => prev.filter((p) => p.id !== planId))
-    if (activePlanId === planId) setActivePlanId(null)
+    if (wasActive) setActivePlanId(null)
     setSelectedPlanId(null)
+
+    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
+    setDeletedPlan({ plan, index, wasActive })
+    undoTimeoutRef.current = window.setTimeout(() => setDeletedPlan(null), UNDO_WINDOW_MS)
+  }
+
+  function undoDeletePlan() {
+    if (!deletedPlan) return
+    setPlans((prev) => {
+      const next = [...prev]
+      next.splice(deletedPlan.index, 0, deletedPlan.plan)
+      return next
+    })
+    if (deletedPlan.wasActive) setActivePlanId(deletedPlan.plan.id)
+    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
+    setDeletedPlan(null)
+  }
+
+  function dismissDeleteToast() {
+    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
+    setDeletedPlan(null)
   }
 
   const todaysPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
@@ -130,6 +168,15 @@ export default function App() {
           <ExerciseManager exercises={exercises} onAdd={addExercise} onRemove={removeExercise} />
         )}
       </main>
+
+      {deletedPlan && (
+        <Toast
+          message={`Deleted "${deletedPlan.plan.name}"`}
+          actionLabel="Undo"
+          onAction={undoDeletePlan}
+          onDismiss={dismissDeleteToast}
+        />
+      )}
     </div>
   )
 }
