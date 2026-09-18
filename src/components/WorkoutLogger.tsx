@@ -8,13 +8,14 @@ interface Props {
   sessions: WorkoutSession[]
   onSave: (session: WorkoutSession) => void
   planDay?: PlanDay | null
+  activePlanId?: string
 }
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export function WorkoutLogger({ exercises, sessions, onSave, planDay }: Props) {
+export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlanId }: Props) {
   const [date, setDate] = useState(todayIso())
   const [recovery, setRecovery] = useState(3)
   const [logged, setLogged] = useState<LoggedExercise[]>([])
@@ -52,7 +53,14 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay }: Props) {
 
   function saveSession() {
     if (logged.length === 0) return
-    onSave({ id: crypto.randomUUID(), date, recovery, exercises: logged })
+    onSave({
+      id: crypto.randomUUID(),
+      date,
+      recovery,
+      exercises: logged,
+      planId: activePlanId,
+      planDayId: planDay?.id,
+    })
     setLogged([])
   }
 

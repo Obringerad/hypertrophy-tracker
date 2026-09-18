@@ -313,3 +313,157 @@ button.primary:disabled {
   border-color: #3ba55d;
   color: #3ba55d;
 }
+
+.plan-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.plan-name-field input {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text);
+}
+
+.plan-card:hover {
+  border-color: var(--accent);
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.active-badge {
+  background: color-mix(in srgb, #3ba55d 20%, transparent);
+  color: #3ba55d;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.plan-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progress-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 1rem 0;
+}
+
+.progress-bar {
+  background: var(--border);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+
+.progress-bar-fill {
+  background: var(--accent);
+  height: 100%;
+}
+
+.link-btn.danger {
+  color: #d9534f;
+}
+
+.plan-calendar {
+  margin: 1rem 0 1.5rem;
+}
+
+.calendar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-headers {
+  margin-bottom: 2px;
+}
+
+.calendar-header-cell {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.calendar-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.7rem;
+  overflow: hidden;
+}
+
+.calendar-cell.outside-month {
+  opacity: 0.35;
+}
+
+.calendar-cell.today {
+  border-color: var(--accent);
+  border-width: 2px;
+}
+
+.calendar-cell.scheduled {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.calendar-cell.logged {
+  background: color-mix(in srgb, #3ba55d 18%, transparent);
+  border-color: #3ba55d;
+}
+
+.calendar-date {
+  font-weight: 600;
+}
+
+.calendar-day-label {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

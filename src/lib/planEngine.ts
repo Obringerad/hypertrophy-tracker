@@ -2,10 +2,12 @@ import type { Exercise, PlanDay, WorkoutPlan } from '../types'
 import type { SplitTemplate, TemplateDay } from './splitTemplates'
 
 interface MaterializeOptions {
+  name: string
   template: SplitTemplate
   scheduleType: 'fixed' | 'flexible'
   fixedDays?: number[]
   daysPerWeek?: number
+  durationWeeks?: number
   existingExercises: Exercise[]
 }
 
@@ -26,10 +28,12 @@ function blankDaysFor(count: number): TemplateDay[] {
  * don't already exist in the user's library (matched by name, case-insensitive).
  */
 export function materializePlan({
+  name,
   template,
   scheduleType,
   fixedDays,
   daysPerWeek,
+  durationWeeks,
   existingExercises,
 }: MaterializeOptions): MaterializeResult {
   const templateDays =
@@ -64,12 +68,15 @@ export function materializePlan({
 
   const plan: WorkoutPlan = {
     id: crypto.randomUUID(),
+    name: name.trim() || template.name,
     splitName: template.name,
     scheduleType,
     fixedDays: scheduleType === 'fixed' ? [...(fixedDays ?? [])].sort((a, b) => a - b) : undefined,
     daysPerWeek: scheduleType === 'flexible' ? daysPerWeek : undefined,
     days,
     nextDayIndex: 0,
+    startDate: new Date().toISOString().slice(0, 10),
+    durationWeeks,
   }
 
   return { plan, newExercises }

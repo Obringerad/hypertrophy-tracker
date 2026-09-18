@@ -28,6 +28,10 @@ export interface WorkoutSession {
   recovery: number
   exercises: LoggedExercise[]
   notes?: string
+  /** The plan this session was logged against, if any. */
+  planId?: string
+  /** Which of the plan's days this session was for, e.g. the "Push" day. */
+  planDayId?: string
 }
 
 export interface PlanExercise {
@@ -50,6 +54,8 @@ export type Weekday = number
 
 export interface WorkoutPlan {
   id: string
+  /** User-given title, e.g. "10 Week PPL". Defaults to the split name. */
+  name: string
   splitName: string
   scheduleType: ScheduleType
   /** Sorted ascending. Only set when scheduleType is 'fixed'. */
@@ -60,6 +66,10 @@ export interface WorkoutPlan {
   days: PlanDay[]
   /** Index into `days` for the next flexible-schedule session. Unused for fixed schedules. */
   nextDayIndex: number
+  /** ISO date the plan was created/started. */
+  startDate: string
+  /** Target mesocycle length in weeks. Undefined means open-ended. */
+  durationWeeks?: number
 }
 
 export type ProgressionAction = 'increase_weight' | 'increase_reps' | 'hold' | 'decrease' | 'deload'

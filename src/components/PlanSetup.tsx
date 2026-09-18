@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Exercise, PlanDay, ScheduleType, WorkoutPlan } from '../types'
 import { SPLIT_TEMPLATES, type SplitTemplate } from '../lib/splitTemplates'
 import { materializePlan } from '../lib/planEngine'
+import { PlanDayEditor } from './PlanDayEditor'
 
 interface Props {
   existingExercises: Exercise[]
@@ -15,6 +16,8 @@ type Step = 'schedule' | 'split' | 'review'
 
 export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
   const [step, setStep] = useState<Step>('schedule')
+  const [name, setName] = useState('')
+  const [durationWeeks, setDurationWeeks] = useState<number | ''>('')
   const [scheduleType, setScheduleType] = useState<ScheduleType>('fixed')
   const [fixedDays, setFixedDays] = useState<number[]>([1, 3, 5])
   const [daysPerWeek, setDaysPerWeek] = useState(3)
@@ -27,10 +30,12 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
 
   function pickTemplate(template: SplitTemplate) {
     const { plan, newExercises } = materializePlan({
+      name: name || template.name,
       template,
       scheduleType,
       fixedDays: scheduleType === 'fixed' ? fixedDays : undefined,
       daysPerWeek: scheduleType === 'flexible' ? daysPerWeek : undefined,
+      durationWeeks: durationWeeks === '' ? undefined : durationWeeks,
       existingExercises,
     })
     setDraftPlan(plan)
@@ -87,10 +92,28 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
 
   return (
     <div className="panel">
-      <h2>Set up your plan</h2>
+      <h2>Set up a plan</h2>
 
       {step === 'schedule' && (
         <div className="wizard-step">
+          <label className="plan-name-field">
+            Plan name (optional)
+            <input
+              placeholder="e.g. 10 Week PPL"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          <label className="plan-name-field">
+            Duration in weeks (optional, leave blank for open-ended)
+            <input
+              type="number"
+              min={1}
+              value={durationWeeks}
+              onChange={(e) => setDurationWeeks(e.target.value === '' ? '' : Number(e.target.value))}
+            />
+          </label>
+
           <div className="schedule-type-picker">
             <button
               className={scheduleType === 'fixed' ? 'choice-btn active' : 'choice-btn'}
@@ -196,60 +219,6 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-function PlanDayEditor({
-  day,
-  exerciseName,
-  onRemoveExercise,
-  onAddExercise,
-}: {
-  day: PlanDay
-  exerciseName: (id: string) => string
-  onRemoveExercise: (exerciseId: string) => void
-  onAddExercise: (name: string) => void
-}) {
-  const [newName, setNewName] = useState('')
-  return (
-    <div className="plan-day-editor">
-      <h3>{day.label}</h3>
-      <ul className="exercise-list">
-        {day.exercises.map((pe) => (
-          <li key={pe.exerciseId}>
-            <span>
-              {exerciseName(pe.exerciseId)} <span className="muted">&middot; {pe.targetSets} sets</span>
-            </span>
-            <button className="link-btn" onClick={() => onRemoveExercise(pe.exerciseId)}>
-              Remove
-            </button>
-          </li>
-        ))}
-        {day.exercises.length === 0 && <p className="muted">No exercises yet.</p>}
-      </ul>
-      <div className="add-exercise-inline">
-        <input
-          placeholder="Add exercise"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              onAddExercise(newName)
-              setNewName('')
-            }
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            onAddExercise(newName)
-            setNewName('')
-          }}
-        >
-          Add
-        </button>
-      </div>
     </div>
   )
 }
