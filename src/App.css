@@ -149,6 +149,8 @@ button.primary:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .suggestion {
@@ -226,6 +228,8 @@ button.primary:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .split-list {
@@ -278,40 +282,6 @@ button.primary:disabled {
   border-radius: 6px;
   background: transparent;
   color: var(--text);
-}
-
-.today-plan-card {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.6rem 0.8rem;
-  margin-bottom: 1rem;
-}
-
-.exercise-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
-}
-
-.chip {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.85rem;
-}
-
-.chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
-}
-
-.chip.done {
-  border-color: #3ba55d;
-  color: #3ba55d;
 }
 
 .plan-name-field {
@@ -499,4 +469,52 @@ button.primary:disabled {
   font-size: 1.1rem;
   line-height: 1;
   padding: 0;
+}
+
+.workout-home {
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+}
+
+.workout-home-date {
+  color: var(--muted);
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+}
+
+.workout-home h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.6rem;
+}
+
+.recovery-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  max-width: 20rem;
+  margin: 0 auto 1.75rem;
+}
+
+.start-workout-btn {
+  font-size: 1.1rem;
+  padding: 0.9rem 2.5rem;
+  border-radius: 999px;
+}
+
+.workout-progress {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.active-workout h2 {
+  margin: 0.3rem 0 0.1rem;
+  font-size: 1.5rem;
+}
+
+.wizard-actions > div {
+  display: flex;
+  gap: 1rem;
 }
