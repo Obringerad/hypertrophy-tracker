@@ -47,6 +47,9 @@ export default function App() {
     setSessions((prev) => [...prev, session])
     if (activePlan) {
       setPlans((prev) => prev.map((p) => (p.id === activePlan.id ? advancePlanRotation(p) : p)))
+      setSelectedPlanId(activePlan.id)
+      setCreatingPlan(false)
+      setTab('plans')
     }
   }
 
