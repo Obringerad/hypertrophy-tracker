@@ -1,19 +1,12 @@
 import { useState } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
+import { formatDate } from '../lib/dates'
 
 interface Props {
   exercises: Exercise[]
   sessions: WorkoutSession[]
   plans: WorkoutPlan[]
-}
-
-function formatDate(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
+  onDelete: (sessionId: string) => void
 }
 
 function planDayLabel(session: WorkoutSession, plans: WorkoutPlan[]): string | undefined {
@@ -22,7 +15,7 @@ function planDayLabel(session: WorkoutSession, plans: WorkoutPlan[]): string | u
   return plan?.days.find((d) => d.id === session.planDayId)?.label
 }
 
-export function HistoryView({ exercises, sessions, plans }: Props) {
+export function HistoryView({ exercises, sessions, plans, onDelete }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
   const sorted = sessions.slice().sort((a, b) => b.date.localeCompare(a.date))
@@ -94,6 +87,9 @@ export function HistoryView({ exercises, sessions, plans }: Props) {
                       </div>
                     )
                   })}
+                  <button type="button" className="link-btn danger" onClick={() => onDelete(session.id)}>
+                    Delete workout
+                  </button>
                 </div>
               )}
             </div>

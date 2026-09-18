@@ -570,3 +570,8 @@ button.primary:disabled {
 .history-entry-body .plan-day-editor:first-child {
   border-top: none;
 }
+
+.history-entry-body > .link-btn.danger {
+  display: inline-block;
+  margin-top: 0.5rem;
+}

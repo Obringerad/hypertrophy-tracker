@@ -9,16 +9,16 @@ import { PlansList } from './components/PlansList'
 import { PlanDetail } from './components/PlanDetail'
 import { Toast } from './components/Toast'
 import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
+import { formatDate } from './lib/dates'
 import './App.css'
 
 type Tab = 'log' | 'history' | 'plans' | 'exercises'
 
 const UNDO_WINDOW_MS = 6000
 
-interface DeletedPlan {
-  plan: WorkoutPlan
-  index: number
-  wasActive: boolean
+interface UndoAction {
+  message: string
+  undo: () => void
 }
 
 export default function App() {
@@ -29,8 +29,19 @@ export default function App() {
   const [tab, setTab] = useState<Tab>(plans.length > 0 ? 'log' : 'plans')
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [creatingPlan, setCreatingPlan] = useState(plans.length === 0)
-  const [deletedPlan, setDeletedPlan] = useState<DeletedPlan | null>(null)
+  const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
   const undoTimeoutRef = useRef<number | null>(null)
+
+  function pushUndo(message: string, undo: () => void) {
+    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
+    setUndoAction({ message, undo })
+    undoTimeoutRef.current = window.setTimeout(() => setUndoAction(null), UNDO_WINDOW_MS)
+  }
+
+  function dismissUndo() {
+    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
+    setUndoAction(null)
+  }
 
   const activePlan = plans.find((p) => p.id === activePlanId) ?? null
   const selectedPlan = plans.find((p) => p.id === selectedPlanId) ?? null
@@ -78,26 +89,30 @@ export default function App() {
     if (wasActive) setActivePlanId(null)
     setSelectedPlanId(null)
 
-    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
-    setDeletedPlan({ plan, index, wasActive })
-    undoTimeoutRef.current = window.setTimeout(() => setDeletedPlan(null), UNDO_WINDOW_MS)
-  }
-
-  function undoDeletePlan() {
-    if (!deletedPlan) return
-    setPlans((prev) => {
-      const next = [...prev]
-      next.splice(deletedPlan.index, 0, deletedPlan.plan)
-      return next
+    pushUndo(`Deleted "${plan.name}"`, () => {
+      setPlans((prev) => {
+        const next = [...prev]
+        next.splice(index, 0, plan)
+        return next
+      })
+      if (wasActive) setActivePlanId(plan.id)
     })
-    if (deletedPlan.wasActive) setActivePlanId(deletedPlan.plan.id)
-    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
-    setDeletedPlan(null)
   }
 
-  function dismissDeleteToast() {
-    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
-    setDeletedPlan(null)
+  function deleteSession(sessionId: string) {
+    const index = sessions.findIndex((s) => s.id === sessionId)
+    if (index === -1) return
+    const session = sessions[index]
+
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId))
+
+    pushUndo(`Deleted workout from ${formatDate(session.date)}`, () => {
+      setSessions((prev) => {
+        const next = [...prev]
+        next.splice(index, 0, session)
+        return next
+      })
+    })
   }
 
   const todaysPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
@@ -139,7 +154,9 @@ export default function App() {
             activePlanId={activePlan?.id}
           />
         )}
-        {tab === 'history' && <HistoryView exercises={exercises} sessions={sessions} plans={plans} />}
+        {tab === 'history' && (
+          <HistoryView exercises={exercises} sessions={sessions} plans={plans} onDelete={deleteSession} />
+        )}
         {tab === 'plans' &&
           (creatingPlan ? (
             <PlanSetup
@@ -172,12 +189,15 @@ export default function App() {
         )}
       </main>
 
-      {deletedPlan && (
+      {undoAction && (
         <Toast
-          message={`Deleted "${deletedPlan.plan.name}"`}
+          message={undoAction.message}
           actionLabel="Undo"
-          onAction={undoDeletePlan}
-          onDismiss={dismissDeleteToast}
+          onAction={() => {
+            undoAction.undo()
+            dismissUndo()
+          }}
+          onDismiss={dismissUndo}
         />
       )}
     </div>
