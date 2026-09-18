@@ -30,6 +30,38 @@ export interface WorkoutSession {
   notes?: string
 }
 
+export interface PlanExercise {
+  exerciseId: string
+  targetSets: number
+}
+
+export interface PlanDay {
+  id: string
+  label: string
+  exercises: PlanExercise[]
+}
+
+export type ScheduleType = 'fixed' | 'flexible'
+
+/**
+ * A day of the week, 0 (Sunday) - 6 (Saturday), matching Date#getDay().
+ */
+export type Weekday = number
+
+export interface WorkoutPlan {
+  id: string
+  splitName: string
+  scheduleType: ScheduleType
+  /** Sorted ascending. Only set when scheduleType is 'fixed'. */
+  fixedDays?: Weekday[]
+  /** Only set when scheduleType is 'flexible'. */
+  daysPerWeek?: number
+  /** Ordered rotation of day templates, e.g. [Push, Pull, Legs]. */
+  days: PlanDay[]
+  /** Index into `days` for the next flexible-schedule session. Unused for fixed schedules. */
+  nextDayIndex: number
+}
+
 export type ProgressionAction = 'increase_weight' | 'increase_reps' | 'hold' | 'decrease' | 'deload'
 
 export interface ProgressionSuggestion {

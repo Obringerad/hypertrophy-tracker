@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { Exercise, LoggedExercise, SetEntry, WorkoutSession } from '../types'
+import type { Exercise, LoggedExercise, PlanDay, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
 import { SuggestionCard } from './SuggestionCard'
 
@@ -7,17 +7,18 @@ interface Props {
   exercises: Exercise[]
   sessions: WorkoutSession[]
   onSave: (session: WorkoutSession) => void
+  planDay?: PlanDay | null
 }
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export function WorkoutLogger({ exercises, sessions, onSave }: Props) {
+export function WorkoutLogger({ exercises, sessions, onSave, planDay }: Props) {
   const [date, setDate] = useState(todayIso())
   const [recovery, setRecovery] = useState(3)
   const [logged, setLogged] = useState<LoggedExercise[]>([])
-  const [activeExerciseId, setActiveExerciseId] = useState(exercises[0]?.id ?? '')
+  const [activeExerciseId, setActiveExerciseId] = useState(planDay?.exercises[0]?.exerciseId ?? exercises[0]?.id ?? '')
   const [setForm, setSetForm] = useState({ weight: 0, reps: 0, rpe: 8 })
 
   const activeExercise = exercises.find((e) => e.id === activeExerciseId)
@@ -80,6 +81,35 @@ export function WorkoutLogger({ exercises, sessions, onSave }: Props) {
           <span>{recovery}</span>
         </label>
       </div>
+
+      {planDay && planDay.exercises.length > 0 && (
+        <div className="today-plan-card">
+          <span className="muted">Today: {planDay.label}</span>
+          <div className="exercise-chips">
+            {planDay.exercises.map((pe) => {
+              const ex = exercises.find((e) => e.id === pe.exerciseId)
+              if (!ex) return null
+              const done = logged.some((l) => l.exerciseId === pe.exerciseId && l.sets.length >= pe.targetSets)
+              return (
+                <button
+                  key={pe.exerciseId}
+                  type="button"
+                  className={
+                    pe.exerciseId === activeExerciseId
+                      ? 'chip active'
+                      : done
+                        ? 'chip done'
+                        : 'chip'
+                  }
+                  onClick={() => setActiveExerciseId(pe.exerciseId)}
+                >
+                  {ex.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="exercise-picker">
         <select value={activeExerciseId} onChange={(e) => setActiveExerciseId(e.target.value)}>
