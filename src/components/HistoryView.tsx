@@ -47,15 +47,20 @@ export function HistoryView({ exercises, sessions, plans, onDelete }: Props) {
           const dayLabel = planDayLabel(session, plans)
           return (
             <div key={session.id} className="history-entry">
-              <button type="button" className="history-entry-header" onClick={() => toggle(session.id)}>
-                <span className={`history-caret ${isOpen ? 'open' : ''}`}>&#9656;</span>
-                <span className="history-entry-date">{formatDate(session.date)}</span>
-                {dayLabel && <span className="muted">{dayLabel}</span>}
-                <span className="muted">
-                  {session.exercises.length} exercise{session.exercises.length === 1 ? '' : 's'} &middot; Recovery{' '}
-                  {session.recovery}/5
-                </span>
-              </button>
+              <div className="history-entry-header">
+                <button type="button" className="history-toggle" onClick={() => toggle(session.id)}>
+                  <span className={`history-caret ${isOpen ? 'open' : ''}`}>&#9656;</span>
+                  <span className="history-entry-date">{formatDate(session.date)}</span>
+                  {dayLabel && <span className="muted">{dayLabel}</span>}
+                  <span className="muted">
+                    {session.exercises.length} exercise{session.exercises.length === 1 ? '' : 's'} &middot; Recovery{' '}
+                    {session.recovery}/5
+                  </span>
+                </button>
+                <button type="button" className="btn-delete" onClick={() => onDelete(session.id)}>
+                  Delete
+                </button>
+              </div>
 
               {isOpen && (
                 <div className="history-entry-body">
@@ -87,9 +92,6 @@ export function HistoryView({ exercises, sessions, plans, onDelete }: Props) {
                       </div>
                     )
                   })}
-                  <button type="button" className="link-btn danger" onClick={() => onDelete(session.id)}>
-                    Delete workout
-                  </button>
                 </div>
               )}
             </div>

@@ -536,15 +536,38 @@ button.primary:disabled {
 
 .history-entry-header {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.history-toggle {
+  display: flex;
   align-items: center;
   gap: 0.6rem;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   color: var(--text);
-  padding: 0.7rem 0.9rem;
+  padding: 0;
   text-align: left;
   flex-wrap: wrap;
+}
+
+.btn-delete {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid #d9534f;
+  color: #d9534f;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.btn-delete:hover {
+  background: color-mix(in srgb, #d9534f 15%, transparent);
 }
 
 .history-caret {
@@ -569,9 +592,4 @@ button.primary:disabled {
 
 .history-entry-body .plan-day-editor:first-child {
   border-top: none;
-}
-
-.history-entry-body > .link-btn.danger {
-  display: inline-block;
-  margin-top: 0.5rem;
 }
