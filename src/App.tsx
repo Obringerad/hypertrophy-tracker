@@ -139,7 +139,7 @@ export default function App() {
             activePlanId={activePlan?.id}
           />
         )}
-        {tab === 'history' && <HistoryView exercises={exercises} sessions={sessions} />}
+        {tab === 'history' && <HistoryView exercises={exercises} sessions={sessions} plans={plans} />}
         {tab === 'plans' &&
           (creatingPlan ? (
             <PlanSetup

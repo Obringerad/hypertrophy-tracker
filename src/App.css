@@ -521,3 +521,52 @@ button.primary:disabled {
   display: flex;
   gap: 1rem;
 }
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.history-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 0.7rem 0.9rem;
+  text-align: left;
+  flex-wrap: wrap;
+}
+
+.history-caret {
+  display: inline-block;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+  font-size: 0.8rem;
+}
+
+.history-caret.open {
+  transform: rotate(90deg);
+}
+
+.history-entry-date {
+  font-weight: 600;
+}
+
+.history-entry-body {
+  padding: 0 0.9rem 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.history-entry-body .plan-day-editor:first-child {
+  border-top: none;
+}

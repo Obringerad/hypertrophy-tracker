@@ -1,70 +1,105 @@
-import { useMemo, useState } from 'react'
-import type { Exercise, WorkoutSession } from '../types'
-import { historyForExercise, suggestNextSession } from '../lib/progression'
-import { SuggestionCard } from './SuggestionCard'
+import { useState } from 'react'
+import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 
 interface Props {
   exercises: Exercise[]
   sessions: WorkoutSession[]
+  plans: WorkoutPlan[]
 }
 
-export function HistoryView({ exercises, sessions }: Props) {
-  const [exerciseId, setExerciseId] = useState(exercises[0]?.id ?? '')
-  const exercise = exercises.find((e) => e.id === exerciseId)
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
+}
 
-  const history = useMemo(
-    () => (exercise ? historyForExercise(sessions, exercise.id).slice().reverse() : []),
-    [exercise, sessions],
-  )
-  const suggestion = useMemo(() => (exercise ? suggestNextSession(exercise, sessions) : null), [exercise, sessions])
+function planDayLabel(session: WorkoutSession, plans: WorkoutPlan[]): string | undefined {
+  if (!session.planId || !session.planDayId) return undefined
+  const plan = plans.find((p) => p.id === session.planId)
+  return plan?.days.find((d) => d.id === session.planDayId)?.label
+}
 
-  if (exercises.length === 0) {
-    return <p className="muted">Add an exercise to start tracking history.</p>
+export function HistoryView({ exercises, sessions, plans }: Props) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  const sorted = sessions.slice().sort((a, b) => b.date.localeCompare(a.date))
+
+  function toggle(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  if (sessions.length === 0) {
+    return (
+      <div className="panel">
+        <h2>History</h2>
+        <p className="muted">No workouts logged yet.</p>
+      </div>
+    )
   }
 
   return (
     <div className="panel">
       <h2>History</h2>
-      <div className="exercise-picker">
-        <select value={exerciseId} onChange={(e) => setExerciseId(e.target.value)}>
-          {exercises.map((ex) => (
-            <option key={ex.id} value={ex.id}>
-              {ex.name}
-            </option>
-          ))}
-        </select>
+      <div className="history-list">
+        {sorted.map((session) => {
+          const isOpen = expanded.has(session.id)
+          const dayLabel = planDayLabel(session, plans)
+          return (
+            <div key={session.id} className="history-entry">
+              <button type="button" className="history-entry-header" onClick={() => toggle(session.id)}>
+                <span className={`history-caret ${isOpen ? 'open' : ''}`}>&#9656;</span>
+                <span className="history-entry-date">{formatDate(session.date)}</span>
+                {dayLabel && <span className="muted">{dayLabel}</span>}
+                <span className="muted">
+                  {session.exercises.length} exercise{session.exercises.length === 1 ? '' : 's'} &middot; Recovery{' '}
+                  {session.recovery}/5
+                </span>
+              </button>
+
+              {isOpen && (
+                <div className="history-entry-body">
+                  {session.exercises.map((log) => {
+                    const exercise = exercises.find((e) => e.id === log.exerciseId)
+                    return (
+                      <div key={log.exerciseId} className="plan-day-editor">
+                        <h3>{exercise?.name ?? 'Unknown exercise'}</h3>
+                        <table className="set-table">
+                          <thead>
+                            <tr>
+                              <th>Set</th>
+                              <th>Weight</th>
+                              <th>Reps</th>
+                              <th>RPE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {log.sets.map((s, i) => (
+                              <tr key={i}>
+                                <td>{i + 1}</td>
+                                <td>{s.weight}</td>
+                                <td>{s.reps}</td>
+                                <td>{s.rpe}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
-
-      {suggestion && <SuggestionCard suggestion={suggestion} />}
-
-      {history.length === 0 ? (
-        <p className="muted">No sessions logged for this exercise yet.</p>
-      ) : (
-        <table className="set-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Sets</th>
-              <th>Avg RPE</th>
-              <th>Recovery</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((session) => {
-              const log = session.exercises.find((e) => e.exerciseId === exerciseId)!
-              const avgRpe = log.sets.reduce((a, s) => a + s.rpe, 0) / log.sets.length
-              return (
-                <tr key={session.id}>
-                  <td>{session.date}</td>
-                  <td>{log.sets.map((s) => `${s.weight}x${s.reps}`).join(', ')}</td>
-                  <td>{avgRpe.toFixed(1)}</td>
-                  <td>{session.recovery}/5</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      )}
     </div>
   )
 }
