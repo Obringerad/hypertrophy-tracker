@@ -4,6 +4,7 @@ import type { Exercise, WorkoutPlan, WorkoutSession } from './types'
 import { ExerciseManager } from './components/ExerciseManager'
 import { WorkoutLogger } from './components/WorkoutLogger'
 import { HistoryView } from './components/HistoryView'
+import { CalendarTab } from './components/CalendarTab'
 import { PlanSetup } from './components/PlanSetup'
 import { PlansList } from './components/PlansList'
 import { PlanDetail } from './components/PlanDetail'
@@ -12,7 +13,7 @@ import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
 import { formatDate } from './lib/dates'
 import './App.css'
 
-type Tab = 'log' | 'history' | 'plans' | 'exercises'
+type Tab = 'log' | 'history' | 'calendar' | 'plans' | 'exercises'
 
 const UNDO_WINDOW_MS = 6000
 
@@ -128,6 +129,9 @@ export default function App() {
           <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
             History
           </button>
+          <button className={tab === 'calendar' ? 'active' : ''} onClick={() => setTab('calendar')}>
+            Calendar
+          </button>
           <button
             className={tab === 'plans' ? 'active' : ''}
             onClick={() => {
@@ -157,6 +161,7 @@ export default function App() {
         {tab === 'history' && (
           <HistoryView exercises={exercises} sessions={sessions} plans={plans} onDelete={deleteSession} />
         )}
+        {tab === 'calendar' && <CalendarTab plans={plans} sessions={sessions} />}
         {tab === 'plans' &&
           (creatingPlan ? (
             <PlanSetup
