@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import type { Exercise, WorkoutPlan, WorkoutSession } from './types'
 import { ExerciseManager } from './components/ExerciseManager'
+import { HomeTab } from './components/HomeTab'
 import { WorkoutLogger } from './components/WorkoutLogger'
 import { HistoryView } from './components/HistoryView'
 import { CalendarTab } from './components/CalendarTab'
@@ -13,7 +14,7 @@ import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
 import { formatDate } from './lib/dates'
 import './App.css'
 
-type Tab = 'log' | 'history' | 'calendar' | 'plans' | 'exercises'
+type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises'
 
 const UNDO_WINDOW_MS = 6000
 
@@ -27,7 +28,7 @@ export default function App() {
   const [sessions, setSessions] = useLocalStorage<WorkoutSession[]>('hypertrophy.sessions', [])
   const [plans, setPlans] = useLocalStorage<WorkoutPlan[]>('hypertrophy.plans', [])
   const [activePlanId, setActivePlanId] = useLocalStorage<string | null>('hypertrophy.activePlanId', null)
-  const [tab, setTab] = useState<Tab>(plans.length > 0 ? 'log' : 'plans')
+  const [tab, setTab] = useState<Tab>(plans.length > 0 ? 'home' : 'plans')
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [creatingPlan, setCreatingPlan] = useState(plans.length === 0)
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
@@ -123,6 +124,9 @@ export default function App() {
       <header className="app-header">
         <h1>Hypertrophy Tracker</h1>
         <nav className="tabs">
+          <button className={tab === 'home' ? 'active' : ''} onClick={() => setTab('home')}>
+            Home
+          </button>
           <button className={tab === 'log' ? 'active' : ''} onClick={() => setTab('log')}>
             Log Workout
           </button>
@@ -149,6 +153,7 @@ export default function App() {
       </header>
 
       <main>
+        {tab === 'home' && <HomeTab plans={plans} sessions={sessions} onGoToLog={() => setTab('log')} />}
         {tab === 'log' && (
           <WorkoutLogger
             exercises={exercises}

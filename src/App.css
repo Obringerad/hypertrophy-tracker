@@ -593,3 +593,21 @@ button.primary:disabled {
 .history-entry-body .plan-day-editor:first-child {
   border-top: none;
 }
+
+.home-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.home-header .workout-home-date {
+  margin-bottom: 0.75rem;
+}
+
+.home-calendar-picker {
+  margin-bottom: 1rem;
+}
+
+.home-graphs-note {
+  text-align: center;
+  margin-top: 1.5rem;
+}
