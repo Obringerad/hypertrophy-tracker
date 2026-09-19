@@ -41,7 +41,8 @@ export interface CalendarDay {
   isToday: boolean
   isCurrentMonth: boolean
   isScheduled: boolean
-  planDayLabel?: string
+  /** Label to show for a logged session that day: its plan day's name, or a generic fallback for an off-schedule/freeform session. */
+  sessionLabel?: string
 }
 
 function toIso(d: Date): string {
@@ -74,7 +75,7 @@ export function buildMonthCalendar(
       isToday: iso === todayIso,
       isCurrentMonth,
       isScheduled,
-      planDayLabel: planDay?.label,
+      sessionLabel: session ? (planDay?.label ?? 'Workout') : undefined,
     }
   }
 

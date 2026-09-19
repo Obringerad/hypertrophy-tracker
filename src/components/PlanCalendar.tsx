@@ -55,15 +55,15 @@ export function PlanCalendar({ plan, sessions }: Props) {
                 'calendar-cell',
                 day.isCurrentMonth ? '' : 'outside-month',
                 day.isToday ? 'today' : '',
-                day.planDayLabel ? 'logged' : '',
-                day.isScheduled && !day.planDayLabel ? 'scheduled' : '',
+                day.sessionLabel ? 'logged' : '',
+                day.isScheduled && !day.sessionLabel ? 'scheduled' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
-              title={day.planDayLabel ?? (day.isScheduled ? 'Scheduled' : undefined)}
+              title={day.sessionLabel ?? (day.isScheduled ? 'Scheduled' : undefined)}
             >
               <span className="calendar-date">{day.dayOfMonth}</span>
-              {day.planDayLabel && <span className="calendar-day-label">{day.planDayLabel}</span>}
+              {day.sessionLabel && <span className="calendar-day-label">{day.sessionLabel}</span>}
             </div>
           ))}
         </div>
