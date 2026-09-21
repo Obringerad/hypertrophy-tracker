@@ -7,8 +7,12 @@ interface Props {
 export function WeeklyGoalFlag({ status }: Props) {
   const { daysRemainingInWeek, sessionsRemaining, met, atRisk } = status
   const className = ['weekly-goal-flag', met ? 'met' : atRisk ? 'at-risk' : 'on-track'].join(' ')
-  const sessionWord = sessionsRemaining === 1 ? 'session' : 'sessions'
 
+  if (met) {
+    return <div className={className}>All workouts completed this week</div>
+  }
+
+  const sessionWord = sessionsRemaining === 1 ? 'session' : 'sessions'
   return (
     <div className={className}>
       {sessionsRemaining}/{daysRemainingInWeek} {sessionWord} remaining this week
