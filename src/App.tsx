@@ -203,7 +203,7 @@ export default function App() {
             onUpdateExerciseSets={updateExerciseSets}
           />
         )}
-        {tab === 'calendar' && <CalendarTab plans={plans} sessions={sessions} />}
+        {tab === 'calendar' && <CalendarTab plans={plans} sessions={sessions} exercises={exercises} />}
         {tab === 'plans' &&
           (creatingPlan ? (
             <PlanSetup

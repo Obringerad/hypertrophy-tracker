@@ -107,7 +107,7 @@ export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, o
         )}
       </div>
 
-      <PlanCalendar plan={plan} sessions={sessions} />
+      <PlanCalendar plan={plan} sessions={sessions} exercises={exercises} />
 
       {plan.days.map((day) => (
         <PlanDayEditor

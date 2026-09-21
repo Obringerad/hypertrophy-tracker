@@ -6,6 +6,7 @@ interface Props {
   weeks: CalendarDay[][]
   onPrevMonth: () => void
   onNextMonth: () => void
+  onDayClick?: (iso: string) => void
 }
 
 const WEEKDAY_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -14,7 +15,7 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-export function MonthCalendarGrid({ year, month, weeks, onPrevMonth, onNextMonth }: Props) {
+export function MonthCalendarGrid({ year, month, weeks, onPrevMonth, onNextMonth, onDayClick }: Props) {
   return (
     <div className="plan-calendar">
       <div className="calendar-nav">
@@ -39,6 +40,7 @@ export function MonthCalendarGrid({ year, month, weeks, onPrevMonth, onNextMonth
         <div className="calendar-grid" key={i}>
           {week.map((day) => {
             const hasSessions = day.labels.length > 0
+            const clickable = hasSessions && !!onDayClick
             return (
               <div
                 key={day.iso}
@@ -48,10 +50,24 @@ export function MonthCalendarGrid({ year, month, weeks, onPrevMonth, onNextMonth
                   day.isToday ? 'today' : '',
                   hasSessions ? 'logged' : '',
                   day.isScheduled && !hasSessions ? 'scheduled' : '',
+                  clickable ? 'clickable' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
                 title={hasSessions ? day.labels.join(', ') : day.isScheduled ? 'Scheduled' : undefined}
+                onClick={clickable ? () => onDayClick!(day.iso) : undefined}
+                role={clickable ? 'button' : undefined}
+                tabIndex={clickable ? 0 : undefined}
+                onKeyDown={
+                  clickable
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onDayClick!(day.iso)
+                        }
+                      }
+                    : undefined
+                }
               >
                 <span className="calendar-date">{day.dayOfMonth}</span>
                 {day.labels.map((label, idx) => (
