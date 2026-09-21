@@ -6,14 +6,17 @@ import { MonthCalendarGrid } from './MonthCalendarGrid'
 interface Props {
   plans: WorkoutPlan[]
   sessions: WorkoutSession[]
+  activePlanId: string | null
   onGoToLog: () => void
+  onSetActivePlan: (planId: string) => void
+  onCreatePlan: () => void
 }
 
 function formatToday(): string {
   return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-export function HomeTab({ plans, sessions, onGoToLog }: Props) {
+export function HomeTab({ plans, sessions, activePlanId, onGoToLog, onSetActivePlan, onCreatePlan }: Props) {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
@@ -32,6 +35,37 @@ export function HomeTab({ plans, sessions, onGoToLog }: Props) {
     <div className="panel home-tab">
       <div className="home-header">
         <p className="workout-home-date">{formatToday()}</p>
+
+        {plans.length === 0 ? (
+          <div className="home-plan-picker">
+            <p className="muted">No plan yet</p>
+            <button type="button" className="choice-btn" onClick={onCreatePlan}>
+              Create a plan
+            </button>
+          </div>
+        ) : (
+          <div className="home-plan-picker">
+            <label className="plan-name-field home-active-plan-field">
+              Active plan
+              <select value={activePlanId ?? ''} onChange={(e) => onSetActivePlan(e.target.value)}>
+                {!activePlanId && (
+                  <option value="" disabled>
+                    Select a plan
+                  </option>
+                )}
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="button" className="link-btn" onClick={onCreatePlan}>
+              + New plan
+            </button>
+          </div>
+        )}
+
         <button type="button" className="primary start-workout-btn" onClick={onGoToLog}>
           Log Workout
         </button>

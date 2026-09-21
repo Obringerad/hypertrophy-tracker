@@ -153,7 +153,20 @@ export default function App() {
       </header>
 
       <main>
-        {tab === 'home' && <HomeTab plans={plans} sessions={sessions} onGoToLog={() => setTab('log')} />}
+        {tab === 'home' && (
+          <HomeTab
+            plans={plans}
+            sessions={sessions}
+            activePlanId={activePlanId}
+            onGoToLog={() => setTab('log')}
+            onSetActivePlan={setActivePlanId}
+            onCreatePlan={() => {
+              setTab('plans')
+              setSelectedPlanId(null)
+              setCreatingPlan(true)
+            }}
+          />
+        )}
         {tab === 'log' && (
           <WorkoutLogger
             exercises={exercises}
