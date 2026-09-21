@@ -78,6 +78,16 @@
   color: var(--muted);
 }
 
+.rep-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rep-range-inputs input {
+  width: 3.5rem;
+}
+
 .exercise-form button,
 .set-form button,
 button.primary {

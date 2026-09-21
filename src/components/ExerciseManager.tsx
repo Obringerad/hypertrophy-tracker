@@ -79,19 +79,21 @@ export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props)
         />
         <label>
           Rep range
-          <input
-            type="number"
-            min={1}
-            value={form.repRangeLow}
-            onChange={(e) => setForm({ ...form, repRangeLow: Number(e.target.value) })}
-          />
-          -
-          <input
-            type="number"
-            min={1}
-            value={form.repRangeHigh}
-            onChange={(e) => setForm({ ...form, repRangeHigh: Number(e.target.value) })}
-          />
+          <div className="rep-range-inputs">
+            <input
+              type="number"
+              min={1}
+              value={form.repRangeLow}
+              onChange={(e) => setForm({ ...form, repRangeLow: Number(e.target.value) })}
+            />
+            <span>-</span>
+            <input
+              type="number"
+              min={1}
+              value={form.repRangeHigh}
+              onChange={(e) => setForm({ ...form, repRangeHigh: Number(e.target.value) })}
+            />
+          </div>
         </label>
         <label>
           Smallest weight jump
@@ -123,19 +125,21 @@ export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props)
                 />
                 <label>
                   Rep range
-                  <input
-                    type="number"
-                    min={1}
-                    value={editForm.repRangeLow}
-                    onChange={(e) => setEditForm({ ...editForm, repRangeLow: Number(e.target.value) })}
-                  />
-                  -
-                  <input
-                    type="number"
-                    min={1}
-                    value={editForm.repRangeHigh}
-                    onChange={(e) => setEditForm({ ...editForm, repRangeHigh: Number(e.target.value) })}
-                  />
+                  <div className="rep-range-inputs">
+                    <input
+                      type="number"
+                      min={1}
+                      value={editForm.repRangeLow}
+                      onChange={(e) => setEditForm({ ...editForm, repRangeLow: Number(e.target.value) })}
+                    />
+                    <span>-</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={editForm.repRangeHigh}
+                      onChange={(e) => setEditForm({ ...editForm, repRangeHigh: Number(e.target.value) })}
+                    />
+                  </div>
                 </label>
                 <label>
                   Smallest weight jump
