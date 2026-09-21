@@ -34,3 +34,47 @@ export function planProgress(plan: WorkoutPlan, sessions: WorkoutSession[], toda
   const expectedTotalSessions = totalWeeks ? totalWeeks * expectedSessionsPerWeek(plan) : undefined
   return { completedSessions, week, totalWeeks, expectedTotalSessions }
 }
+
+export interface WeeklyGoalStatus {
+  daysPerWeek: number
+  sessionsThisWeek: number
+  /** Days left in the calendar week (Sun-Sat), including today. */
+  daysRemainingInWeek: number
+  sessionsRemaining: number
+  met: boolean
+  /** Not enough days left in the week to still hit the goal. */
+  atRisk: boolean
+}
+
+/** How a flexible-schedule plan is tracking against its days/week goal for the current calendar week. */
+export function weeklyGoalStatus(
+  plan: WorkoutPlan,
+  sessions: WorkoutSession[],
+  today: Date = new Date(),
+): WeeklyGoalStatus | null {
+  if (plan.scheduleType !== 'flexible' || !plan.daysPerWeek) return null
+
+  const todayStripped = stripTime(today)
+  const dayOfWeek = todayStripped.getDay()
+  const weekStart = new Date(todayStripped)
+  weekStart.setDate(weekStart.getDate() - dayOfWeek)
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 6)
+
+  const sessionsThisWeek = sessionsForPlan(sessions, plan.id).filter((s) => {
+    const d = parseIsoDate(s.date)
+    return d >= weekStart && d <= weekEnd
+  }).length
+
+  const daysRemainingInWeek = 7 - dayOfWeek
+  const sessionsRemaining = Math.max(0, plan.daysPerWeek - sessionsThisWeek)
+
+  return {
+    daysPerWeek: plan.daysPerWeek,
+    sessionsThisWeek,
+    daysRemainingInWeek,
+    sessionsRemaining,
+    met: sessionsRemaining === 0,
+    atRisk: sessionsRemaining > 0 && sessionsRemaining > daysRemainingInWeek,
+  }
+}

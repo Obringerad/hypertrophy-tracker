@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -462,6 +462,32 @@ li.exercise-list-item-editing {
 
 .plan-calendar {
   margin: 1rem 0 1.5rem;
+}
+
+.weekly-goal-flag {
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+
+.weekly-goal-flag.on-track {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.weekly-goal-flag.met {
+  background: color-mix(in srgb, #3ba55d 15%, transparent);
+  border-color: #3ba55d;
+  color: #3ba55d;
+}
+
+.weekly-goal-flag.at-risk {
+  background: color-mix(in srgb, #d9534f 12%, transparent);
+  border-color: #d9534f;
+  color: #d9534f;
 }
 
 .calendar-nav {

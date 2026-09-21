@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { buildMonthCalendar } from '../lib/calendar'
+import { weeklyGoalStatus } from '../lib/planProgress'
 import { MonthCalendarGrid } from './MonthCalendarGrid'
 import { DayWorkoutModal } from './DayWorkoutModal'
+import { WeeklyGoalFlag } from './WeeklyGoalFlag'
 
 interface Props {
   plans: WorkoutPlan[]
@@ -19,6 +21,7 @@ export function CalendarTab({ plans, sessions, exercises }: Props) {
 
   const selectedPlan = selectedPlanId === 'all' ? undefined : plans.find((p) => p.id === selectedPlanId)
   const weeks = buildMonthCalendar(sessions, year, month, { plan: selectedPlan, allPlans: plans })
+  const goalStatus = selectedPlan ? weeklyGoalStatus(selectedPlan, sessions) : null
 
   function shiftMonth(delta: number) {
     const next = new Date(year, month + delta, 1)
@@ -42,6 +45,8 @@ export function CalendarTab({ plans, sessions, exercises }: Props) {
           </select>
         </div>
       )}
+
+      {goalStatus && <WeeklyGoalFlag status={goalStatus} />}
 
       <MonthCalendarGrid
         year={year}
