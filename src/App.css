@@ -636,3 +636,57 @@ button.primary:disabled {
   text-align: center;
   margin-top: 1.5rem;
 }
+
+.progress-graphs {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+
+.progress-graphs h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.progress-graph {
+  margin-top: 1rem;
+}
+
+.progress-graph-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.line-chart-svg {
+  width: 100%;
+  height: 120px;
+  display: block;
+}
+
+.line-chart-axis {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.line-chart-path {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.line-chart-dot {
+  fill: var(--accent);
+}
+
+.line-chart-value-label {
+  fill: var(--muted);
+  font-size: 10px;
+}
+
+.line-chart-x-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}

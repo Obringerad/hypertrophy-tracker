@@ -157,6 +157,7 @@ export default function App() {
           <HomeTab
             plans={plans}
             sessions={sessions}
+            exercises={exercises}
             activePlanId={activePlanId}
             onGoToLog={() => setTab('log')}
             onSetActivePlan={setActivePlanId}

@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import type { WorkoutPlan, WorkoutSession } from '../types'
+import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { buildMonthCalendar } from '../lib/calendar'
 import { MonthCalendarGrid } from './MonthCalendarGrid'
+import { ProgressGraphs } from './ProgressGraphs'
 
 interface Props {
   plans: WorkoutPlan[]
   sessions: WorkoutSession[]
+  exercises: Exercise[]
   activePlanId: string | null
   onGoToLog: () => void
   onSetActivePlan: (planId: string) => void
@@ -16,7 +18,15 @@ function formatToday(): string {
   return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-export function HomeTab({ plans, sessions, activePlanId, onGoToLog, onSetActivePlan, onCreatePlan }: Props) {
+export function HomeTab({
+  plans,
+  sessions,
+  exercises,
+  activePlanId,
+  onGoToLog,
+  onSetActivePlan,
+  onCreatePlan,
+}: Props) {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
@@ -97,7 +107,7 @@ export function HomeTab({ plans, sessions, activePlanId, onGoToLog, onSetActiveP
         </>
       )}
 
-      <p className="muted home-graphs-note">Progress graphs are coming soon.</p>
+      <ProgressGraphs exercises={exercises} sessions={sessions} />
     </div>
   )
 }
