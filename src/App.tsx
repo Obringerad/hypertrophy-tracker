@@ -56,6 +56,10 @@ export default function App() {
     setExercises((prev) => prev.filter((e) => e.id !== id))
   }
 
+  function updateExercise(updated: Exercise) {
+    setExercises((prev) => prev.map((e) => (e.id === updated.id ? updated : e)))
+  }
+
   function saveSession(session: WorkoutSession) {
     setSessions((prev) => [...prev, session])
     if (activePlan) {
@@ -225,7 +229,12 @@ export default function App() {
             />
           ))}
         {tab === 'exercises' && (
-          <ExerciseManager exercises={exercises} onAdd={addExercise} onRemove={removeExercise} />
+          <ExerciseManager
+            exercises={exercises}
+            onAdd={addExercise}
+            onRemove={removeExercise}
+            onUpdate={updateExercise}
+          />
         )}
       </main>
 

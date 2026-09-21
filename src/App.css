@@ -115,6 +115,28 @@ button.primary:disabled {
   border-bottom: 1px solid var(--border);
 }
 
+.exercise-list-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.exercise-list-item-editing {
+  display: block;
+  padding: 0.75rem 0;
+}
+
+.exercise-list-item-editing .exercise-form {
+  margin-bottom: 0;
+}
+
+.exercise-form .link-btn {
+  background: none;
+  color: var(--accent);
+  padding: 0;
+  border-radius: 0;
+}
+
 .session-meta {
   display: flex;
   gap: 1.5rem;
