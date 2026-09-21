@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Exercise, WorkoutSession } from '../types'
-import { exerciseProgressPoints, exercisesWithHistory } from '../lib/progressStats'
+import { exerciseProgressPoints, exercisesWithHistory, sessionVolumePoints } from '../lib/progressStats'
 import { formatShortDate } from '../lib/dates'
 import { LineChart } from './LineChart'
 
@@ -19,10 +19,21 @@ export function ProgressGraphs({ exercises, sessions }: Props) {
 
   const selectedId = trainedExercises.some((e) => e.id === exerciseId) ? exerciseId! : trainedExercises[0].id
   const points = exerciseProgressPoints(sessions, selectedId)
+  const volumePoints = sessionVolumePoints(sessions)
 
   return (
     <div className="progress-graphs">
       <h3>Progress</h3>
+
+      {volumePoints.length >= 2 && (
+        <div className="progress-graph">
+          <span className="muted progress-graph-label">Total volume (all exercises)</span>
+          <LineChart
+            points={volumePoints.map((p) => ({ label: formatShortDate(p.date), value: Math.round(p.volume) }))}
+          />
+        </div>
+      )}
+
       <div className="exercise-picker">
         <select value={selectedId} onChange={(e) => setExerciseId(e.target.value)}>
           {trainedExercises.map((exercise) => (
@@ -42,7 +53,7 @@ export function ProgressGraphs({ exercises, sessions }: Props) {
             <LineChart points={points.map((p) => ({ label: formatShortDate(p.date), value: p.topWeight }))} />
           </div>
           <div className="progress-graph">
-            <span className="muted progress-graph-label">Total volume</span>
+            <span className="muted progress-graph-label">Volume (this exercise)</span>
             <LineChart
               points={points.map((p) => ({ label: formatShortDate(p.date), value: Math.round(p.volume) }))}
             />

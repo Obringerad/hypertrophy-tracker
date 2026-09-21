@@ -21,3 +21,22 @@ export function exercisesWithHistory(exercises: Exercise[], sessions: WorkoutSes
   const idsWithHistory = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId)))
   return exercises.filter((e) => idsWithHistory.has(e.id))
 }
+
+export interface SessionVolumePoint {
+  date: string
+  volume: number
+}
+
+/** Total volume (reps × weight, summed across every set and exercise) for each session, oldest first. */
+export function sessionVolumePoints(sessions: WorkoutSession[]): SessionVolumePoint[] {
+  return sessions
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((session) => ({
+      date: session.date,
+      volume: session.exercises.reduce(
+        (sum, log) => sum + log.sets.reduce((setSum, s) => setSum + s.reps * s.weight, 0),
+        0,
+      ),
+    }))
+}
