@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import type { Exercise, WorkoutPlan, WorkoutSession } from './types'
+import type { Exercise, SetEntry, WorkoutPlan, WorkoutSession } from './types'
 import { ExerciseManager } from './components/ExerciseManager'
 import { HomeTab } from './components/HomeTab'
 import { WorkoutLogger } from './components/WorkoutLogger'
@@ -117,6 +117,16 @@ export default function App() {
     })
   }
 
+  function updateExerciseSets(sessionId: string, exerciseId: string, sets: SetEntry[]) {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === sessionId
+          ? { ...s, exercises: s.exercises.map((log) => (log.exerciseId === exerciseId ? { ...log, sets } : log)) }
+          : s,
+      ),
+    )
+  }
+
   const todaysPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
 
   return (
@@ -178,7 +188,13 @@ export default function App() {
           />
         )}
         {tab === 'history' && (
-          <HistoryView exercises={exercises} sessions={sessions} plans={plans} onDelete={deleteSession} />
+          <HistoryView
+            exercises={exercises}
+            sessions={sessions}
+            plans={plans}
+            onDelete={deleteSession}
+            onUpdateExerciseSets={updateExerciseSets}
+          />
         )}
         {tab === 'calendar' && <CalendarTab plans={plans} sessions={sessions} />}
         {tab === 'plans' &&

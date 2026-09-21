@@ -272,6 +272,32 @@ button.primary:disabled {
   font-size: 1rem;
 }
 
+.exercise-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exercise-log-header h3 {
+  margin: 0;
+}
+
+.exercise-log-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.set-table input {
+  width: 4rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+}
+
 .add-exercise-inline {
   display: flex;
   gap: 0.5rem;
