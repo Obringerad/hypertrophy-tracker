@@ -33,7 +33,7 @@ export function HomeTab({
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
-  const [selectedPlanId, setSelectedPlanId] = useState('all')
+  const [selectedPlanId, setSelectedPlanId] = useState(activePlanId ?? 'all')
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const selectedPlan = selectedPlanId === 'all' ? undefined : plans.find((p) => p.id === selectedPlanId)
