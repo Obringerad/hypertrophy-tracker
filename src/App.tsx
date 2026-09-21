@@ -136,7 +136,10 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Hypertrophy Tracker</h1>
+        <h1>
+          Hypertrophy Tracker {/* TEMP dev marker, delete this span + .dev-deploy-marker CSS when done testing deploys */}
+          <span className="dev-deploy-marker" />
+        </h1>
         <nav className="tabs">
           <button className={tab === 'home' ? 'active' : ''} onClick={() => setTab('home')}>
             Home

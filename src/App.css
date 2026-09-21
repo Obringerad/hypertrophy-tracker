@@ -9,6 +9,17 @@
   margin-bottom: 0.75rem;
 }
 
+/* TEMP dev marker, delete this rule + the .dev-deploy-marker span in App.tsx when done testing deploys */
+.dev-deploy-marker {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: blue;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 .tabs {
   display: flex;
   gap: 0.25rem;
