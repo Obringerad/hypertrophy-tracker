@@ -76,7 +76,21 @@
   border-radius: 6px;
   background: transparent;
   color: var(--text);
+}
+
+.set-form input {
   width: 7rem;
+}
+
+.exercise-form input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exercise-form > input,
+.exercise-form > label {
+  flex: 1 1 140px;
+  min-width: 0;
 }
 
 .exercise-form label,
@@ -93,10 +107,13 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .rep-range-inputs input {
-  width: 3.5rem;
+  flex: 1;
+  width: auto;
+  min-width: 0;
 }
 
 .exercise-form button,
@@ -142,7 +159,7 @@ button.primary:disabled {
   flex-shrink: 0;
 }
 
-.exercise-list-item-editing {
+li.exercise-list-item-editing {
   display: block;
   padding: 0.75rem 0;
 }
