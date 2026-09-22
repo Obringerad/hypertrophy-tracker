@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -476,10 +476,14 @@ li.exercise-list-item-editing {
 }
 
 .weekly-goal-flag {
-  border-radius: 8px;
-  padding: 0.6rem 0.9rem;
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
   margin-bottom: 0.75rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   border: 1px solid var(--border);
 }
 
