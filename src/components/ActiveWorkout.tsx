@@ -152,6 +152,7 @@ export function ActiveWorkout({
   }
 
   const exerciseNumber = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
+  const currentExerciseLog = logged.find((l) => l.exerciseId === current.exerciseId)
 
   return (
     <div className="panel active-workout">
@@ -164,6 +165,31 @@ export function ActiveWorkout({
       </p>
 
       {suggestion && <SuggestionCard suggestion={suggestion} />}
+
+      {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
+        <table className="set-table">
+          <thead>
+            <tr>
+              <th>Set</th>
+              <th>Weight</th>
+              <th>Reps</th>
+              <th>RPE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentExerciseLog.sets.map((s, i) => (
+              <tr key={i} className="set-table-logged-row">
+                <td>
+                  <span className="set-logged-check">&#10003;</span> {i + 1}
+                </td>
+                <td>{s.weight}</td>
+                <td>{s.reps}</td>
+                <td>{s.rpe}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       <div className="set-form">
         <label>

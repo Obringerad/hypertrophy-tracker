@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -206,6 +206,15 @@ li.exercise-list-item-editing {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
+}
+
+.set-table-logged-row {
+  background: color-mix(in srgb, #3ba55d 10%, transparent);
+}
+
+.set-logged-check {
+  color: #3ba55d;
+  font-weight: 700;
 }
 
 .session-summary {

@@ -113,8 +113,10 @@ export function FreeformWorkout({ exercises, sessions, recovery, date, activePla
           </thead>
           <tbody>
             {activeLog.sets.map((s, i) => (
-              <tr key={i}>
-                <td>{i + 1}</td>
+              <tr key={i} className="set-table-logged-row">
+                <td>
+                  <span className="set-logged-check">&#10003;</span> {i + 1}
+                </td>
                 <td>{s.weight}</td>
                 <td>{s.reps}</td>
                 <td>{s.rpe}</td>
