@@ -119,8 +119,8 @@ export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, o
         />
       ))}
 
-      <div className="wizard-actions">
-        <button type="button" className="link-btn danger" onClick={onDelete}>
+      <div className="plan-detail-danger-zone">
+        <button type="button" className="btn-delete" onClick={onDelete}>
           Delete plan
         </button>
       </div>

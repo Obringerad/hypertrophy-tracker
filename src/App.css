@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -465,8 +465,10 @@ li.exercise-list-item-editing {
   height: 100%;
 }
 
-.link-btn.danger {
-  color: #d9534f;
+.plan-detail-danger-zone {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
 }
 
 .plan-calendar {
