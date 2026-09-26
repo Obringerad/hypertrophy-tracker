@@ -53,11 +53,11 @@ export function FreeformWorkout({
 
   const activeExercise = exercises.find((e) => e.id === activeExerciseId)
   const suggestion = useMemo(
-    () => (activeExercise ? suggestNextSession(activeExercise, sessions) : null),
-    [activeExercise, sessions],
+    () => (activeExercise ? suggestNextSession(activeExercise, sessions, weightUnit) : null),
+    [activeExercise, sessions, weightUnit],
   )
   const activeLog = logged.find((l) => l.exerciseId === activeExerciseId)
-  const priorBest = maxWeightEver(sessions, activeExerciseId)
+  const priorBest = maxWeightEver(sessions, activeExerciseId, weightUnit)
 
   const filteredExercises = exercises.filter((e) => e.name.toLowerCase().includes(exerciseFilter.toLowerCase()))
 
@@ -94,6 +94,7 @@ export function FreeformWorkout({
       exercises: logged,
       notes: notes.trim() || undefined,
       planId: activePlanId,
+      unit: weightUnit,
     })
   }
 

@@ -20,8 +20,8 @@ export function ProgressGraphs({ exercises, sessions }: Props) {
   }
 
   const selectedId = trainedExercises.some((e) => e.id === exerciseId) ? exerciseId! : trainedExercises[0].id
-  const points = exerciseProgressPoints(sessions, selectedId)
-  const volumePoints = sessionVolumePoints(sessions)
+  const points = exerciseProgressPoints(sessions, selectedId, weightUnit)
+  const volumePoints = sessionVolumePoints(sessions, weightUnit)
 
   return (
     <div className="progress-graphs">

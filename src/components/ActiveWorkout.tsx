@@ -74,8 +74,8 @@ export function ActiveWorkout({
   const current = queue[stepIndex]
   const currentExercise = current ? exercises.find((e) => e.id === current.exerciseId) : undefined
   const suggestion = useMemo(
-    () => (currentExercise ? suggestNextSession(currentExercise, sessions) : null),
-    [currentExercise, sessions],
+    () => (currentExercise ? suggestNextSession(currentExercise, sessions, weightUnit) : null),
+    [currentExercise, sessions, weightUnit],
   )
 
   // Prefill weight/reps from the suggestion whenever a new exercise starts.
@@ -148,6 +148,7 @@ export function ActiveWorkout({
       notes: notes.trim() || undefined,
       planId: activePlanId,
       planDayId: planDay.id,
+      unit: weightUnit,
     })
   }
 
@@ -158,7 +159,7 @@ export function ActiveWorkout({
         {logged.length === 0 && <p className="muted">Nothing logged yet.</p>}
         {logged.map((l) => {
           const ex = exercises.find((e) => e.id === l.exerciseId)
-          const priorBest = maxWeightEver(sessions, l.exerciseId)
+          const priorBest = maxWeightEver(sessions, l.exerciseId, weightUnit)
           return (
             <div key={l.exerciseId} className="plan-day-editor">
               <h3>{ex?.name ?? 'Unknown exercise'}</h3>
@@ -219,7 +220,7 @@ export function ActiveWorkout({
 
   const exerciseNumber = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
   const currentExerciseLog = logged.find((l) => l.exerciseId === current.exerciseId)
-  const priorBest = maxWeightEver(sessions, current.exerciseId)
+  const priorBest = maxWeightEver(sessions, current.exerciseId, weightUnit)
   const lastQueueIndexForExercise = queue.map((q) => q.exerciseId).lastIndexOf(current.exerciseId)
   const canRemovePlannedSet = lastQueueIndexForExercise > stepIndex
 

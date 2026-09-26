@@ -1,5 +1,6 @@
-import { useRef, type ChangeEvent } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
+import type { WeightUnit } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 
 interface BackupData {
@@ -24,11 +25,35 @@ interface Props {
   plans: WorkoutPlan[]
   activePlanId: string | null
   onImport: (data: ImportedData) => void
+  onChangeUnit: (fromUnit: WeightUnit, toUnit: WeightUnit, convertHistory: boolean) => void
 }
 
-export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport }: Props) {
+const UNIT_LABEL: Record<WeightUnit, string> = { lb: 'Pounds (lb)', kg: 'Kilograms (kg)' }
+
+export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport, onChangeUnit }: Props) {
   const { weightUnit, setWeightUnit } = useSettings()
+  const [pendingUnit, setPendingUnit] = useState<WeightUnit | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const hasLoggedWeights = sessions.some((s) => s.exercises.some((log) => log.sets.length > 0))
+
+  function requestUnitChange(newUnit: WeightUnit) {
+    if (newUnit === weightUnit) return
+    if (!hasLoggedWeights) {
+      // Nothing logged yet - nothing for a history/future choice to apply to.
+      onChangeUnit(weightUnit, newUnit, false)
+      setWeightUnit(newUnit)
+      return
+    }
+    setPendingUnit(newUnit)
+  }
+
+  function resolveUnitChange(convertHistory: boolean) {
+    if (!pendingUnit) return
+    onChangeUnit(weightUnit, pendingUnit, convertHistory)
+    setWeightUnit(pendingUnit)
+    setPendingUnit(null)
+  }
 
   function handleExport() {
     const data: BackupData = { version: 1, exercises, sessions, plans, activePlanId, weightUnit }
@@ -74,18 +99,38 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
           <button
             type="button"
             className={weightUnit === 'lb' ? 'choice-btn active' : 'choice-btn'}
-            onClick={() => setWeightUnit('lb')}
+            onClick={() => requestUnitChange('lb')}
           >
             Pounds (lb)
           </button>
           <button
             type="button"
             className={weightUnit === 'kg' ? 'choice-btn active' : 'choice-btn'}
-            onClick={() => setWeightUnit('kg')}
+            onClick={() => requestUnitChange('kg')}
           >
             Kilograms (kg)
           </button>
         </div>
+
+        {pendingUnit && (
+          <div className="unit-change-prompt">
+            <p>
+              Switch to {UNIT_LABEL[pendingUnit]}? Your logged weights are stored in whatever unit they were
+              entered in, so history will keep displaying correctly either way.
+            </p>
+            <div className="settings-actions">
+              <button type="button" className="primary" onClick={() => resolveUnitChange(true)}>
+                Convert all history to {pendingUnit}
+              </button>
+              <button type="button" className="choice-btn" onClick={() => resolveUnitChange(false)}>
+                Only use {pendingUnit} for new workouts
+              </button>
+              <button type="button" className="link-btn" onClick={() => setPendingUnit(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="settings-section">

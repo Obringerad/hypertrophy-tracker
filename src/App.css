@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -790,6 +790,19 @@ li.exercise-list-item-editing {
   align-items: center;
   flex-wrap: wrap;
   margin-top: 0.75rem;
+}
+
+.unit-change-prompt {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.unit-change-prompt p {
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 .rest-timer {

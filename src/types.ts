@@ -1,3 +1,5 @@
+import type { WeightUnit } from './lib/units'
+
 export interface Exercise {
   id: string
   name: string
@@ -32,6 +34,8 @@ export interface WorkoutSession {
   planId?: string
   /** Which of the plan's days this session was for, e.g. the "Push" day. */
   planDayId?: string
+  /** Unit the weights in this session were logged in. Missing on sessions predating this field, which default to lb. */
+  unit?: WeightUnit
 }
 
 export interface PlanExercise {

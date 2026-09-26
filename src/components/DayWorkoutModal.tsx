@@ -2,8 +2,7 @@ import { useEffect } from 'react'
 import type { Exercise, WorkoutSession } from '../types'
 import { formatDate } from '../lib/dates'
 import { maxWeightEver } from '../lib/records'
-import { formatWeight } from '../lib/units'
-import { useSettings } from '../context/SettingsContext'
+import { formatWeight, sessionUnit } from '../lib/units'
 
 interface Props {
   date: string
@@ -13,7 +12,6 @@ interface Props {
 }
 
 export function DayWorkoutModal({ date, sessions, exercises, onClose }: Props) {
-  const { weightUnit } = useSettings()
   const daySessions = sessions.filter((s) => s.date === date)
 
   useEffect(() => {
@@ -42,7 +40,7 @@ export function DayWorkoutModal({ date, sessions, exercises, onClose }: Props) {
             {session.notes && <p className="history-entry-notes muted">"{session.notes}"</p>}
             {session.exercises.map((log) => {
               const exercise = exercises.find((e) => e.id === log.exerciseId)
-              const priorBest = maxWeightEver(sessions, log.exerciseId)
+              const priorBest = maxWeightEver(sessions, log.exerciseId, sessionUnit(session))
               return (
                 <div key={log.exerciseId} className="plan-day-editor">
                   <h3>{exercise?.name ?? 'Unknown exercise'}</h3>
@@ -60,7 +58,7 @@ export function DayWorkoutModal({ date, sessions, exercises, onClose }: Props) {
                         <tr key={i}>
                           <td>{i + 1}</td>
                           <td>
-                            {formatWeight(s.weight, weightUnit)}
+                            {formatWeight(s.weight, sessionUnit(session))}
                             {s.weight > 0 && s.weight === priorBest && <span className="pr-badge">PR</span>}
                           </td>
                           <td>{s.reps}</td>

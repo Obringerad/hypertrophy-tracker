@@ -2,8 +2,7 @@ import { useState } from 'react'
 import type { Exercise, SetEntry, WorkoutPlan, WorkoutSession } from '../types'
 import { formatDate } from '../lib/dates'
 import { maxWeightEver } from '../lib/records'
-import { formatWeight } from '../lib/units'
-import { useSettings } from '../context/SettingsContext'
+import { formatWeight, sessionUnit } from '../lib/units'
 
 interface Props {
   exercises: Exercise[]
@@ -24,7 +23,6 @@ function logKey(sessionId: string, exerciseId: string): string {
 }
 
 export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExerciseSets }: Props) {
-  const { weightUnit } = useSettings()
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [draftSets, setDraftSets] = useState<SetEntry[]>([])
@@ -100,7 +98,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
                     const exercise = exercises.find((e) => e.id === log.exerciseId)
                     const key = logKey(session.id, log.exerciseId)
                     const isEditing = editingKey === key
-                    const priorBest = maxWeightEver(sessions, log.exerciseId)
+                    const priorBest = maxWeightEver(sessions, log.exerciseId, sessionUnit(session))
                     return (
                       <div key={log.exerciseId} className="plan-day-editor">
                         <div className="exercise-log-header">
@@ -172,7 +170,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
                                 ) : (
                                   <>
                                     <td>
-                                      {formatWeight(s.weight, weightUnit)}
+                                      {formatWeight(s.weight, sessionUnit(session))}
                                       {s.weight > 0 && s.weight === priorBest && (
                                         <span className="pr-badge">PR</span>
                                       )}

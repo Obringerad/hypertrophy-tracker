@@ -1,4 +1,5 @@
-import type { Exercise, LoggedExercise, ProgressionSuggestion, WorkoutSession } from '../types'
+import type { Exercise, LoggedExercise, ProgressionSuggestion, SetEntry, WorkoutSession } from '../types'
+import { convertWeight, sessionUnit, type WeightUnit } from './units'
 
 function avg(nums: number[]): number {
   return nums.reduce((a, b) => a + b, 0) / nums.length
@@ -6,6 +7,12 @@ function avg(nums: number[]): number {
 
 function findLoggedExercise(session: WorkoutSession, exerciseId: string): LoggedExercise | undefined {
   return session.exercises.find((e) => e.exerciseId === exerciseId)
+}
+
+function setsInUnit(session: WorkoutSession, sets: SetEntry[], targetUnit: WeightUnit): SetEntry[] {
+  const from = sessionUnit(session)
+  if (from === targetUnit) return sets
+  return sets.map((s) => ({ ...s, weight: convertWeight(s.weight, from, targetUnit) }))
 }
 
 /** Sessions that included this exercise, oldest first. */
@@ -20,17 +27,20 @@ export function historyForExercise(sessions: WorkoutSession[], exerciseId: strin
  *
  * Reads the most recent session (top set performance + RPE) plus the one before it
  * (to catch two-session regressions worth deloading for) and the reported recovery rating.
+ * Historical weights are normalized to `targetUnit` before comparing, since past sessions may
+ * have been logged in a different unit than the one currently in use.
  */
 export function suggestNextSession(
   exercise: Exercise,
   allSessions: WorkoutSession[],
+  targetUnit: WeightUnit,
 ): ProgressionSuggestion | null {
   const history = historyForExercise(allSessions, exercise.id)
   if (history.length === 0) return null
 
   const last = history[history.length - 1]
   const lastLog = findLoggedExercise(last, exercise.id)!
-  const sets = lastLog.sets
+  const sets = setsInUnit(last, lastLog.sets, targetUnit)
   if (sets.length === 0) return null
 
   const topWeight = Math.max(...sets.map((s) => s.weight))
@@ -42,8 +52,9 @@ export function suggestNextSession(
 
   const prior = history.length > 1 ? history[history.length - 2] : undefined
   const priorLog = prior ? findLoggedExercise(prior, exercise.id) : undefined
-  const priorTopWeight = priorLog ? Math.max(...priorLog.sets.map((s) => s.weight)) : undefined
-  const priorAvgRpe = priorLog ? avg(priorLog.sets.map((s) => s.rpe)) : undefined
+  const priorSets = prior && priorLog ? setsInUnit(prior, priorLog.sets, targetUnit) : undefined
+  const priorTopWeight = priorSets ? Math.max(...priorSets.map((s) => s.weight)) : undefined
+  const priorAvgRpe = priorSets ? avg(priorSets.map((s) => s.rpe)) : undefined
 
   const regressed =
     priorTopWeight !== undefined &&

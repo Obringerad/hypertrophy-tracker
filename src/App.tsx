@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import type { Exercise, SetEntry, WorkoutPlan, WorkoutSession } from './types'
+import { convertWeight, sessionUnit, type WeightUnit } from './lib/units'
 import { ExerciseManager } from './components/ExerciseManager'
 import { HomeTab } from './components/HomeTab'
 import { WorkoutLogger } from './components/WorkoutLogger'
@@ -162,6 +163,27 @@ export default function App() {
     )
   }
 
+  function changeWeightUnit(fromUnit: WeightUnit, toUnit: WeightUnit, convertHistory: boolean) {
+    setExercises((prev) =>
+      prev.map((e) => ({ ...e, weightIncrement: convertWeight(e.weightIncrement, fromUnit, toUnit) })),
+    )
+    if (convertHistory) {
+      setSessions((prev) =>
+        prev.map((s) => {
+          const unit = sessionUnit(s)
+          return {
+            ...s,
+            unit: toUnit,
+            exercises: s.exercises.map((log) => ({
+              ...log,
+              sets: log.sets.map((set) => ({ ...set, weight: convertWeight(set.weight, unit, toUnit) })),
+            })),
+          }
+        }),
+      )
+    }
+  }
+
   function importData(data: {
     exercises: Exercise[]
     sessions: WorkoutSession[]
@@ -295,6 +317,7 @@ export default function App() {
             plans={plans}
             activePlanId={activePlanId}
             onImport={importData}
+            onChangeUnit={changeWeightUnit}
           />
         )}
       </main>
