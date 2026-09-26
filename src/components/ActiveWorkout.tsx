@@ -45,11 +45,12 @@ export function ActiveWorkout({
   onCancel,
 }: Props) {
   const { weightUnit } = useSettings()
-  const queue = useMemo(() => buildQueue(planDay), [planDay])
+  const [queue, setQueue] = useState<QueueItem[]>(() => buildQueue(planDay))
   const [stepIndex, setStepIndex] = useState(0)
   const [logged, setLogged] = useState<LoggedExercise[]>([])
   const [form, setForm] = useState({ weight: 0, reps: 0, rpe: 8 })
   const [notes, setNotes] = useState('')
+  const [notesOpen, setNotesOpen] = useState(false)
 
   const current = queue[stepIndex]
   const currentExercise = current ? exercises.find((e) => e.id === current.exerciseId) : undefined
@@ -85,6 +86,30 @@ export function ActiveWorkout({
     if (!current) return
     const nextIndex = queue.findIndex((q, i) => i > stepIndex && q.exerciseId !== current.exerciseId)
     setStepIndex(nextIndex === -1 ? queue.length : nextIndex)
+  }
+
+  function addPlannedSet() {
+    if (!current) return
+    const exerciseId = current.exerciseId
+    setQueue((prev) => {
+      const lastIdx = prev.map((q) => q.exerciseId).lastIndexOf(exerciseId)
+      const newTotal = prev.filter((q) => q.exerciseId === exerciseId).length + 1
+      const updated = prev.map((q) => (q.exerciseId === exerciseId ? { ...q, targetSets: newTotal } : q))
+      const newItem: QueueItem = { exerciseId, setNumber: newTotal, targetSets: newTotal }
+      return [...updated.slice(0, lastIdx + 1), newItem, ...updated.slice(lastIdx + 1)]
+    })
+  }
+
+  function removePlannedSet() {
+    if (!current) return
+    const exerciseId = current.exerciseId
+    setQueue((prev) => {
+      const lastIdx = prev.map((q) => q.exerciseId).lastIndexOf(exerciseId)
+      if (lastIdx <= stepIndex) return prev
+      const newTotal = prev.filter((q) => q.exerciseId === exerciseId).length - 1
+      const next = prev.filter((_, i) => i !== lastIdx)
+      return next.map((q) => (q.exerciseId === exerciseId ? { ...q, targetSets: newTotal } : q))
+    })
   }
 
   function removeSet(exerciseId: string, index: number) {
@@ -176,6 +201,8 @@ export function ActiveWorkout({
   const exerciseNumber = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
   const currentExerciseLog = logged.find((l) => l.exerciseId === current.exerciseId)
   const priorBest = maxWeightEver(sessions, current.exerciseId)
+  const lastQueueIndexForExercise = queue.map((q) => q.exerciseId).lastIndexOf(current.exerciseId)
+  const canRemovePlannedSet = lastQueueIndexForExercise > stepIndex
 
   return (
     <div className="panel active-workout">
@@ -183,13 +210,45 @@ export function ActiveWorkout({
         Exercise {exerciseNumber} of {planDay.exercises.length}
       </div>
       <h2>{currentExercise?.name ?? 'Unknown exercise'}</h2>
-      <p className="muted">
-        Set {current.setNumber} of {current.targetSets}
-      </p>
+      <div className="set-count-row">
+        <p className="muted">
+          Set {current.setNumber} of {current.targetSets}
+        </p>
+        <div className="set-count-buttons">
+          <button
+            type="button"
+            className="link-btn"
+            onClick={removePlannedSet}
+            disabled={!canRemovePlannedSet}
+            title="Remove a set from this exercise"
+          >
+            − set
+          </button>
+          <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
+            + set
+          </button>
+        </div>
+      </div>
 
       {suggestion && <SuggestionCard suggestion={suggestion} />}
 
       <RestTimer />
+
+      {notesOpen || notes ? (
+        <label className="session-notes-field">
+          Notes (optional)
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="How did it feel? Anything to remember for next time?"
+            rows={2}
+          />
+        </label>
+      ) : (
+        <button type="button" className="link-btn add-note-btn" onClick={() => setNotesOpen(true)}>
+          + Add a note
+        </button>
+      )}
 
       {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
         <table className="set-table">
