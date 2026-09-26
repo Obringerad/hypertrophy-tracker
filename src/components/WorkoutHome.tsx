@@ -6,20 +6,49 @@ interface Props {
   recovery: number
   onRecoveryChange: (value: number) => void
   onStart: () => void
+  date: string
+  onDateChange: (date: string) => void
+  isToday: boolean
 }
 
-function formatToday(): string {
-  return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
-export function WorkoutHome({ planDay, hasActivePlan, recovery, onRecoveryChange, onStart }: Props) {
+function formatChosenDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+}
+
+export function WorkoutHome({
+  planDay,
+  hasActivePlan,
+  recovery,
+  onRecoveryChange,
+  onStart,
+  date,
+  onDateChange,
+  isToday,
+}: Props) {
   return (
     <div className="panel workout-home">
-      <p className="workout-home-date">{formatToday()}</p>
-      <h2>{planDay ? planDay.label : 'Freeform workout'}</h2>
-      {!planDay && (
+      <label className="workout-home-date-picker">
+        <input
+          type="date"
+          value={date}
+          max={todayIso()}
+          onChange={(e) => onDateChange(e.target.value)}
+        />
+      </label>
+      <p className="workout-home-date">{formatChosenDate(date)}</p>
+      <h2>{isToday && planDay ? planDay.label : 'Freeform workout'}</h2>
+      {!(isToday && planDay) && (
         <p className="muted">
-          {hasActivePlan ? "No workout scheduled today, but you can still log one." : 'No active plan yet.'}
+          {isToday
+            ? hasActivePlan
+              ? "No workout scheduled today, but you can still log one."
+              : 'No active plan yet.'
+            : 'Backdated workouts are logged freeform.'}
         </p>
       )}
 

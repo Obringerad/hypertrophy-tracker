@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import type { Exercise, SetEntry, WorkoutPlan, WorkoutSession } from '../types'
 import { formatDate } from '../lib/dates'
+import { maxWeightEver } from '../lib/records'
+import { formatWeight } from '../lib/units'
+import { useSettings } from '../context/SettingsContext'
 
 interface Props {
   exercises: Exercise[]
@@ -21,6 +24,7 @@ function logKey(sessionId: string, exerciseId: string): string {
 }
 
 export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExerciseSets }: Props) {
+  const { weightUnit } = useSettings()
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [draftSets, setDraftSets] = useState<SetEntry[]>([])
@@ -91,10 +95,12 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
 
               {isOpen && (
                 <div className="history-entry-body">
+                  {session.notes && <p className="history-entry-notes muted">"{session.notes}"</p>}
                   {session.exercises.map((log) => {
                     const exercise = exercises.find((e) => e.id === log.exerciseId)
                     const key = logKey(session.id, log.exerciseId)
                     const isEditing = editingKey === key
+                    const priorBest = maxWeightEver(sessions, log.exerciseId)
                     return (
                       <div key={log.exerciseId} className="plan-day-editor">
                         <div className="exercise-log-header">
@@ -165,7 +171,12 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
                                   </>
                                 ) : (
                                   <>
-                                    <td>{s.weight}</td>
+                                    <td>
+                                      {formatWeight(s.weight, weightUnit)}
+                                      {s.weight > 0 && s.weight === priorBest && (
+                                        <span className="pr-badge">PR</span>
+                                      )}
+                                    </td>
                                     <td>{s.reps}</td>
                                     <td>{s.rpe}</td>
                                   </>

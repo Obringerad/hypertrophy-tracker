@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -139,6 +139,20 @@ button.primary:disabled {
   font-size: 0.85rem;
 }
 
+.exercise-search {
+  margin-bottom: 0.75rem;
+}
+
+.exercise-search input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
 .exercise-list {
   list-style: none;
   padding: 0;
@@ -157,6 +171,29 @@ button.primary:disabled {
   display: flex;
   gap: 0.75rem;
   flex-shrink: 0;
+}
+
+.plan-day-exercise-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.plan-day-target-sets {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.plan-day-target-sets input {
+  width: 3rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
 }
 
 li.exercise-list-item-editing {
@@ -192,6 +229,52 @@ li.exercise-list-item-editing {
   background: var(--panel);
   color: var(--text);
   min-width: 12rem;
+}
+
+.freeform-exercise-picker {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.freeform-exercise-picker input {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+}
+
+.pr-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, gold 25%, transparent);
+  color: #b8860b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
+.session-notes-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.session-notes-field textarea {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
 }
 
 .set-table {
@@ -657,6 +740,20 @@ li.exercise-list-item-editing {
   font-size: 0.95rem;
 }
 
+.workout-home-date-picker {
+  display: block;
+  margin: 0 auto 0.5rem;
+  width: fit-content;
+}
+
+.workout-home-date-picker input {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+}
+
 .workout-home h2 {
   margin: 0 0 1.5rem;
   font-size: 1.6rem;
@@ -676,6 +773,58 @@ li.exercise-list-item-editing {
   font-size: 1.1rem;
   padding: 0.9rem 2.5rem;
   border-radius: 999px;
+}
+
+.settings-section {
+  margin-bottom: 1.75rem;
+}
+
+.settings-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.rest-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.rest-timer-preset {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.rest-timer-active {
+  border-color: var(--accent);
+}
+
+.rest-timer-clock {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.rest-timer-done {
+  border-color: #3ba55d;
+}
+
+.rest-timer-done .rest-timer-clock {
+  color: #3ba55d;
 }
 
 .workout-progress {
@@ -764,6 +913,12 @@ li.exercise-list-item-editing {
 
 .history-entry-body .plan-day-editor:first-child {
   border-top: none;
+}
+
+.history-entry-notes {
+  font-style: italic;
+  padding-top: 0.75rem;
+  margin: 0;
 }
 
 .home-header {

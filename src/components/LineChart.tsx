@@ -5,6 +5,7 @@ interface Point {
 
 interface Props {
   points: Point[]
+  valueSuffix?: string
 }
 
 const WIDTH = 600
@@ -12,7 +13,7 @@ const HEIGHT = 160
 const PAD_X = 8
 const PAD_Y = 18
 
-export function LineChart({ points }: Props) {
+export function LineChart({ points, valueSuffix = '' }: Props) {
   if (points.length === 0) return null
 
   const values = points.map((p) => p.value)
@@ -49,10 +50,12 @@ export function LineChart({ points }: Props) {
         })}
         <text x={PAD_X} y={12} className="line-chart-value-label">
           {max}
+          {valueSuffix}
         </text>
         {min !== max && (
           <text x={PAD_X} y={HEIGHT - PAD_Y - 4} className="line-chart-value-label">
             {min}
+            {valueSuffix}
           </text>
         )}
       </svg>

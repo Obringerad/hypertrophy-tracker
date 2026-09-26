@@ -36,7 +36,7 @@ export function planProgress(plan: WorkoutPlan, sessions: WorkoutSession[], toda
 }
 
 export interface WeeklyGoalStatus {
-  daysPerWeek: number
+  targetSessions: number
   sessionsThisWeek: number
   /** Days left in the calendar week (Sun-Sat), including today. */
   daysRemainingInWeek: number
@@ -46,13 +46,14 @@ export interface WeeklyGoalStatus {
   atRisk: boolean
 }
 
-/** How a flexible-schedule plan is tracking against its days/week goal for the current calendar week. */
+/** How a plan (fixed or flexible) is tracking against its weekly session target for the current calendar week. */
 export function weeklyGoalStatus(
   plan: WorkoutPlan,
   sessions: WorkoutSession[],
   today: Date = new Date(),
 ): WeeklyGoalStatus | null {
-  if (plan.scheduleType !== 'flexible' || !plan.daysPerWeek) return null
+  const targetSessions = expectedSessionsPerWeek(plan)
+  if (targetSessions <= 0) return null
 
   const todayStripped = stripTime(today)
   const dayOfWeek = todayStripped.getDay()
@@ -67,10 +68,10 @@ export function weeklyGoalStatus(
   }).length
 
   const daysRemainingInWeek = 7 - dayOfWeek
-  const sessionsRemaining = Math.max(0, plan.daysPerWeek - sessionsThisWeek)
+  const sessionsRemaining = Math.max(0, targetSessions - sessionsThisWeek)
 
   return {
-    daysPerWeek: plan.daysPerWeek,
+    targetSessions,
     sessionsThisWeek,
     daysRemainingInWeek,
     sessionsRemaining,

@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { Exercise } from '../types'
+import { formatWeight } from '../lib/units'
+import { useSettings } from '../context/SettingsContext'
 
 interface Props {
   exercises: Exercise[]
@@ -17,9 +19,13 @@ const emptyForm = {
 }
 
 export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props) {
+  const { weightUnit } = useSettings()
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState(emptyForm)
+  const [filter, setFilter] = useState('')
+
+  const filteredExercises = exercises.filter((ex) => ex.name.toLowerCase().includes(filter.toLowerCase()))
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -108,8 +114,19 @@ export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props)
         <button type="submit">Add exercise</button>
       </form>
 
+      {exercises.length > 0 && (
+        <div className="exercise-search">
+          <input
+            type="text"
+            placeholder="Filter exercises..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
+      )}
+
       <ul className="exercise-list">
-        {exercises.map((ex) =>
+        {filteredExercises.map((ex) =>
           editingId === ex.id ? (
             <li key={ex.id} className="exercise-list-item-editing">
               <div className="exercise-form">
@@ -166,7 +183,7 @@ export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props)
                 <span className="muted">
                   {' '}
                   &middot; {ex.muscleGroup} &middot; {ex.repRangeLow}-{ex.repRangeHigh} reps &middot; +
-                  {ex.weightIncrement}
+                  {formatWeight(ex.weightIncrement, weightUnit)}
                 </span>
               </div>
               <div className="exercise-list-actions">
@@ -181,6 +198,9 @@ export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props)
           ),
         )}
         {exercises.length === 0 && <p className="muted">No exercises yet. Add one above.</p>}
+        {exercises.length > 0 && filteredExercises.length === 0 && (
+          <p className="muted">No exercises match "{filter}".</p>
+        )}
       </ul>
     </div>
   )

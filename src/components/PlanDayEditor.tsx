@@ -6,9 +6,10 @@ interface Props {
   exerciseName: (id: string) => string
   onRemoveExercise: (exerciseId: string) => void
   onAddExercise: (name: string) => void
+  onUpdateTargetSets: (exerciseId: string, targetSets: number) => void
 }
 
-export function PlanDayEditor({ day, exerciseName, onRemoveExercise, onAddExercise }: Props) {
+export function PlanDayEditor({ day, exerciseName, onRemoveExercise, onAddExercise, onUpdateTargetSets }: Props) {
   const [newName, setNewName] = useState('')
 
   function submit() {
@@ -22,8 +23,17 @@ export function PlanDayEditor({ day, exerciseName, onRemoveExercise, onAddExerci
       <ul className="exercise-list">
         {day.exercises.map((pe) => (
           <li key={pe.exerciseId}>
-            <span>
-              {exerciseName(pe.exerciseId)} <span className="muted">&middot; {pe.targetSets} sets</span>
+            <span className="plan-day-exercise-info">
+              {exerciseName(pe.exerciseId)}
+              <span className="plan-day-target-sets">
+                <input
+                  type="number"
+                  min={1}
+                  value={pe.targetSets}
+                  onChange={(e) => onUpdateTargetSets(pe.exerciseId, Math.max(1, Number(e.target.value)))}
+                />
+                <span className="muted">sets</span>
+              </span>
             </span>
             <button className="link-btn" onClick={() => onRemoveExercise(pe.exerciseId)}>
               Remove

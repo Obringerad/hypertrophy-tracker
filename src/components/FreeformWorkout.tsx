@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
+import { maxWeightEver } from '../lib/records'
+import { formatWeight } from '../lib/units'
+import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
+import { RestTimer } from './RestTimer'
 
 interface Props {
   exercises: Exercise[]
@@ -14,9 +18,12 @@ interface Props {
 }
 
 export function FreeformWorkout({ exercises, sessions, recovery, date, activePlanId, onFinish, onCancel }: Props) {
+  const { weightUnit } = useSettings()
   const [logged, setLogged] = useState<LoggedExercise[]>([])
   const [activeExerciseId, setActiveExerciseId] = useState(exercises[0]?.id ?? '')
   const [setForm, setSetForm] = useState({ weight: 0, reps: 0, rpe: 8 })
+  const [exerciseFilter, setExerciseFilter] = useState('')
+  const [notes, setNotes] = useState('')
 
   const activeExercise = exercises.find((e) => e.id === activeExerciseId)
   const suggestion = useMemo(
@@ -24,6 +31,13 @@ export function FreeformWorkout({ exercises, sessions, recovery, date, activePla
     [activeExercise, sessions],
   )
   const activeLog = logged.find((l) => l.exerciseId === activeExerciseId)
+  const priorBest = maxWeightEver(sessions, activeExerciseId)
+
+  const filteredExercises = exercises.filter((e) => e.name.toLowerCase().includes(exerciseFilter.toLowerCase()))
+
+  function selectExercise(id: string) {
+    setActiveExerciseId(id)
+  }
 
   function addSet() {
     if (!activeExerciseId || setForm.reps <= 0) return
@@ -47,16 +61,37 @@ export function FreeformWorkout({ exercises, sessions, recovery, date, activePla
 
   function finish() {
     if (logged.length === 0) return
-    onFinish({ id: crypto.randomUUID(), date, recovery, exercises: logged, planId: activePlanId })
+    onFinish({
+      id: crypto.randomUUID(),
+      date,
+      recovery,
+      exercises: logged,
+      notes: notes.trim() || undefined,
+      planId: activePlanId,
+    })
   }
 
   return (
     <div className="panel">
       <h2>Freeform workout</h2>
 
-      <div className="exercise-picker">
-        <select value={activeExerciseId} onChange={(e) => setActiveExerciseId(e.target.value)}>
-          {exercises.map((ex) => (
+      <div className="exercise-picker freeform-exercise-picker">
+        <input
+          type="text"
+          placeholder="Filter exercises..."
+          value={exerciseFilter}
+          onChange={(e) => setExerciseFilter(e.target.value)}
+        />
+        <select
+          value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
+          onChange={(e) => selectExercise(e.target.value)}
+        >
+          {!filteredExercises.some((e) => e.id === activeExerciseId) && (
+            <option value="" disabled>
+              Select an exercise
+            </option>
+          )}
+          {filteredExercises.map((ex) => (
             <option key={ex.id} value={ex.id}>
               {ex.name}
             </option>
@@ -65,6 +100,8 @@ export function FreeformWorkout({ exercises, sessions, recovery, date, activePla
       </div>
 
       {suggestion && <SuggestionCard suggestion={suggestion} />}
+
+      <RestTimer />
 
       <div className="set-form">
         <label>
@@ -117,7 +154,10 @@ export function FreeformWorkout({ exercises, sessions, recovery, date, activePla
                 <td>
                   <span className="set-logged-check">&#10003;</span> {i + 1}
                 </td>
-                <td>{s.weight}</td>
+                <td>
+                  {formatWeight(s.weight, weightUnit)}
+                  {s.weight > priorBest && <span className="pr-badge">PR</span>}
+                </td>
                 <td>{s.reps}</td>
                 <td>{s.rpe}</td>
                 <td>
@@ -130,6 +170,16 @@ export function FreeformWorkout({ exercises, sessions, recovery, date, activePla
           </tbody>
         </table>
       )}
+
+      <label className="session-notes-field">
+        Notes (optional)
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="How did it feel? Anything to remember for next time?"
+          rows={3}
+        />
+      </label>
 
       <div className="session-summary">
         <p className="muted">

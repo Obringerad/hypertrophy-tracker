@@ -5,7 +5,7 @@ interface Props {
 }
 
 export function WeeklyGoalFlag({ status }: Props) {
-  const { daysPerWeek, sessionsThisWeek, met, atRisk } = status
+  const { targetSessions, sessionsThisWeek, met, atRisk } = status
   const className = ['weekly-goal-flag', met ? 'met' : atRisk ? 'at-risk' : 'on-track'].join(' ')
 
   if (met) {
@@ -14,7 +14,7 @@ export function WeeklyGoalFlag({ status }: Props) {
 
   return (
     <div className={className}>
-      {sessionsThisWeek}/{daysPerWeek} sessions this week
+      {sessionsThisWeek}/{targetSessions} sessions this week
     </div>
   )
 }

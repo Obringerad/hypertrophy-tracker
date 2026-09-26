@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, PlanDay, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
+import { maxWeightEver } from '../lib/records'
+import { formatWeight } from '../lib/units'
+import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
+import { RestTimer } from './RestTimer'
 
 interface Props {
   planDay: PlanDay
@@ -40,10 +44,12 @@ export function ActiveWorkout({
   onFinish,
   onCancel,
 }: Props) {
+  const { weightUnit } = useSettings()
   const queue = useMemo(() => buildQueue(planDay), [planDay])
   const [stepIndex, setStepIndex] = useState(0)
   const [logged, setLogged] = useState<LoggedExercise[]>([])
   const [form, setForm] = useState({ weight: 0, reps: 0, rpe: 8 })
+  const [notes, setNotes] = useState('')
 
   const current = queue[stepIndex]
   const currentExercise = current ? exercises.find((e) => e.id === current.exerciseId) : undefined
@@ -95,6 +101,7 @@ export function ActiveWorkout({
       date,
       recovery,
       exercises: logged,
+      notes: notes.trim() || undefined,
       planId: activePlanId,
       planDayId: planDay.id,
     })
@@ -107,6 +114,7 @@ export function ActiveWorkout({
         {logged.length === 0 && <p className="muted">Nothing logged yet.</p>}
         {logged.map((l) => {
           const ex = exercises.find((e) => e.id === l.exerciseId)
+          const priorBest = maxWeightEver(sessions, l.exerciseId)
           return (
             <div key={l.exerciseId} className="plan-day-editor">
               <h3>{ex?.name ?? 'Unknown exercise'}</h3>
@@ -124,7 +132,10 @@ export function ActiveWorkout({
                   {l.sets.map((s, i) => (
                     <tr key={i}>
                       <td>{i + 1}</td>
-                      <td>{s.weight}</td>
+                      <td>
+                        {formatWeight(s.weight, weightUnit)}
+                        {s.weight > priorBest && <span className="pr-badge">PR</span>}
+                      </td>
                       <td>{s.reps}</td>
                       <td>{s.rpe}</td>
                       <td>
@@ -139,6 +150,17 @@ export function ActiveWorkout({
             </div>
           )
         })}
+
+        <label className="session-notes-field">
+          Notes (optional)
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="How did it feel? Anything to remember for next time?"
+            rows={3}
+          />
+        </label>
+
         <div className="wizard-actions">
           <button type="button" className="link-btn" onClick={onCancel}>
             Cancel
@@ -153,6 +175,7 @@ export function ActiveWorkout({
 
   const exerciseNumber = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
   const currentExerciseLog = logged.find((l) => l.exerciseId === current.exerciseId)
+  const priorBest = maxWeightEver(sessions, current.exerciseId)
 
   return (
     <div className="panel active-workout">
@@ -165,6 +188,8 @@ export function ActiveWorkout({
       </p>
 
       {suggestion && <SuggestionCard suggestion={suggestion} />}
+
+      <RestTimer />
 
       {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
         <table className="set-table">
@@ -182,7 +207,10 @@ export function ActiveWorkout({
                 <td>
                   <span className="set-logged-check">&#10003;</span> {i + 1}
                 </td>
-                <td>{s.weight}</td>
+                <td>
+                  {formatWeight(s.weight, weightUnit)}
+                  {s.weight > priorBest && <span className="pr-badge">PR</span>}
+                </td>
                 <td>{s.reps}</td>
                 <td>{s.rpe}</td>
               </tr>

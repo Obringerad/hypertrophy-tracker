@@ -10,11 +10,13 @@ import { PlanSetup } from './components/PlanSetup'
 import { PlansList } from './components/PlansList'
 import { PlanDetail } from './components/PlanDetail'
 import { Toast } from './components/Toast'
+import { SettingsTab } from './components/SettingsTab'
+import { SettingsProvider } from './context/SettingsContext'
 import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
 import { formatDate } from './lib/dates'
 import './App.css'
 
-type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises'
+type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises' | 'settings'
 
 const UNDO_WINDOW_MS = 6000
 
@@ -53,7 +55,29 @@ export default function App() {
   }
 
   function removeExercise(id: string) {
+    const index = exercises.findIndex((e) => e.id === id)
+    if (index === -1) return
+    const exercise = exercises[index]
+
+    const usedInPlans = plans.filter((p) => p.days.some((d) => d.exercises.some((pe) => pe.exerciseId === id))).length
+    const usedInSessions = sessions.filter((s) => s.exercises.some((log) => log.exerciseId === id)).length
+    const usageParts: string[] = []
+    if (usedInPlans > 0) usageParts.push(`${usedInPlans} plan${usedInPlans === 1 ? '' : 's'}`)
+    if (usedInSessions > 0) usageParts.push(`${usedInSessions} logged session${usedInSessions === 1 ? '' : 's'}`)
+    const message =
+      usageParts.length > 0
+        ? `"${exercise.name}" is used in ${usageParts.join(' and ')}. Those will show "Unknown exercise" if you remove it. Delete anyway?`
+        : `Delete "${exercise.name}"? This can't be undone.`
+    if (!window.confirm(message)) return
+
     setExercises((prev) => prev.filter((e) => e.id !== id))
+    pushUndo(`Deleted "${exercise.name}"`, () => {
+      setExercises((prev) => {
+        const next = [...prev]
+        next.splice(index, 0, exercise)
+        return next
+      })
+    })
   }
 
   function updateExercise(updated: Exercise) {
@@ -131,9 +155,24 @@ export default function App() {
     )
   }
 
+  function importData(data: {
+    exercises: Exercise[]
+    sessions: WorkoutSession[]
+    plans: WorkoutPlan[]
+    activePlanId: string | null
+  }) {
+    setExercises(data.exercises)
+    setSessions(data.sessions)
+    setPlans(data.plans)
+    setActivePlanId(data.activePlanId)
+    setSelectedPlanId(null)
+    setCreatingPlan(data.plans.length === 0)
+  }
+
   const todaysPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
 
   return (
+    <SettingsProvider>
     <div className="app">
       <header className="app-header">
         <h1>
@@ -165,6 +204,9 @@ export default function App() {
           </button>
           <button className={tab === 'exercises' ? 'active' : ''} onClick={() => setTab('exercises')}>
             Exercises
+          </button>
+          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>
+            Settings
           </button>
         </nav>
       </header>
@@ -239,6 +281,15 @@ export default function App() {
             onUpdate={updateExercise}
           />
         )}
+        {tab === 'settings' && (
+          <SettingsTab
+            exercises={exercises}
+            sessions={sessions}
+            plans={plans}
+            activePlanId={activePlanId}
+            onImport={importData}
+          />
+        )}
       </main>
 
       {undoAction && (
@@ -253,5 +304,6 @@ export default function App() {
         />
       )}
     </div>
+    </SettingsProvider>
   )
 }

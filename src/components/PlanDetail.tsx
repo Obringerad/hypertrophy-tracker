@@ -29,6 +29,17 @@ export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, o
     })
   }
 
+  function updateTargetSets(dayId: string, exerciseId: string, targetSets: number) {
+    onUpdatePlan({
+      ...plan,
+      days: plan.days.map((d) =>
+        d.id === dayId
+          ? { ...d, exercises: d.exercises.map((pe) => (pe.exerciseId === exerciseId ? { ...pe, targetSets } : pe)) }
+          : d,
+      ),
+    })
+  }
+
   function addExercise(dayId: string, name: string) {
     if (!name.trim()) return
     const existing = exercises.find((e) => e.name.toLowerCase() === name.trim().toLowerCase())
@@ -116,6 +127,7 @@ export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, o
           exerciseName={exerciseName}
           onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
           onAddExercise={(name) => addExercise(day.id, name)}
+          onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
         />
       ))}
 

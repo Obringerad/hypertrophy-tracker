@@ -41,7 +41,7 @@ export function PlanCalendar({ plan, sessions, exercises }: Props) {
       {selectedDate && (
         <DayWorkoutModal
           date={selectedDate}
-          sessions={sessions.filter((s) => s.date === selectedDate)}
+          sessions={sessions}
           exercises={exercises}
           onClose={() => setSelectedDate(null)}
         />

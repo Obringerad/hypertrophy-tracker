@@ -86,6 +86,26 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
     )
   }
 
+  function updateTargetSets(dayId: string, exerciseId: string, targetSets: number) {
+    setDraftPlan((prev) =>
+      prev
+        ? {
+            ...prev,
+            days: prev.days.map((d) =>
+              d.id === dayId
+                ? {
+                    ...d,
+                    exercises: d.exercises.map((pe) =>
+                      pe.exerciseId === exerciseId ? { ...pe, targetSets } : pe,
+                    ),
+                  }
+                : d,
+            ),
+          }
+        : prev,
+    )
+  }
+
   function exerciseName(id: string): string {
     return [...existingExercises, ...draftExercises].find((e) => e.id === id)?.name ?? 'Unknown exercise'
   }
@@ -207,6 +227,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
               exerciseName={exerciseName}
               onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
               onAddExercise={(name) => addExercise(day.id, name)}
+              onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
             />
           ))}
           <div className="wizard-actions">
