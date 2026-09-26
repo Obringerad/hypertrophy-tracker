@@ -7,6 +7,19 @@ import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 
+export interface QueueItem {
+  exerciseId: string
+  setNumber: number
+  targetSets: number
+}
+
+export interface ActiveWorkoutProgress {
+  queue: QueueItem[]
+  stepIndex: number
+  logged: LoggedExercise[]
+  notes: string
+}
+
 interface Props {
   planDay: PlanDay
   exercises: Exercise[]
@@ -16,12 +29,10 @@ interface Props {
   activePlanId?: string
   onFinish: (session: WorkoutSession) => void
   onCancel: () => void
-}
-
-interface QueueItem {
-  exerciseId: string
-  setNumber: number
-  targetSets: number
+  /** Queue/stepIndex are omitted when there's no compatible resumable queue to restore. */
+  initialProgress?: Partial<Pick<ActiveWorkoutProgress, 'queue' | 'stepIndex'>> &
+    Pick<ActiveWorkoutProgress, 'logged' | 'notes'>
+  onProgressChange: (progress: ActiveWorkoutProgress) => void
 }
 
 function buildQueue(planDay: PlanDay): QueueItem[] {
@@ -43,14 +54,22 @@ export function ActiveWorkout({
   activePlanId,
   onFinish,
   onCancel,
+  initialProgress,
+  onProgressChange,
 }: Props) {
   const { weightUnit } = useSettings()
-  const [queue, setQueue] = useState<QueueItem[]>(() => buildQueue(planDay))
-  const [stepIndex, setStepIndex] = useState(0)
-  const [logged, setLogged] = useState<LoggedExercise[]>([])
+  const [queue, setQueue] = useState<QueueItem[]>(() => initialProgress?.queue ?? buildQueue(planDay))
+  const [stepIndex, setStepIndex] = useState(() => initialProgress?.stepIndex ?? 0)
+  const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
   const [form, setForm] = useState({ weight: 0, reps: 0, rpe: 8 })
-  const [notes, setNotes] = useState('')
-  const [notesOpen, setNotesOpen] = useState(false)
+  const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
+  const [notesOpen, setNotesOpen] = useState(() => !!initialProgress?.notes)
+
+  // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
+  useEffect(() => {
+    onProgressChange({ queue, stepIndex, logged, notes })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue, stepIndex, logged, notes])
 
   const current = queue[stepIndex]
   const currentExercise = current ? exercises.find((e) => e.id === current.exerciseId) : undefined

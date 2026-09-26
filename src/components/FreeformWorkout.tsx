@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
 import { maxWeightEver } from '../lib/records'
@@ -6,6 +6,12 @@ import { formatWeight } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
+
+export interface FreeformWorkoutProgress {
+  logged: LoggedExercise[]
+  notes: string
+  activeExerciseId: string
+}
 
 interface Props {
   exercises: Exercise[]
@@ -15,15 +21,35 @@ interface Props {
   activePlanId?: string
   onFinish: (session: WorkoutSession) => void
   onCancel: () => void
+  initialProgress?: FreeformWorkoutProgress
+  onProgressChange: (progress: FreeformWorkoutProgress) => void
 }
 
-export function FreeformWorkout({ exercises, sessions, recovery, date, activePlanId, onFinish, onCancel }: Props) {
+export function FreeformWorkout({
+  exercises,
+  sessions,
+  recovery,
+  date,
+  activePlanId,
+  onFinish,
+  onCancel,
+  initialProgress,
+  onProgressChange,
+}: Props) {
   const { weightUnit } = useSettings()
-  const [logged, setLogged] = useState<LoggedExercise[]>([])
-  const [activeExerciseId, setActiveExerciseId] = useState(exercises[0]?.id ?? '')
+  const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
+  const [activeExerciseId, setActiveExerciseId] = useState(
+    () => initialProgress?.activeExerciseId ?? exercises[0]?.id ?? '',
+  )
   const [setForm, setSetForm] = useState({ weight: 0, reps: 0, rpe: 8 })
   const [exerciseFilter, setExerciseFilter] = useState('')
-  const [notes, setNotes] = useState('')
+  const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
+
+  // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
+  useEffect(() => {
+    onProgressChange({ logged, notes, activeExerciseId })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logged, notes, activeExerciseId])
 
   const activeExercise = exercises.find((e) => e.id === activeExerciseId)
   const suggestion = useMemo(

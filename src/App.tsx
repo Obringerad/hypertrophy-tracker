@@ -30,7 +30,14 @@ export default function App() {
   const [sessions, setSessions] = useLocalStorage<WorkoutSession[]>('hypertrophy.sessions', [])
   const [plans, setPlans] = useLocalStorage<WorkoutPlan[]>('hypertrophy.plans', [])
   const [activePlanId, setActivePlanId] = useLocalStorage<string | null>('hypertrophy.activePlanId', null)
-  const [tab, setTab] = useState<Tab>('home')
+  const [tab, setTab] = useState<Tab>(() => {
+    try {
+      const draft = window.localStorage.getItem('hypertrophy.workoutDraft')
+      return draft && draft !== 'null' ? 'log' : 'home'
+    } catch {
+      return 'home'
+    }
+  })
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [creatingPlan, setCreatingPlan] = useState(plans.length === 0)
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
