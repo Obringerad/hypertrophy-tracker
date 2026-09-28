@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -864,6 +864,19 @@ li.exercise-list-item-editing {
   font-weight: 600;
 }
 
+.guide-list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.guide-list li {
+  margin-bottom: 0.5rem;
+}
+
+.guide-list li:last-child {
+  margin-bottom: 0;
+}
+
 .tool-inputs-sep {
   font-size: 1.2rem;
   color: var(--muted);
@@ -1242,7 +1255,7 @@ li.exercise-list-item-editing {
   .tabs button {
     flex: 1 1 0;
     min-width: 0;
-    padding: 0.6rem 0.2rem;
+    padding: 0.6rem 0.1rem;
     font-size: 0.7rem;
   }
 
