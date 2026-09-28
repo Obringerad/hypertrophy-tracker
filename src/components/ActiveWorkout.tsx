@@ -227,6 +227,13 @@ export function ActiveWorkout({
   const priorBest = maxWeightEver(sessions, current.exerciseId, weightUnit)
   const lastQueueIndexForExercise = queue.map((q) => q.exerciseId).lastIndexOf(current.exerciseId)
   const canRemovePlannedSet = lastQueueIndexForExercise > stepIndex
+  const isLastSetOfExercise = current.setNumber >= current.targetSets
+  const isLastExercise = exerciseNumber >= planDay.exercises.length
+  const logSetLabel = isLastSetOfExercise
+    ? isLastExercise
+      ? 'Log set and finish workout'
+      : 'Log set and start next exercise'
+    : 'Log set'
 
   return (
     <div className="panel active-workout">
@@ -347,14 +354,14 @@ export function ActiveWorkout({
 
       <div className="wizard-actions">
         <div>
-          {current.setNumber < current.targetSets || exerciseNumber < planDay.exercises.length ? (
+          {!(isLastSetOfExercise && isLastExercise) ? (
             <button type="button" className="link-btn" onClick={skipRestOfExercise}>
               Skip rest of exercise
             </button>
           ) : null}
         </div>
         <button type="button" className="primary" onClick={logSet}>
-          Log set
+          {logSetLabel}
         </button>
       </div>
     </div>
