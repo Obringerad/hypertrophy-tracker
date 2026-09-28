@@ -214,7 +214,8 @@ export default function App() {
             Home
           </button>
           <button className={tab === 'log' ? 'active' : ''} onClick={() => setTab('log')}>
-            Log Workout
+            <span className="tab-label-full">Log Workout</span>
+            <span className="tab-label-short">Log</span>
           </button>
           <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
             History
