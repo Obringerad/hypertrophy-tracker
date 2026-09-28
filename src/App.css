@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -833,14 +833,15 @@ li.exercise-list-item-editing {
   font-size: 0.9rem;
 }
 
-.unit-converter {
+.tool-inputs-row {
   display: flex;
   align-items: flex-end;
   gap: 0.75rem;
   flex-wrap: wrap;
+  margin-bottom: 0.75rem;
 }
 
-.unit-converter label {
+.tool-inputs-row label {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -848,7 +849,7 @@ li.exercise-list-item-editing {
   color: var(--muted);
 }
 
-.unit-converter input {
+.tool-inputs-row input {
   width: 8rem;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--border);
@@ -859,10 +860,43 @@ li.exercise-list-item-editing {
   font-weight: 600;
 }
 
-.unit-converter-sep {
+.tool-inputs-sep {
   font-size: 1.2rem;
   color: var(--muted);
   padding-bottom: 0.5rem;
+}
+
+.plate-chip-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.plate-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.one-rm-result {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.one-rm-result .muted {
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-left: 0.5rem;
 }
 
 .rest-timer {
