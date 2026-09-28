@@ -239,7 +239,7 @@ export function ActiveWorkout({
     <div className="panel active-workout">
       <div className="workout-sticky-header">
         <div className="workout-progress-header">
-          <span className="workout-progress muted">
+          <span className="workout-progress meta-text">
             Exercise {exerciseNumber} of {planDay.exercises.length}
           </span>
           <button type="button" className="link-btn-danger" onClick={onCancel}>
@@ -251,7 +251,7 @@ export function ActiveWorkout({
         </div>
         <h2>{currentExercise?.name ?? 'Unknown exercise'}</h2>
         <div className="set-count-row">
-          <p className="muted">
+          <p className="meta-text">
             Set {current.setNumber} of {current.targetSets}
           </p>
           <div className="set-count-buttons">

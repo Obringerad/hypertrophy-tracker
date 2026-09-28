@@ -38,4 +38,6 @@ button {
 input,
 select {
   font: inherit;
+  /* Never let an input inherit below 16px - iOS Safari auto-zooms the page on focus otherwise. */
+  font-size: max(1rem, 16px);
 }

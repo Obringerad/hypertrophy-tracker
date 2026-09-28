@@ -101,7 +101,7 @@ export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, o
         <strong>
           {progress.totalWeeks ? `Week ${progress.week} of ${progress.totalWeeks}` : `Week ${progress.week}`}
         </strong>
-        <span className="muted">
+        <span className="meta-text">
           {progress.expectedTotalSessions
             ? `${progress.completedSessions} / ${progress.expectedTotalSessions} sessions`
             : `${progress.completedSessions} sessions logged`}

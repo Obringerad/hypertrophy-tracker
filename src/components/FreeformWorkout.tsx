@@ -216,7 +216,7 @@ export function FreeformWorkout({
       </label>
 
       <div className="session-summary">
-        <p className="muted">
+        <p className="meta-text">
           {logged.length} exercise{logged.length === 1 ? '' : 's'} logged this session.
         </p>
         <div className="wizard-actions">

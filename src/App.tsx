@@ -12,12 +12,13 @@ import { PlansList } from './components/PlansList'
 import { PlanDetail } from './components/PlanDetail'
 import { Toast } from './components/Toast'
 import { SettingsTab } from './components/SettingsTab'
+import { ToolsTab } from './components/ToolsTab'
 import { SettingsProvider } from './context/SettingsContext'
 import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
 import { formatDate } from './lib/dates'
 import './App.css'
 
-type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises' | 'settings'
+type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises' | 'tools' | 'settings'
 
 const UNDO_WINDOW_MS = 6000
 
@@ -234,6 +235,9 @@ export default function App() {
           <button className={tab === 'exercises' ? 'active' : ''} onClick={() => setTab('exercises')}>
             Exercises
           </button>
+          <button className={tab === 'tools' ? 'active' : ''} onClick={() => setTab('tools')}>
+            Tools
+          </button>
           <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>
             Settings
           </button>
@@ -310,6 +314,7 @@ export default function App() {
             onUpdate={updateExercise}
           />
         )}
+        {tab === 'tools' && <ToolsTab />}
         {tab === 'settings' && (
           <SettingsTab
             exercises={exercises}

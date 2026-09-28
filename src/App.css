@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -57,6 +57,14 @@
 
 .muted {
   color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* For text you're actively tracking mid-workout (set/exercise position, session counts) -
+   readable at a glance, unlike truly secondary text which stays `.muted`. */
+.meta-text {
+  color: var(--text);
+  opacity: 0.75;
   font-size: 0.9rem;
 }
 
@@ -124,6 +132,8 @@ button.primary {
   border: none;
   border-radius: 6px;
   padding: 0.5rem 0.9rem;
+  text-align: center;
+  line-height: 1.3;
 }
 
 button.primary:disabled {
@@ -135,7 +145,7 @@ button.primary:disabled {
   background: none;
   border: none;
   color: var(--accent);
-  padding: 0;
+  padding: 0.35rem 0;
   font-size: 0.85rem;
 }
 
@@ -208,7 +218,7 @@ li.exercise-list-item-editing {
 .exercise-form .link-btn {
   background: none;
   color: var(--accent);
-  padding: 0;
+  padding: 0.3rem 0;
   border-radius: 0;
 }
 
@@ -248,12 +258,12 @@ li.exercise-list-item-editing {
 .pr-badge {
   display: inline-block;
   margin-left: 0.4rem;
-  padding: 0.05rem 0.4rem;
+  padding: 0.1rem 0.5rem;
   border-radius: 999px;
   background: color-mix(in srgb, gold 25%, transparent);
   color: #b8860b;
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   letter-spacing: 0.02em;
   vertical-align: middle;
 }
@@ -288,7 +298,24 @@ li.exercise-list-item-editing {
   text-align: left;
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+}
+
+.set-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.set-table td {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.set-table td .link-btn {
+  font-size: 0.85rem;
+  font-weight: 400;
 }
 
 .set-table-logged-row {
@@ -607,7 +634,7 @@ li.exercise-list-item-editing {
 
 .calendar-header-cell {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
@@ -618,7 +645,7 @@ li.exercise-list-item-editing {
   padding: 0.2rem;
   display: flex;
   flex-direction: column;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   overflow: hidden;
 }
 
@@ -649,12 +676,13 @@ li.exercise-list-item-editing {
 }
 
 .calendar-date {
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
 .calendar-day-label {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.68rem;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -737,7 +765,7 @@ li.exercise-list-item-editing {
 .workout-home-date {
   color: var(--muted);
   margin: 0 0 0.25rem;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
 .workout-home-date-picker {
@@ -764,7 +792,7 @@ li.exercise-list-item-editing {
   flex-direction: column;
   gap: 0.3rem;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   max-width: 20rem;
   margin: 0 auto 1.75rem;
 }
@@ -805,6 +833,38 @@ li.exercise-list-item-editing {
   font-size: 0.9rem;
 }
 
+.unit-converter {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.unit-converter label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.unit-converter input {
+  width: 8rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.unit-converter-sep {
+  font-size: 1.2rem;
+  color: var(--muted);
+  padding-bottom: 0.5rem;
+}
+
 .rest-timer {
   display: flex;
   align-items: center;
@@ -841,7 +901,7 @@ li.exercise-list-item-editing {
 }
 
 .workout-progress {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -1045,7 +1105,7 @@ li.exercise-list-item-editing {
 
 .line-chart-value-label {
   fill: var(--muted);
-  font-size: 10px;
+  font-size: 0.7rem;
 }
 
 .line-chart-x-labels {
@@ -1059,7 +1119,7 @@ li.exercise-list-item-editing {
 .link-btn-danger {
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.35rem 0;
   font-size: 0.85rem;
   color: var(--muted);
 }

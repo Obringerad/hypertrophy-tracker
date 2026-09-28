@@ -31,7 +31,7 @@ interface Props {
 const UNIT_LABEL: Record<WeightUnit, string> = { lb: 'Pounds (lb)', kg: 'Kilograms (kg)' }
 
 export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport, onChangeUnit }: Props) {
-  const { weightUnit, setWeightUnit } = useSettings()
+  const { weightUnit, setWeightUnit, textSize, setTextSize } = useSettings()
   const [pendingUnit, setPendingUnit] = useState<WeightUnit | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -131,6 +131,27 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
             </div>
           </div>
         )}
+      </div>
+
+      <div className="settings-section">
+        <h3>Text size</h3>
+        <p className="muted">Makes weights, reps, and other numbers easier to read at a glance mid-workout.</p>
+        <div className="schedule-type-picker">
+          <button
+            type="button"
+            className={textSize === 'normal' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setTextSize('normal')}
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            className={textSize === 'large' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setTextSize('large')}
+          >
+            Large
+          </button>
+        </div>
       </div>
 
       <div className="settings-section">
