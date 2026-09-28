@@ -6,6 +6,7 @@ import { formatWeight } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
+import { NumberStepper } from './NumberStepper'
 
 export interface QueueItem {
   exerciseId: string
@@ -64,6 +65,7 @@ export function ActiveWorkout({
   const [form, setForm] = useState({ weight: 0, reps: 0, rpe: 8 })
   const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
   const [notesOpen, setNotesOpen] = useState(() => !!initialProgress?.notes)
+  const [restSignal, setRestSignal] = useState(0)
 
   // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
   useEffect(() => {
@@ -99,6 +101,7 @@ export function ActiveWorkout({
       return [...prev, { exerciseId: current.exerciseId, sets: [newSet] }]
     })
     setStepIndex((i) => i + 1)
+    setRestSignal((n) => n + 1)
   }
 
   function skipRestOfExercise() {
@@ -207,8 +210,8 @@ export function ActiveWorkout({
         </label>
 
         <div className="wizard-actions">
-          <button type="button" className="link-btn" onClick={onCancel}>
-            Cancel
+          <button type="button" className="link-btn-danger" onClick={onCancel}>
+            Discard workout
           </button>
           <button type="button" className="primary" onClick={finish} disabled={logged.length === 0}>
             Finish workout
@@ -219,6 +222,7 @@ export function ActiveWorkout({
   }
 
   const exerciseNumber = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
+  const progressPercent = queue.length > 0 ? Math.round((stepIndex / queue.length) * 100) : 0
   const currentExerciseLog = logged.find((l) => l.exerciseId === current.exerciseId)
   const priorBest = maxWeightEver(sessions, current.exerciseId, weightUnit)
   const lastQueueIndexForExercise = queue.map((q) => q.exerciseId).lastIndexOf(current.exerciseId)
@@ -226,33 +230,43 @@ export function ActiveWorkout({
 
   return (
     <div className="panel active-workout">
-      <div className="workout-progress muted">
-        Exercise {exerciseNumber} of {planDay.exercises.length}
-      </div>
-      <h2>{currentExercise?.name ?? 'Unknown exercise'}</h2>
-      <div className="set-count-row">
-        <p className="muted">
-          Set {current.setNumber} of {current.targetSets}
-        </p>
-        <div className="set-count-buttons">
-          <button
-            type="button"
-            className="link-btn"
-            onClick={removePlannedSet}
-            disabled={!canRemovePlannedSet}
-            title="Remove a set from this exercise"
-          >
-            − set
+      <div className="workout-sticky-header">
+        <div className="workout-progress-header">
+          <span className="workout-progress muted">
+            Exercise {exerciseNumber} of {planDay.exercises.length}
+          </span>
+          <button type="button" className="link-btn-danger" onClick={onCancel}>
+            Cancel workout
           </button>
-          <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
-            + set
-          </button>
+        </div>
+        <div className="progress-bar">
+          <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+        <h2>{currentExercise?.name ?? 'Unknown exercise'}</h2>
+        <div className="set-count-row">
+          <p className="muted">
+            Set {current.setNumber} of {current.targetSets}
+          </p>
+          <div className="set-count-buttons">
+            <button
+              type="button"
+              className="link-btn"
+              onClick={removePlannedSet}
+              disabled={!canRemovePlannedSet}
+              title="Remove a set from this exercise"
+            >
+              − set
+            </button>
+            <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
+              + set
+            </button>
+          </div>
         </div>
       </div>
 
       {suggestion && <SuggestionCard suggestion={suggestion} />}
 
-      <RestTimer />
+      <RestTimer autoStartSignal={restSignal} />
 
       {notesOpen || notes ? (
         <label className="session-notes-field">
@@ -301,39 +315,38 @@ export function ActiveWorkout({
       <div className="set-form">
         <label>
           Weight
-          <input
-            type="number"
-            step={0.5}
+          <NumberStepper
             value={form.weight}
-            onChange={(e) => setForm({ ...form, weight: Number(e.target.value) })}
+            step={currentExercise?.weightIncrement ?? 2.5}
+            min={0}
+            onChange={(weight) => setForm({ ...form, weight })}
           />
         </label>
         <label>
           Reps
-          <input
-            type="number"
-            min={0}
+          <NumberStepper
             value={form.reps}
-            onChange={(e) => setForm({ ...form, reps: Number(e.target.value) })}
+            step={1}
+            min={0}
+            inputMode="numeric"
+            onChange={(reps) => setForm({ ...form, reps })}
           />
         </label>
         <label>
           RPE
-          <input
-            type="number"
+          <NumberStepper
+            value={form.rpe}
+            step={1}
             min={1}
             max={10}
-            value={form.rpe}
-            onChange={(e) => setForm({ ...form, rpe: Number(e.target.value) })}
+            inputMode="numeric"
+            onChange={(rpe) => setForm({ ...form, rpe })}
           />
         </label>
       </div>
 
       <div className="wizard-actions">
         <div>
-          <button type="button" className="link-btn" onClick={onCancel}>
-            Cancel workout
-          </button>
           {current.setNumber < current.targetSets || exerciseNumber < planDay.exercises.length ? (
             <button type="button" className="link-btn" onClick={skipRestOfExercise}>
               Skip rest of exercise

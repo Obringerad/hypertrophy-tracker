@@ -6,6 +6,7 @@ import { formatWeight } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
+import { NumberStepper } from './NumberStepper'
 
 export interface FreeformWorkoutProgress {
   logged: LoggedExercise[]
@@ -44,6 +45,7 @@ export function FreeformWorkout({
   const [setForm, setSetForm] = useState({ weight: 0, reps: 0, rpe: 8 })
   const [exerciseFilter, setExerciseFilter] = useState('')
   const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
+  const [restSignal, setRestSignal] = useState(0)
 
   // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
   useEffect(() => {
@@ -75,6 +77,7 @@ export function FreeformWorkout({
       }
       return [...prev, { exerciseId: activeExerciseId, sets: [newSet] }]
     })
+    setRestSignal((n) => n + 1)
   }
 
   function removeSet(exerciseId: string, index: number) {
@@ -102,61 +105,65 @@ export function FreeformWorkout({
     <div className="panel">
       <h2>Freeform workout</h2>
 
-      <div className="exercise-picker freeform-exercise-picker">
-        <input
-          type="text"
-          placeholder="Filter exercises..."
-          value={exerciseFilter}
-          onChange={(e) => setExerciseFilter(e.target.value)}
-        />
-        <select
-          value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
-          onChange={(e) => selectExercise(e.target.value)}
-        >
-          {!filteredExercises.some((e) => e.id === activeExerciseId) && (
-            <option value="" disabled>
-              Select an exercise
-            </option>
-          )}
-          {filteredExercises.map((ex) => (
-            <option key={ex.id} value={ex.id}>
-              {ex.name}
-            </option>
-          ))}
-        </select>
+      <div className="workout-sticky-header">
+        <div className="exercise-picker freeform-exercise-picker">
+          <input
+            type="text"
+            placeholder="Filter exercises..."
+            value={exerciseFilter}
+            onChange={(e) => setExerciseFilter(e.target.value)}
+          />
+          <select
+            value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
+            onChange={(e) => selectExercise(e.target.value)}
+          >
+            {!filteredExercises.some((e) => e.id === activeExerciseId) && (
+              <option value="" disabled>
+                Select an exercise
+              </option>
+            )}
+            {filteredExercises.map((ex) => (
+              <option key={ex.id} value={ex.id}>
+                {ex.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {suggestion && <SuggestionCard suggestion={suggestion} />}
       </div>
 
-      {suggestion && <SuggestionCard suggestion={suggestion} />}
-
-      <RestTimer />
+      <RestTimer autoStartSignal={restSignal} />
 
       <div className="set-form">
         <label>
           Weight
-          <input
-            type="number"
-            step={0.5}
+          <NumberStepper
             value={setForm.weight}
-            onChange={(e) => setSetForm({ ...setForm, weight: Number(e.target.value) })}
+            step={activeExercise?.weightIncrement ?? 2.5}
+            min={0}
+            onChange={(weight) => setSetForm({ ...setForm, weight })}
           />
         </label>
         <label>
           Reps
-          <input
-            type="number"
-            min={0}
+          <NumberStepper
             value={setForm.reps}
-            onChange={(e) => setSetForm({ ...setForm, reps: Number(e.target.value) })}
+            step={1}
+            min={0}
+            inputMode="numeric"
+            onChange={(reps) => setSetForm({ ...setForm, reps })}
           />
         </label>
         <label>
           RPE
-          <input
-            type="number"
+          <NumberStepper
+            value={setForm.rpe}
+            step={1}
             min={1}
             max={10}
-            value={setForm.rpe}
-            onChange={(e) => setSetForm({ ...setForm, rpe: Number(e.target.value) })}
+            inputMode="numeric"
+            onChange={(rpe) => setSetForm({ ...setForm, rpe })}
           />
         </label>
         <button type="button" onClick={addSet}>
@@ -213,8 +220,8 @@ export function FreeformWorkout({
           {logged.length} exercise{logged.length === 1 ? '' : 's'} logged this session.
         </p>
         <div className="wizard-actions">
-          <button type="button" className="link-btn" onClick={onCancel}>
-            Cancel
+          <button type="button" className="link-btn-danger" onClick={onCancel}>
+            Cancel workout
           </button>
           <button type="button" className="primary" onClick={finish} disabled={logged.length === 0}>
             Finish workout

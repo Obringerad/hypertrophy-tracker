@@ -69,6 +69,8 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
   }
 
   function cancelWorkout() {
+    const hasLoggedSets = (draft?.logged.length ?? 0) > 0
+    if (hasLoggedSets && !window.confirm('Discard this workout? All logged sets will be lost.')) return
     clearDraftImmediately()
     setStarted(false)
     setDraft(null)

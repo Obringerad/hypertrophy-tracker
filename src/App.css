@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -1054,4 +1054,100 @@ li.exercise-list-item-editing {
   margin-top: 0.2rem;
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+.link-btn-danger {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.link-btn-danger:hover {
+  color: #d9534f;
+}
+
+.workout-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.workout-progress-header .workout-progress {
+  margin: 0;
+}
+
+.workout-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--panel);
+  margin: -1.25rem -1.25rem 0.75rem;
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.number-stepper {
+  display: flex;
+  align-items: stretch;
+  gap: 0.3rem;
+}
+
+.number-stepper input {
+  width: 3.5rem;
+  text-align: center;
+  padding: 0.4rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+}
+
+.stepper-btn {
+  width: 2.2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.stepper-btn:active {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+
+  .tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    z-index: 50;
+    background: var(--bg);
+    border-bottom: none;
+    border-top: 1px solid var(--border);
+    justify-content: space-around;
+    overflow-x: auto;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tabs button {
+    flex: 1 1 0;
+    padding: 0.6rem 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .workout-sticky-header {
+    top: -1px;
+  }
 }
