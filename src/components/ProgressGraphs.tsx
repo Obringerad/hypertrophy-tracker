@@ -15,10 +15,14 @@ interface ChartPoint {
   value: number
 }
 
+function round2(n: number): number {
+  return Math.round(n * 100) / 100
+}
+
 function StatHeader({ title, points, unit }: { title: string; points: ChartPoint[]; unit: string }) {
-  const current = points[points.length - 1].value
+  const current = round2(points[points.length - 1].value)
   const previous = points[points.length - 2].value
-  const delta = current - previous
+  const delta = round2(current - previous)
 
   return (
     <>

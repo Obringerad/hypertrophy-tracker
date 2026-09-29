@@ -17,6 +17,10 @@ const PAD_TOP = 22
 const PAD_BOTTOM = 16
 const GRID_STEPS = 3
 
+function round2(n: number): number {
+  return Math.round(n * 100) / 100
+}
+
 export function LineChart({ points, valueSuffix = '' }: Props) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
@@ -105,7 +109,7 @@ export function LineChart({ points, valueSuffix = '' }: Props) {
             className="line-chart-end-label"
             style={{ left: `${(endX / WIDTH) * 100}%`, top: `${(endY / HEIGHT) * 100}%` }}
           >
-            {points[lastIndex].value}
+            {round2(points[lastIndex].value)}
             {valueSuffix}
           </div>
         )}
@@ -116,7 +120,7 @@ export function LineChart({ points, valueSuffix = '' }: Props) {
             style={{ left: `${(hoverX / WIDTH) * 100}%`, top: `${(hoverY / HEIGHT) * 100}%` }}
           >
             <span className="line-chart-tooltip-value">
-              {points[hoverIndex].value}
+              {round2(points[hoverIndex].value)}
               {valueSuffix}
             </span>
             <span className="line-chart-tooltip-label">{points[hoverIndex].label}</span>
