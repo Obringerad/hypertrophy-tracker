@@ -85,19 +85,19 @@ export function PlanDetail({
     <div className="panel">
       <div className="plan-detail-header">
         <button type="button" className="link-btn" onClick={onBack}>
-          &lt; All plans
+          &lt; All Plans
         </button>
         {isActive ? (
           <span className="active-badge">Active</span>
         ) : (
           <button type="button" className="link-btn" onClick={onSetActive}>
-            Make active
+            Make Active
           </button>
         )}
       </div>
 
       <label className="plan-name-field">
-        Plan name
+        Plan Name
         <input value={plan.name} onChange={(e) => onUpdatePlan({ ...plan, name: e.target.value })} />
       </label>
 
@@ -144,13 +144,13 @@ export function PlanDetail({
 
       <div className="settings-actions">
         <button type="button" className="choice-btn" onClick={onDuplicate}>
-          Duplicate plan
+          Duplicate Plan
         </button>
       </div>
 
       <div className="plan-detail-danger-zone">
         <button type="button" className="btn-delete" onClick={onDelete}>
-          Delete plan
+          Delete Plan
         </button>
       </div>
     </div>

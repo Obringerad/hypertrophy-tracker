@@ -44,7 +44,7 @@ export function WorkoutHome({
         />
       </label>
       <p className="workout-home-date">{formatChosenDate(date)}</p>
-      <h2>{isToday && planDay ? planDay.label : 'Freeform workout'}</h2>
+      <h2>{isToday && planDay ? planDay.label : 'Freeform Workout'}</h2>
       {!(isToday && planDay) && (
         <p className="muted">
           {isToday
@@ -72,7 +72,7 @@ export function WorkoutHome({
       </button>
       {onRepeatLast && (
         <button type="button" className="link-btn repeat-last-btn" onClick={onRepeatLast}>
-          Repeat last workout
+          Repeat Last Workout
         </button>
       )}
     </div>

@@ -134,7 +134,7 @@ export function FreeformWorkout({
 
   return (
     <div className="panel">
-      <h2>Freeform workout</h2>
+      <h2>Freeform Workout</h2>
 
       <div className="workout-sticky-header">
         {recentIds.length > 0 && (
@@ -217,7 +217,7 @@ export function FreeformWorkout({
           />
         </label>
         <button type="button" onClick={addSet}>
-          Add set
+          Add Set
         </button>
       </div>
 
@@ -259,7 +259,7 @@ export function FreeformWorkout({
       )}
 
       <label className="session-notes-field">
-        Notes (optional)
+        Notes (Optional)
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -274,10 +274,10 @@ export function FreeformWorkout({
         </p>
         <div className="wizard-actions">
           <button type="button" className="link-btn-danger" onClick={onCancel}>
-            Cancel workout
+            Cancel Workout
           </button>
           <button type="button" className="primary" onClick={finish} disabled={logged.length === 0}>
-            Finish workout
+            Finish Workout
           </button>
         </div>
       </div>

@@ -13,7 +13,7 @@ interface Props {
 export function PlansList({ plans, sessions, activePlanId, onOpen, onNew }: Props) {
   return (
     <div className="panel">
-      <h2>Your plans</h2>
+      <h2>Your Plans</h2>
       <div className="plans-list">
         {plans.map((plan) => {
           const progress = planProgress(plan, sessions)
@@ -43,7 +43,7 @@ export function PlansList({ plans, sessions, activePlanId, onOpen, onNew }: Prop
         {plans.length === 0 && <p className="muted">No plans yet. Create one to get started.</p>}
       </div>
       <button type="button" className="primary" onClick={onNew}>
-        New plan
+        New Plan
       </button>
     </div>
   )

@@ -105,7 +105,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
           onChange={(e) => setForm({ ...form, muscleGroup: e.target.value })}
         />
         <label>
-          Rep range
+          Rep Range
           <div className="rep-range-inputs">
             <input
               type="number"
@@ -123,7 +123,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
           </div>
         </label>
         <label>
-          Smallest weight jump
+          Smallest Weight Jump
           <input
             type="number"
             min={0}
@@ -132,7 +132,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
             onChange={(e) => setForm({ ...form, weightIncrement: Number(e.target.value) })}
           />
         </label>
-        <button type="submit">Add exercise</button>
+        <button type="submit">Add Exercise</button>
       </form>
 
       {exercises.length > 0 && (
@@ -162,7 +162,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
                   onChange={(e) => setEditForm({ ...editForm, muscleGroup: e.target.value })}
                 />
                 <label>
-                  Rep range
+                  Rep Range
                   <div className="rep-range-inputs">
                     <input
                       type="number"
@@ -180,7 +180,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
                   </div>
                 </label>
                 <label>
-                  Smallest weight jump
+                  Smallest Weight Jump
                   <input
                     type="number"
                     min={0}

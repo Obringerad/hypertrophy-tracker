@@ -86,7 +86,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
         {filterableExercises.length > 0 && (
           <div className="exercise-picker history-exercise-filter">
             <select value={exerciseFilter} onChange={(e) => setExerciseFilter(e.target.value)}>
-              <option value="">All exercises</option>
+              <option value="">All Exercises</option>
               {filterableExercises.map((ex) => (
                 <option key={ex.id} value={ex.id}>
                   {ex.name}

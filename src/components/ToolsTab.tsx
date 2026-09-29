@@ -91,7 +91,7 @@ export function ToolsTab({ prefillWeight }: Props) {
       <h2>Tools</h2>
 
       <div className="settings-section">
-        <h3>lb ⇄ kg converter</h3>
+        <h3>lb ⇄ kg Converter</h3>
         <div className="tool-inputs-row">
           <label>
             Pounds
@@ -107,14 +107,14 @@ export function ToolsTab({ prefillWeight }: Props) {
       </div>
 
       <div className="settings-section">
-        <h3>Plate calculator</h3>
+        <h3>Plate Calculator</h3>
         <div className="tool-inputs-row">
           <label>
-            Target weight ({weightUnit})
+            Target Weight ({weightUnit})
             <input type="number" inputMode="decimal" min={0} value={targetWeight} onFocus={selectAll} onChange={(e) => setTargetWeight(e.target.value)} />
           </label>
           <label>
-            Bar weight ({weightUnit})
+            Bar Weight ({weightUnit})
             <input type="number" inputMode="decimal" min={0} value={barWeight} onFocus={selectAll} onChange={(e) => setBarWeight(e.target.value)} />
           </label>
         </div>
@@ -148,14 +148,14 @@ export function ToolsTab({ prefillWeight }: Props) {
       </div>
 
       <div className="settings-section">
-        <h3>Estimated 1-rep max</h3>
+        <h3>Estimated 1-Rep Max</h3>
         <div className="tool-inputs-row">
           <label>
-            Weight lifted ({weightUnit})
+            Weight Lifted ({weightUnit})
             <input type="number" inputMode="decimal" min={0} value={oneRmWeight} onFocus={selectAll} onChange={(e) => setOneRmWeight(e.target.value)} />
           </label>
           <label>
-            Reps performed
+            Reps Performed
             <input type="number" inputMode="numeric" min={1} value={oneRmReps} onFocus={selectAll} onChange={(e) => setOneRmReps(e.target.value)} />
           </label>
         </div>

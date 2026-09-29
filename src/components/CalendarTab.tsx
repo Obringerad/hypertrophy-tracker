@@ -36,7 +36,7 @@ export function CalendarTab({ plans, sessions, exercises }: Props) {
       {plans.length > 0 && (
         <div className="exercise-picker">
           <select value={selectedPlanId} onChange={(e) => setSelectedPlanId(e.target.value)}>
-            <option value="all">All plans combined</option>
+            <option value="all">All Plans Combined</option>
             {plans.map((plan) => (
               <option key={plan.id} value={plan.id}>
                 {plan.name}

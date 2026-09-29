@@ -3,10 +3,10 @@ import { formatWeight } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 
 const ACTION_LABEL: Record<ProgressionSuggestion['action'], string> = {
-  increase_weight: 'Add weight',
-  increase_reps: 'Add a rep',
+  increase_weight: 'Add Weight',
+  increase_reps: 'Add a Rep',
   hold: 'Repeat',
-  decrease: 'Reduce load',
+  decrease: 'Reduce Load',
   deload: 'Deload',
 }
 
@@ -28,7 +28,7 @@ export function SuggestionCard({ suggestion, onShowPlates }: Props) {
       <p className="muted">{suggestion.reason}</p>
       {onShowPlates && (
         <button type="button" className="link-btn" onClick={() => onShowPlates(suggestion.suggestedWeight)}>
-          Plates for this weight
+          Plates for This Weight
         </button>
       )}
     </div>

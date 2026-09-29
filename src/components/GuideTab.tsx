@@ -38,7 +38,7 @@ export function GuideTab() {
       </div>
 
       <div className="settings-section">
-        <h3>How the weight suggestion decides</h3>
+        <h3>How the Weight Suggestion Decides</h3>
         <p className="muted">
           Every exercise has a target rep range (e.g. 8-12). After each session, the next suggestion is
           based on your last top set, checked against these rules in order:
@@ -53,11 +53,11 @@ export function GuideTab() {
             weight and rep target again.
           </li>
           <li>
-            <strong>Increase weight</strong> - you hit the <em>top</em> of the rep range and RPE was 8 or
+            <strong>Increase Weight</strong> - you hit the <em>top</em> of the rep range and RPE was 8 or
             under. Weight goes up by one increment, reps reset to the bottom of the range.
           </li>
           <li>
-            <strong>Increase reps</strong> - anything else. Same weight, aim for one more rep.
+            <strong>Increase Reps</strong> - anything else. Same weight, aim for one more rep.
           </li>
         </ol>
         <p className="muted">
@@ -67,7 +67,7 @@ export function GuideTab() {
       </div>
 
       <div className="settings-section">
-        <h3>Recovery rating</h3>
+        <h3>Recovery Rating</h3>
         <p className="muted">
           Logged once per session, 1 (wrecked) to 5 (fully recovered). A rating of 2 or below overrides
           everything else and suggests a deload, regardless of how the lifts themselves went.
@@ -75,7 +75,7 @@ export function GuideTab() {
       </div>
 
       <div className="settings-section">
-        <h3>PR badges</h3>
+        <h3>PR Badges</h3>
         <p className="muted">
           A set gets a PR badge when its weight beats every other weight you've ever logged for that
           exercise - converted to a common unit first if you've trained in both lb and kg.
@@ -83,7 +83,7 @@ export function GuideTab() {
       </div>
 
       <div className="settings-section">
-        <h3>Weight units</h3>
+        <h3>Weight Units</h3>
         <p className="muted">
           Each session remembers the unit it was actually logged in. Switching units in Settings never
           silently relabels old history - you'll be asked whether to convert everything or just start
@@ -92,7 +92,7 @@ export function GuideTab() {
       </div>
 
       <div className="settings-section">
-        <h3>Your data</h3>
+        <h3>Your Data</h3>
         <p className="muted">
           Everything lives only in this browser - there's no account and nothing syncs anywhere. Export
           a backup from Settings periodically, and definitely before clearing site data or switching

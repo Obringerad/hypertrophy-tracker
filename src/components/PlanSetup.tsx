@@ -112,12 +112,12 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
 
   return (
     <div className="panel">
-      <h2>Set up a plan</h2>
+      <h2>Set Up a Plan</h2>
 
       {step === 'schedule' && (
         <div className="wizard-step">
           <label className="plan-name-field">
-            Plan name (optional)
+            Plan Name (Optional)
             <input
               placeholder="e.g. 10 Week PPL"
               value={name}
@@ -139,13 +139,13 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
               className={scheduleType === 'fixed' ? 'choice-btn active' : 'choice-btn'}
               onClick={() => setScheduleType('fixed')}
             >
-              Fixed days
+              Fixed Days
             </button>
             <button
               className={scheduleType === 'flexible' ? 'choice-btn active' : 'choice-btn'}
               onClick={() => setScheduleType('flexible')}
             >
-              Goal days/week
+              Goal Days/Week
             </button>
           </div>
 
@@ -163,7 +163,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
             </div>
           ) : (
             <label className="days-per-week-picker">
-              Days per week
+              Days per Week
               <input
                 type="number"
                 min={1}
@@ -186,7 +186,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
               disabled={scheduleType === 'fixed' ? fixedDays.length === 0 : daysPerWeek < 1}
               onClick={() => setStep('split')}
             >
-              Next: choose a split
+              Next: Choose a Split
             </button>
           </div>
         </div>
@@ -235,7 +235,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
               Back
             </button>
             <button type="button" className="primary" onClick={() => onSave(draftPlan, draftExercises)}>
-              Save plan
+              Save Plan
             </button>
           </div>
         </div>

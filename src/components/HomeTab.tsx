@@ -46,7 +46,7 @@ export function HomeTab({
 
   const activePlan = plans.find((p) => p.id === activePlanId)
   const upcomingPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
-  const upcomingLabel = activePlan?.scheduleType === 'fixed' ? 'Today' : 'Next up'
+  const upcomingLabel = activePlan?.scheduleType === 'fixed' ? 'Today' : 'Next Up'
   const showDeloadNudge = recentRecoveryIsLow(sessions)
 
   function shiftMonth(delta: number) {
@@ -64,13 +64,13 @@ export function HomeTab({
           <div className="home-plan-picker">
             <p className="muted">No plan yet</p>
             <button type="button" className="choice-btn" onClick={onCreatePlan}>
-              Create a plan
+              Create a Plan
             </button>
           </div>
         ) : (
           <div className="home-plan-picker">
             <label className="plan-name-field home-active-plan-field">
-              Active plan
+              Active Plan
               <select value={activePlanId ?? ''} onChange={(e) => onSetActivePlan(e.target.value)}>
                 {!activePlanId && (
                   <option value="" disabled>
@@ -85,7 +85,7 @@ export function HomeTab({
               </select>
             </label>
             <button type="button" className="link-btn" onClick={onCreatePlan}>
-              + New plan
+              + New Plan
             </button>
           </div>
         )}
@@ -97,7 +97,7 @@ export function HomeTab({
 
       {showDeloadNudge && (
         <div className="deload-nudge">
-          <strong>Recovery's been low</strong>
+          <strong>Recovery's Been Low</strong>
           <p className="muted">
             Your last 2 sessions were both rated 2/5 or worse. Consider an easier week before pushing again.
           </p>
@@ -117,7 +117,7 @@ export function HomeTab({
           {plans.length > 0 && (
             <div className="exercise-picker home-calendar-picker">
               <select value={selectedPlanId} onChange={(e) => setSelectedPlanId(e.target.value)}>
-                <option value="all">All plans combined</option>
+                <option value="all">All Plans Combined</option>
                 {plans.map((plan) => (
                   <option key={plan.id} value={plan.id}>
                     {plan.name}

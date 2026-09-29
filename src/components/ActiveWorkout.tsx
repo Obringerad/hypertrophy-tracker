@@ -161,7 +161,7 @@ export function ActiveWorkout({
   if (!current) {
     return (
       <div className="panel">
-        <h2>{planDay.label}: workout complete</h2>
+        <h2>{planDay.label}: Workout Complete</h2>
         {logged.length === 0 && <p className="muted">Nothing logged yet.</p>}
         {logged.map((l) => {
           const ex = exercises.find((e) => e.id === l.exerciseId)
@@ -203,7 +203,7 @@ export function ActiveWorkout({
         })}
 
         <label className="session-notes-field">
-          Notes (optional)
+          Notes (Optional)
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -214,10 +214,10 @@ export function ActiveWorkout({
 
         <div className="wizard-actions">
           <button type="button" className="link-btn-danger" onClick={onCancel}>
-            Discard workout
+            Discard Workout
           </button>
           <button type="button" className="primary" onClick={finish} disabled={logged.length === 0}>
-            Finish workout
+            Finish Workout
           </button>
         </div>
       </div>
@@ -234,9 +234,9 @@ export function ActiveWorkout({
   const isLastExercise = exerciseNumber >= planDay.exercises.length
   const logSetLabel = isLastSetOfExercise
     ? isLastExercise
-      ? 'Log set and finish workout'
-      : 'Log set and start next exercise'
-    : 'Log set'
+      ? 'Log Set and Finish Workout'
+      : 'Log Set and Start Next Exercise'
+    : 'Log Set'
 
   return (
     <div className="panel active-workout">
@@ -246,7 +246,7 @@ export function ActiveWorkout({
             Exercise {exerciseNumber} of {planDay.exercises.length}
           </span>
           <button type="button" className="link-btn-danger" onClick={onCancel}>
-            Cancel workout
+            Cancel Workout
           </button>
         </div>
         <div className="progress-bar">
@@ -265,10 +265,10 @@ export function ActiveWorkout({
               disabled={!canRemovePlannedSet}
               title="Remove a set from this exercise"
             >
-              − set
+              − Set
             </button>
             <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
-              + set
+              + Set
             </button>
           </div>
         </div>
@@ -281,7 +281,7 @@ export function ActiveWorkout({
 
       {notesOpen || notes ? (
         <label className="session-notes-field">
-          Notes (optional)
+          Notes (Optional)
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -291,7 +291,7 @@ export function ActiveWorkout({
         </label>
       ) : (
         <button type="button" className="link-btn add-note-btn" onClick={() => setNotesOpen(true)}>
-          + Add a note
+          + Add a Note
         </button>
       )}
 
@@ -363,7 +363,7 @@ export function ActiveWorkout({
         <div>
           {!(isLastSetOfExercise && isLastExercise) ? (
             <button type="button" className="link-btn" onClick={skipRestOfExercise}>
-              Skip to next exercise
+              Skip to Next Exercise
             </button>
           ) : null}
         </div>

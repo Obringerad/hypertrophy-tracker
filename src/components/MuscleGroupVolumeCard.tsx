@@ -13,7 +13,7 @@ export function MuscleGroupVolumeCard({ sessions, exercises }: Props) {
 
   return (
     <div className="muscle-volume-card">
-      <p className="meta-text muscle-volume-label">This week's volume</p>
+      <p className="meta-text muscle-volume-label">This Week's Volume</p>
       <div className="muscle-volume-list">
         {volume.map((v) => (
           <div key={v.muscleGroup} className="muscle-volume-row">

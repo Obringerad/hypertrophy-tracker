@@ -134,7 +134,7 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
       <h2>Settings</h2>
 
       <div className="settings-section">
-        <h3>Weight unit</h3>
+        <h3>Weight Unit</h3>
         <div className="schedule-type-picker">
           <button
             type="button"
@@ -160,10 +160,10 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
             </p>
             <div className="settings-actions">
               <button type="button" className="primary" onClick={() => resolveUnitChange(true)}>
-                Convert all history to {pendingUnit}
+                Convert All History to {pendingUnit}
               </button>
               <button type="button" className="choice-btn" onClick={() => resolveUnitChange(false)}>
-                Only use {pendingUnit} for new workouts
+                Only Use {pendingUnit} for New Workouts
               </button>
               <button type="button" className="link-btn" onClick={() => setPendingUnit(null)}>
                 Cancel
@@ -174,7 +174,7 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
       </div>
 
       <div className="settings-section">
-        <h3>Text size</h3>
+        <h3>Text Size</h3>
         <p className="muted">Makes weights, reps, and other numbers easier to read at a glance mid-workout.</p>
         <div className="schedule-type-picker">
           <button
@@ -230,10 +230,10 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
         </p>
         <div className="settings-actions">
           <button type="button" className="primary" onClick={handleExport}>
-            Export backup
+            Export Backup
           </button>
           <button type="button" className="choice-btn" onClick={() => fileInputRef.current?.click()}>
-            Import backup
+            Import Backup
           </button>
           <input
             ref={fileInputRef}
