@@ -4,6 +4,7 @@ import { SPLIT_TEMPLATES, type SplitTemplate } from '../lib/splitTemplates'
 import { materializePlan } from '../lib/planEngine'
 import { useSettings } from '../context/SettingsContext'
 import { PlanDayEditor, type NewExerciseDetails } from './PlanDayEditor'
+import { MuscleGroupTag } from './MuscleGroupTag'
 
 interface Props {
   existingExercises: Exercise[]
@@ -23,8 +24,10 @@ function workingWeightFromOneRepMax(oneRepMax: number, reps: number, increment: 
   return Math.max(0, Math.round(raw / increment) * increment)
 }
 
-/** Rough estimate of another exercise's starting weight relative to a day's anchor lift, based on
- * how their target rep ranges compare (a higher rep ceiling usually means lighter accessory work). */
+/** Rough estimate of another exercise's starting weight relative to the anchor lift for its muscle
+ * group, based on how their target rep ranges compare (a higher rep ceiling usually means lighter
+ * accessory work). Only ever compared within the same muscle group - a squat number says nothing
+ * useful about an overhead press, so those are never cross-estimated against each other. */
 function estimateStartingWeight(anchorWorkingWeight: number, anchor: Exercise, target: Exercise): number {
   const repCeilingDiff = target.repRangeHigh - anchor.repRangeHigh
   // Deliberately conservative - a higher rep target usually means a lighter, more isolated movement,
@@ -33,6 +36,26 @@ function estimateStartingWeight(anchorWorkingWeight: number, anchor: Exercise, t
   const ratio = repCeilingDiff >= 3 ? 0.3 : repCeilingDiff > 0 ? 0.5 : 0.65
   const increment = target.weightIncrement || 2.5
   return Math.max(0, Math.round((anchorWorkingWeight * ratio) / increment) * increment)
+}
+
+/** For each muscle group appearing anywhere in the plan, the first exercise (in day/exercise order)
+ * that uses it - the lift the user is asked for a one-rep max on, and the basis for estimating the
+ * rest of that muscle group's exercises. */
+function planMuscleGroupAnchors(
+  plan: WorkoutPlan,
+  exerciseById: Map<string, Exercise>,
+): { muscleGroup: string; anchor: Exercise }[] {
+  const seen = new Set<string>()
+  const result: { muscleGroup: string; anchor: Exercise }[] = []
+  for (const day of plan.days) {
+    for (const pe of day.exercises) {
+      const ex = exerciseById.get(pe.exerciseId)
+      if (!ex || seen.has(ex.muscleGroup)) continue
+      seen.add(ex.muscleGroup)
+      result.push({ muscleGroup: ex.muscleGroup, anchor: ex })
+    }
+  }
+  return result
 }
 
 export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: Props) {
@@ -67,23 +90,23 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
     setStep('weights')
   }
 
-  /** Converts each day's entered one-rep-max guess into a working weight for its first exercise,
-   * and estimates the rest of that day's exercises from it, before moving on to review. Days left
-   * blank are skipped entirely. */
+  /** Converts each muscle group's entered one-rep-max guess into a working weight for its anchor
+   * exercise, and estimates every other used exercise in that same muscle group from there - never
+   * across muscle groups, since a squat number can't say anything useful about a shoulder press.
+   * Muscle groups left blank are skipped entirely. */
   function applyStartingWeights() {
     if (!draftPlan) return
     const pool = [...existingExercises, ...draftExercises]
+    const exerciseById = new Map(pool.map((e) => [e.id, e]))
+    const usedIds = new Set(draftPlan.days.flatMap((d) => d.exercises.map((pe) => pe.exerciseId)))
+    const anchors = planMuscleGroupAnchors(draftPlan, exerciseById)
     const updates = new Map<string, Exercise>()
 
-    for (const day of draftPlan.days) {
-      if (day.exercises.length === 0) continue
-      const raw = anchorWeights[day.id]
+    for (const { muscleGroup, anchor } of anchors) {
+      const raw = anchorWeights[muscleGroup]
       const oneRepMax = raw ? Number(raw) : NaN
       if (!Number.isFinite(oneRepMax) || oneRepMax <= 0) continue
 
-      const anchorId = day.exercises[0].exerciseId
-      const anchor = pool.find((e) => e.id === anchorId)
-      if (!anchor) continue
       const anchorWorkingWeight = workingWeightFromOneRepMax(
         oneRepMax,
         anchor.repRangeLow,
@@ -91,14 +114,11 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
       )
       updates.set(anchor.id, { ...anchor, startingWeight: anchorWorkingWeight })
 
-      for (const pe of day.exercises.slice(1)) {
-        if (updates.has(pe.exerciseId)) continue
-        const target = pool.find((e) => e.id === pe.exerciseId)
-        if (!target) continue
-        updates.set(target.id, {
-          ...target,
-          startingWeight: estimateStartingWeight(anchorWorkingWeight, anchor, target),
-        })
+      for (const id of usedIds) {
+        if (id === anchor.id || updates.has(id)) continue
+        const target = exerciseById.get(id)
+        if (!target || target.muscleGroup !== muscleGroup) continue
+        updates.set(id, { ...target, startingWeight: estimateStartingWeight(anchorWorkingWeight, anchor, target) })
       }
     }
 
@@ -172,6 +192,23 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
                   }
                 : d,
             ),
+          }
+        : prev,
+    )
+  }
+
+  function reorderExercises(dayId: string, fromIndex: number, toIndex: number) {
+    setDraftPlan((prev) =>
+      prev
+        ? {
+            ...prev,
+            days: prev.days.map((d) => {
+              if (d.id !== dayId) return d
+              const next = [...d.exercises]
+              const [moved] = next.splice(fromIndex, 1)
+              next.splice(toIndex, 0, moved)
+              return { ...d, exercises: next }
+            }),
           }
         : prev,
     )
@@ -328,30 +365,24 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
       {step === 'weights' && draftPlan && (
         <div className="wizard-step">
           <p className="muted">
-            What would you guess is your one-rep max for each day's main exercise, in {weightUnit}? Optional
-            - we'll work out a starting weight for it and estimate the rest of that day from there. Leave
-            any of these blank to skip.
+            What would you guess is your one-rep max for each muscle group's main exercise, in {weightUnit}?
+            Optional - we'll work out a starting weight for it and estimate the rest of that muscle group's
+            exercises from there. Leave any of these blank to skip.
           </p>
-          {draftPlan.days
-            .filter((day) => day.exercises.length > 0)
-            .map((day) => {
-              const anchor = [...existingExercises, ...draftExercises].find(
-                (e) => e.id === day.exercises[0].exerciseId,
-              )
-              if (!anchor) return null
-              return (
-                <label key={day.id} className="plan-name-field">
-                  {day.label}: {anchor.name} (1RM)
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="0"
-                    value={anchorWeights[day.id] ?? ''}
-                    onChange={(e) => setAnchorWeights((prev) => ({ ...prev, [day.id]: e.target.value }))}
-                  />
-                </label>
-              )
-            })}
+          {planMuscleGroupAnchors(draftPlan, new Map([...existingExercises, ...draftExercises].map((e) => [e.id, e]))).map(
+            ({ muscleGroup, anchor }) => (
+              <label key={muscleGroup} className="plan-name-field">
+                <MuscleGroupTag muscleGroup={muscleGroup} /> {anchor.name} (1RM)
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={anchorWeights[muscleGroup] ?? ''}
+                  onChange={(e) => setAnchorWeights((prev) => ({ ...prev, [muscleGroup]: e.target.value }))}
+                />
+              </label>
+            ),
+          )}
           <div className="wizard-actions">
             <button type="button" className="link-btn" onClick={() => setStep('split')}>
               Back
@@ -377,6 +408,7 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
               onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
               onAddExercise={(name, details) => addExercise(day.id, name, details)}
               onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
+              onReorderExercises={(fromIndex, toIndex) => reorderExercises(day.id, fromIndex, toIndex)}
               weightUnit={weightUnit}
               onUpdateStartingWeight={updateStartingWeight}
             />

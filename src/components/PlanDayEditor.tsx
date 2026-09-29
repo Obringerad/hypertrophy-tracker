@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Exercise, PlanDay } from '../types'
 import { catalogExercisesForMuscleGroup, type CatalogExercise } from '../lib/exerciseCatalog'
 import { MuscleGroupTag } from './MuscleGroupTag'
@@ -20,6 +20,8 @@ interface Props {
    * an already-saved plan being edited later doesn't show a weight field. */
   weightUnit?: string
   onUpdateStartingWeight?: (exerciseId: string, weight: number) => void
+  /** Lets exercises be dragged into a new order within this day. Omit to render a static list. */
+  onReorderExercises?: (fromIndex: number, toIndex: number) => void
 }
 
 /** How many alternative exercises to suggest when one is removed from a day. */
@@ -38,9 +40,40 @@ export function PlanDayEditor({
   onUpdateTargetSets,
   weightUnit,
   onUpdateStartingWeight,
+  onReorderExercises,
 }: Props) {
   const [newName, setNewName] = useState('')
   const [swapSuggestion, setSwapSuggestion] = useState<SwapSuggestion | null>(null)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+
+  function handleDragHandlePointerDown(e: ReactPointerEvent<HTMLSpanElement>, index: number) {
+    if (!onReorderExercises) return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setDragIndex(index)
+  }
+
+  function handleDragPointerMove(e: ReactPointerEvent<HTMLSpanElement>) {
+    if (dragIndex === null || !onReorderExercises || !listRef.current) return
+    const y = e.clientY
+    const rows = listRef.current.querySelectorAll<HTMLLIElement>('li[data-row-index]')
+    rows.forEach((row) => {
+      const i = Number(row.dataset.rowIndex)
+      if (i === dragIndex) return
+      const rect = row.getBoundingClientRect()
+      if (y < rect.top || y > rect.bottom) return
+      const midpoint = rect.top + rect.height / 2
+      const crossedIntoRow = (i < dragIndex && y < midpoint) || (i > dragIndex && y > midpoint)
+      if (crossedIntoRow) {
+        onReorderExercises(dragIndex, i)
+        setDragIndex(i)
+      }
+    })
+  }
+
+  function handleDragPointerUp() {
+    setDragIndex(null)
+  }
 
   function exercise(id: string): Exercise | undefined {
     return exercises.find((e) => e.id === id)
@@ -96,9 +129,25 @@ export function PlanDayEditor({
   return (
     <div className="plan-day-editor">
       <h3>{day.label}</h3>
-      <ul className="exercise-list">
-        {day.exercises.map((pe) => (
-          <li key={pe.exerciseId}>
+      <ul className="exercise-list" ref={listRef}>
+        {day.exercises.map((pe, index) => (
+          <li
+            key={pe.exerciseId}
+            data-row-index={index}
+            className={dragIndex === index ? 'exercise-row-dragging' : undefined}
+          >
+            {onReorderExercises && (
+              <span
+                className="drag-handle"
+                onPointerDown={(e) => handleDragHandlePointerDown(e, index)}
+                onPointerMove={handleDragPointerMove}
+                onPointerUp={handleDragPointerUp}
+                onPointerCancel={handleDragPointerUp}
+                aria-hidden="true"
+              >
+                ⠿
+              </span>
+            )}
             <span className="plan-day-exercise-info">
               {exerciseName(pe.exerciseId)}{' '}
               {exercise(pe.exerciseId) && <MuscleGroupTag muscleGroup={exercise(pe.exerciseId)!.muscleGroup} />}

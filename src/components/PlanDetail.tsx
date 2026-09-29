@@ -50,6 +50,19 @@ export function PlanDetail({
     })
   }
 
+  function reorderExercises(dayId: string, fromIndex: number, toIndex: number) {
+    onUpdatePlan({
+      ...plan,
+      days: plan.days.map((d) => {
+        if (d.id !== dayId) return d
+        const next = [...d.exercises]
+        const [moved] = next.splice(fromIndex, 1)
+        next.splice(toIndex, 0, moved)
+        return { ...d, exercises: next }
+      }),
+    })
+  }
+
   function addExercise(dayId: string, name: string, details?: NewExerciseDetails) {
     if (!name.trim()) return
     const existing = exercises.find((e) => e.name.toLowerCase() === name.trim().toLowerCase())
@@ -138,6 +151,7 @@ export function PlanDetail({
           onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
           onAddExercise={(name, details) => addExercise(day.id, name, details)}
           onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
+          onReorderExercises={(fromIndex, toIndex) => reorderExercises(day.id, fromIndex, toIndex)}
         />
       ))}
 

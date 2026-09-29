@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -181,6 +181,25 @@ button.primary:disabled {
   border-bottom: 1px solid var(--border);
 }
 
+.exercise-row-dragging {
+  opacity: 0.6;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  cursor: grab;
+  color: var(--muted);
+  padding: 0 0.6rem 0 0;
+  touch-action: none;
+  user-select: none;
+  font-size: 1.1rem;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
 .exercise-list-actions {
   display: flex;
   gap: 0.75rem;
@@ -192,6 +211,7 @@ button.primary:disabled {
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 .plan-day-target-sets {
