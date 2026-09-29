@@ -36,26 +36,43 @@ function calculatePlates(perSide: number, plateSizes: number[]): PlateResult {
 
   if (target <= 0) return { plates: [], remainder: perSide }
 
-  // countByParity[sum][0/1] = fewest plates (even/odd) that sum to exactly `sum`.
+  // countByParity[sum][0/1] = fewest plates (even/odd) that sum to exactly `sum`, with ties
+  // broken by using the fewest smallest-denomination plates (so a 5 stays a 5 instead of
+  // splitting into two 2.5s just to flip parity, when a same-count option avoids that).
   const EVEN = 0
   const ODD = 1
   const count: [number, number][] = new Array(target + 1)
+  const smallUsed: [number, number][] = new Array(target + 1)
   const pick: [number, number][] = new Array(target + 1)
   count[0] = [0, Infinity]
+  smallUsed[0] = [0, Infinity]
   pick[0] = [-1, -1]
+
+  function isBetter(count1: number, small1: number, count2: number, small2: number): boolean {
+    return count1 < count2 || (count1 === count2 && small1 < small2)
+  }
 
   for (let sum = 1; sum <= target; sum++) {
     count[sum] = [Infinity, Infinity]
+    smallUsed[sum] = [Infinity, Infinity]
     pick[sum] = [-1, -1]
     for (const size of sizes) {
       if (size > sum) continue
       const prev = count[sum - size]
-      if (prev[ODD] + 1 < count[sum][EVEN]) {
-        count[sum][EVEN] = prev[ODD] + 1
+      const prevSmall = smallUsed[sum - size]
+      const extraSmall = size === unit ? 1 : 0
+      const newCountEven = prev[ODD] + 1
+      const newSmallEven = prevSmall[ODD] + extraSmall
+      if (isBetter(newCountEven, newSmallEven, count[sum][EVEN], smallUsed[sum][EVEN])) {
+        count[sum][EVEN] = newCountEven
+        smallUsed[sum][EVEN] = newSmallEven
         pick[sum][EVEN] = size
       }
-      if (prev[EVEN] + 1 < count[sum][ODD]) {
-        count[sum][ODD] = prev[EVEN] + 1
+      const newCountOdd = prev[EVEN] + 1
+      const newSmallOdd = prevSmall[EVEN] + extraSmall
+      if (isBetter(newCountOdd, newSmallOdd, count[sum][ODD], smallUsed[sum][ODD])) {
+        count[sum][ODD] = newCountOdd
+        smallUsed[sum][ODD] = newSmallOdd
         pick[sum][ODD] = size
       }
     }
