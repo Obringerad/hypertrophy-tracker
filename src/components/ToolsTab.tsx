@@ -21,16 +21,62 @@ interface PlateResult {
   remainder: number
 }
 
+// Scales every standard plate size (down to 1.25) to an integer so the DP below can index arrays by sum.
+const PLATE_SCALE = 4
+// Above this many scaled units the DP array would get needlessly large for a weight no one actually loads.
+const MAX_SCALED_TARGET = 4000
+
 function calculatePlates(perSide: number, plateSizes: number[]): PlateResult {
-  let remaining = perSide
-  const plates: number[] = []
-  for (const size of plateSizes) {
-    while (remaining + 1e-9 >= size) {
-      plates.push(size)
-      remaining = Math.round((remaining - size) * 100) / 100
+  if (perSide <= 0) return { plates: [], remainder: Math.max(0, perSide) }
+
+  const sizes = plateSizes.map((s) => Math.round(s * PLATE_SCALE))
+  const unit = Math.min(...sizes)
+  const rawTarget = Math.round(perSide * PLATE_SCALE)
+  const target = Math.min(Math.floor(rawTarget / unit) * unit, MAX_SCALED_TARGET)
+
+  if (target <= 0) return { plates: [], remainder: perSide }
+
+  // countByParity[sum][0/1] = fewest plates (even/odd) that sum to exactly `sum`.
+  const EVEN = 0
+  const ODD = 1
+  const count: [number, number][] = new Array(target + 1)
+  const pick: [number, number][] = new Array(target + 1)
+  count[0] = [0, Infinity]
+  pick[0] = [-1, -1]
+
+  for (let sum = 1; sum <= target; sum++) {
+    count[sum] = [Infinity, Infinity]
+    pick[sum] = [-1, -1]
+    for (const size of sizes) {
+      if (size > sum) continue
+      const prev = count[sum - size]
+      if (prev[ODD] + 1 < count[sum][EVEN]) {
+        count[sum][EVEN] = prev[ODD] + 1
+        pick[sum][EVEN] = size
+      }
+      if (prev[EVEN] + 1 < count[sum][ODD]) {
+        count[sum][ODD] = prev[EVEN] + 1
+        pick[sum][ODD] = size
+      }
     }
   }
-  return { plates, remainder: Math.max(0, remaining) }
+
+  // Prefer an even plate count per side when one reaches the exact same target weight.
+  const parity = count[target][EVEN] < Infinity ? EVEN : ODD
+
+  const plates: number[] = []
+  let sum = target
+  let p = parity
+  while (sum > 0) {
+    const size = pick[sum][p]
+    plates.push(size / PLATE_SCALE)
+    sum -= size
+    p = p === EVEN ? ODD : EVEN
+  }
+  plates.sort((a, b) => b - a)
+
+  const remainder = Math.max(0, Math.round((perSide - target / PLATE_SCALE) * 100) / 100)
+  return { plates, remainder }
 }
 
 const REP_TARGETS = [1, 3, 5, 8, 10]
@@ -123,18 +169,35 @@ export function ToolsTab({ prefillWeight }: Props) {
 
         {plateResult && (
           <div className="plate-result">
-            <p className="muted">Plates per side:</p>
-            <div className="plate-chip-row">
-              {plateResult.plates.length === 0 ? (
-                <span className="muted">Bar only</span>
-              ) : (
-                plateResult.plates.map((p, i) => (
-                  <span key={i} className="plate-chip">
-                    {p}
-                  </span>
-                ))
-              )}
-            </div>
+            {plateResult.plates.length === 0 ? (
+              <p className="muted">Bar only - no plates needed.</p>
+            ) : (
+              <>
+                <div className="plate-barbell">
+                  <div className="plate-barbell-stack">
+                    {plateResult.plates
+                      .slice()
+                      .reverse()
+                      .map((p, i) => (
+                        <span key={i} className="plate-chip">
+                          {p}
+                        </span>
+                      ))}
+                  </div>
+                  <div className="plate-barbell-bar" />
+                  <div className="plate-barbell-stack">
+                    {plateResult.plates.map((p, i) => (
+                      <span key={i} className="plate-chip">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="muted plate-barbell-caption">
+                  Load this on both sides - plate closest to the bar listed first.
+                </p>
+              </>
+            )}
             {plateResult.remainder > 0 && (
               <p className="muted">
                 Closest match - {plateResult.remainder} {weightUnit} per side can't be made with these plates.

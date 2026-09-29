@@ -13,7 +13,7 @@ interface Props {
 const WIDTH = 600
 const HEIGHT = 220
 const PAD_X = 16
-const PAD_TOP = 16
+const PAD_TOP = 22
 const PAD_BOTTOM = 16
 const GRID_STEPS = 3
 
