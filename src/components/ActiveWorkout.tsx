@@ -88,7 +88,7 @@ export function ActiveWorkout({
     if (suggestion) {
       setForm({ weight: suggestion.suggestedWeight, reps: suggestion.suggestedReps, rpe: 8 })
     } else {
-      setForm({ weight: 0, reps: 0, rpe: 8 })
+      setForm({ weight: currentExercise?.startingWeight ?? 0, reps: 0, rpe: 8 })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.exerciseId])

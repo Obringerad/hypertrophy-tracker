@@ -2,20 +2,36 @@ import { useState } from 'react'
 import type { Exercise, PlanDay, ScheduleType, WorkoutPlan } from '../types'
 import { SPLIT_TEMPLATES, type SplitTemplate } from '../lib/splitTemplates'
 import { materializePlan } from '../lib/planEngine'
+import { useSettings } from '../context/SettingsContext'
 import { PlanDayEditor } from './PlanDayEditor'
 
 interface Props {
   existingExercises: Exercise[]
-  onSave: (plan: WorkoutPlan, newExercises: Exercise[]) => void
+  /** Shows a brief walkthrough step first, for someone setting up their very first plan. */
+  isFirstPlan?: boolean
+  onSave: (plan: WorkoutPlan, newExercises: Exercise[], updatedExercises?: Exercise[]) => void
   onCancel?: () => void
 }
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-type Step = 'schedule' | 'split' | 'review'
+type Step = 'intro' | 'schedule' | 'split' | 'weights' | 'review'
 
-export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
-  const [step, setStep] = useState<Step>('schedule')
+/** Rough estimate of another exercise's starting weight relative to a day's anchor lift, based on
+ * how their target rep ranges compare (a higher rep ceiling usually means lighter accessory work). */
+function estimateStartingWeight(anchorWeight: number, anchor: Exercise, target: Exercise): number {
+  const repCeilingDiff = target.repRangeHigh - anchor.repRangeHigh
+  // Deliberately conservative - a higher rep target usually means a lighter, more isolated movement,
+  // but this can't tell a barbell lift from a dumbbell or cable one, so it undershoots on purpose.
+  // It's a starting point in an editable field, not a recommendation.
+  const ratio = repCeilingDiff >= 3 ? 0.3 : repCeilingDiff > 0 ? 0.5 : 0.65
+  const increment = target.weightIncrement || 2.5
+  return Math.max(0, Math.round((anchorWeight * ratio) / increment) * increment)
+}
+
+export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: Props) {
+  const { weightUnit } = useSettings()
+  const [step, setStep] = useState<Step>(isFirstPlan ? 'intro' : 'schedule')
   const [name, setName] = useState('')
   const [durationWeeks, setDurationWeeks] = useState<number | ''>('')
   const [scheduleType, setScheduleType] = useState<ScheduleType>('fixed')
@@ -23,6 +39,8 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
   const [daysPerWeek, setDaysPerWeek] = useState<number | ''>(3)
   const [draftPlan, setDraftPlan] = useState<WorkoutPlan | null>(null)
   const [draftExercises, setDraftExercises] = useState<Exercise[]>([])
+  const [existingExerciseUpdates, setExistingExerciseUpdates] = useState<Record<string, Exercise>>({})
+  const [anchorWeights, setAnchorWeights] = useState<Record<string, string>>({})
 
   function toggleDay(day: number) {
     setFixedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()))
@@ -40,6 +58,44 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
     })
     setDraftPlan(plan)
     setDraftExercises(newExercises)
+    setStep('weights')
+  }
+
+  /** Applies each day's entered anchor weight to its first exercise, and estimates the rest of that
+   * day's exercises from it, before moving on to review. Days left blank are skipped entirely. */
+  function applyStartingWeights() {
+    if (!draftPlan) return
+    const pool = [...existingExercises, ...draftExercises]
+    const updates = new Map<string, Exercise>()
+
+    for (const day of draftPlan.days) {
+      if (day.exercises.length === 0) continue
+      const raw = anchorWeights[day.id]
+      const anchorWeight = raw ? Number(raw) : NaN
+      if (!Number.isFinite(anchorWeight) || anchorWeight <= 0) continue
+
+      const anchorId = day.exercises[0].exerciseId
+      const anchor = pool.find((e) => e.id === anchorId)
+      if (!anchor) continue
+      updates.set(anchor.id, { ...anchor, startingWeight: anchorWeight })
+
+      for (const pe of day.exercises.slice(1)) {
+        if (updates.has(pe.exerciseId)) continue
+        const target = pool.find((e) => e.id === pe.exerciseId)
+        if (!target) continue
+        updates.set(target.id, { ...target, startingWeight: estimateStartingWeight(anchorWeight, anchor, target) })
+      }
+    }
+
+    if (updates.size > 0) {
+      setDraftExercises((prev) => prev.map((e) => updates.get(e.id) ?? e))
+      const existingUpdates: Record<string, Exercise> = {}
+      for (const e of existingExercises) {
+        const updated = updates.get(e.id)
+        if (updated) existingUpdates[e.id] = updated
+      }
+      setExistingExerciseUpdates(existingUpdates)
+    }
     setStep('review')
   }
 
@@ -106,10 +162,50 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
     )
   }
 
+  function updateStartingWeight(exerciseId: string, weight: number) {
+    const clamped = Math.max(0, weight)
+    if (draftExercises.some((e) => e.id === exerciseId)) {
+      setDraftExercises((prev) => prev.map((e) => (e.id === exerciseId ? { ...e, startingWeight: clamped } : e)))
+      return
+    }
+    const base = existingExercises.find((e) => e.id === exerciseId)
+    if (!base) return
+    setExistingExerciseUpdates((prev) => ({
+      ...prev,
+      [exerciseId]: { ...base, ...prev[exerciseId], startingWeight: clamped },
+    }))
+  }
 
   return (
     <div className="panel">
       <h2>Set Up a Plan</h2>
+
+      {step === 'intro' && (
+        <div className="wizard-step">
+          <p>Setting up a plan takes four short steps:</p>
+          <ol className="guide-list">
+            <li>
+              <strong>Schedule</strong> - which days of the week you'll train.
+            </li>
+            <li>
+              <strong>Split</strong> - a rotation of training days (or build your own from scratch).
+            </li>
+            <li>
+              <strong>Starting weights</strong> - what you currently lift for a few key exercises, so your
+              first workout isn't blank.
+            </li>
+            <li>
+              <strong>Log workouts</strong> - after that, weight and rep suggestions come from how each
+              session actually goes.
+            </li>
+          </ol>
+          <div className="wizard-actions">
+            <button type="button" className="primary" onClick={() => setStep('schedule')}>
+              Let's Go
+            </button>
+          </div>
+        </div>
+      )}
 
       {step === 'schedule' && (
         <div className="wizard-step">
@@ -214,6 +310,43 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
         </div>
       )}
 
+      {step === 'weights' && draftPlan && (
+        <div className="wizard-step">
+          <p className="muted">
+            What do you currently lift for each day's main exercise, in {weightUnit}? Optional - we'll
+            estimate a starting point for the rest of that day from it. Leave any of these blank to skip.
+          </p>
+          {draftPlan.days
+            .filter((day) => day.exercises.length > 0)
+            .map((day) => {
+              const anchor = [...existingExercises, ...draftExercises].find(
+                (e) => e.id === day.exercises[0].exerciseId,
+              )
+              if (!anchor) return null
+              return (
+                <label key={day.id} className="plan-name-field">
+                  {day.label}: {anchor.name}
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="0"
+                    value={anchorWeights[day.id] ?? ''}
+                    onChange={(e) => setAnchorWeights((prev) => ({ ...prev, [day.id]: e.target.value }))}
+                  />
+                </label>
+              )
+            })}
+          <div className="wizard-actions">
+            <button type="button" className="link-btn" onClick={() => setStep('split')}>
+              Back
+            </button>
+            <button type="button" className="primary" onClick={applyStartingWeights}>
+              Next: Review
+            </button>
+          </div>
+        </div>
+      )}
+
       {step === 'review' && draftPlan && (
         <div className="wizard-step">
           <p className="muted">Review the generated days, then save. You can tweak exercises any time later.</p>
@@ -221,17 +354,26 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
             <PlanDayEditor
               key={day.id}
               day={day}
-              exercises={[...existingExercises, ...draftExercises]}
+              exercises={[
+                ...existingExercises.map((e) => existingExerciseUpdates[e.id] ?? e),
+                ...draftExercises,
+              ]}
               onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
               onAddExercise={(name) => addExercise(day.id, name)}
               onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
+              weightUnit={weightUnit}
+              onUpdateStartingWeight={updateStartingWeight}
             />
           ))}
           <div className="wizard-actions">
-            <button type="button" className="link-btn" onClick={() => setStep('split')}>
+            <button type="button" className="link-btn" onClick={() => setStep('weights')}>
               Back
             </button>
-            <button type="button" className="primary" onClick={() => onSave(draftPlan, draftExercises)}>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => onSave(draftPlan, draftExercises, Object.values(existingExerciseUpdates))}
+            >
               Save Plan
             </button>
           </div>

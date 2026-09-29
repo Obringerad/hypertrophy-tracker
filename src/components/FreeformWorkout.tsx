@@ -83,7 +83,7 @@ export function FreeformWorkout({
     if (suggestion) {
       setSetForm({ weight: suggestion.suggestedWeight, reps: suggestion.suggestedReps, rpe: 8 })
     } else {
-      setSetForm({ weight: 0, reps: 0, rpe: 8 })
+      setSetForm({ weight: activeExercise?.startingWeight ?? 0, reps: 0, rpe: 8 })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeExerciseId])

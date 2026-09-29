@@ -9,6 +9,8 @@ export interface Exercise {
   repRangeHigh: number
   /** Smallest jump available on the equipment (plates/pins), used when suggesting weight increases. */
   weightIncrement: number
+  /** Estimated or user-entered weight to prefill the first time this exercise is logged, before any history exists. */
+  startingWeight?: number
 }
 
 export interface SetEntry {

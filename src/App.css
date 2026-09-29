@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -208,6 +208,10 @@ button.primary:disabled {
   border-radius: 6px;
   background: transparent;
   color: var(--text);
+}
+
+.plan-day-target-sets input.starting-weight-input {
+  width: 4rem;
 }
 
 li.exercise-list-item-editing {

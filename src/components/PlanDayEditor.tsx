@@ -7,6 +7,10 @@ interface Props {
   onRemoveExercise: (exerciseId: string) => void
   onAddExercise: (name: string) => void
   onUpdateTargetSets: (exerciseId: string, targetSets: number) => void
+  /** Unit label and update handler for starting weights - only passed during initial plan setup, so
+   * an already-saved plan being edited later doesn't show a weight field. */
+  weightUnit?: string
+  onUpdateStartingWeight?: (exerciseId: string, weight: number) => void
 }
 
 interface SwapSuggestion {
@@ -14,12 +18,24 @@ interface SwapSuggestion {
   candidates: Exercise[]
 }
 
-export function PlanDayEditor({ day, exercises, onRemoveExercise, onAddExercise, onUpdateTargetSets }: Props) {
+export function PlanDayEditor({
+  day,
+  exercises,
+  onRemoveExercise,
+  onAddExercise,
+  onUpdateTargetSets,
+  weightUnit,
+  onUpdateStartingWeight,
+}: Props) {
   const [newName, setNewName] = useState('')
   const [swapSuggestion, setSwapSuggestion] = useState<SwapSuggestion | null>(null)
 
+  function exercise(id: string): Exercise | undefined {
+    return exercises.find((e) => e.id === id)
+  }
+
   function exerciseName(id: string): string {
-    return exercises.find((e) => e.id === id)?.name ?? 'Unknown exercise'
+    return exercise(id)?.name ?? 'Unknown exercise'
   }
 
   function submit() {
@@ -65,6 +81,19 @@ export function PlanDayEditor({ day, exercises, onRemoveExercise, onAddExercise,
                 />
                 <span className="muted">sets</span>
               </span>
+              {onUpdateStartingWeight && (
+                <span className="plan-day-target-sets">
+                  <input
+                    type="number"
+                    className="starting-weight-input"
+                    min={0}
+                    placeholder="0"
+                    value={exercise(pe.exerciseId)?.startingWeight ?? ''}
+                    onChange={(e) => onUpdateStartingWeight(pe.exerciseId, Number(e.target.value))}
+                  />
+                  <span className="muted">starting {weightUnit}</span>
+                </span>
+              )}
             </span>
             <button className="link-btn" onClick={() => removeExercise(pe.exerciseId)}>
               Remove

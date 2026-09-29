@@ -110,8 +110,11 @@ export default function App() {
     }
   }
 
-  function savePlan(newPlan: WorkoutPlan, newExercises: Exercise[]) {
+  function savePlan(newPlan: WorkoutPlan, newExercises: Exercise[], updatedExercises?: Exercise[]) {
     if (newExercises.length > 0) setExercises((prev) => [...prev, ...newExercises])
+    if (updatedExercises && updatedExercises.length > 0) {
+      setExercises((prev) => prev.map((e) => updatedExercises.find((u) => u.id === e.id) ?? e))
+    }
     setPlans((prev) => [...prev, newPlan])
     setActivePlanId(newPlan.id)
     setCreatingPlan(false)
@@ -310,6 +313,7 @@ export default function App() {
           (creatingPlan ? (
             <PlanSetup
               existingExercises={exercises}
+              isFirstPlan={plans.length === 0}
               onSave={savePlan}
               onCancel={plans.length > 0 ? () => setCreatingPlan(false) : undefined}
             />
