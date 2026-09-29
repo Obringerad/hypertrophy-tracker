@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, PlanDay, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
-import { maxWeightEver } from '../lib/records'
+import { maxWeightEver, isFirstAtWeightAndReps } from '../lib/records'
 import { formatWeight } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
@@ -95,6 +95,7 @@ export function ActiveWorkout({
 
   function logSet() {
     if (!current) return
+    const isLastSetOfExercise = current.setNumber >= current.targetSets
     setLogged((prev) => {
       const existing = prev.find((l) => l.exerciseId === current.exerciseId)
       const newSet: SetEntry = { ...form }
@@ -104,7 +105,9 @@ export function ActiveWorkout({
       return [...prev, { exerciseId: current.exerciseId, sets: [newSet] }]
     })
     setStepIndex((i) => i + 1)
-    setRestSignal((n) => n + 1)
+    // Only auto-start the rest timer between sets of the same exercise - finishing an exercise (or
+    // the whole workout) moves on to something else, not a rest interval to count down.
+    if (!isLastSetOfExercise) setRestSignal((n) => n + 1)
   }
 
   function skipRestOfExercise() {
@@ -185,7 +188,9 @@ export function ActiveWorkout({
                       <td>{i + 1}</td>
                       <td>
                         {formatWeight(s.weight, weightUnit)}
-                        {s.weight > priorBest && <span className="pr-badge">PR</span>}
+                        {s.weight > priorBest && isFirstAtWeightAndReps(l.sets, i) && (
+                          <span className="pr-badge">PR</span>
+                        )}
                       </td>
                       <td>{s.reps}</td>
                       <td>{s.rpe}</td>
@@ -232,11 +237,7 @@ export function ActiveWorkout({
   const canRemovePlannedSet = lastQueueIndexForExercise > stepIndex
   const isLastSetOfExercise = current.setNumber >= current.targetSets
   const isLastExercise = exerciseNumber >= planDay.exercises.length
-  const logSetLabel = isLastSetOfExercise
-    ? isLastExercise
-      ? 'Log Set and Finish Workout'
-      : 'Log Set and Start Next Exercise'
-    : 'Log Set'
+  const logSetLabel = isLastSetOfExercise && isLastExercise ? 'Log Set and Finish Workout' : 'Log Set'
 
   return (
     <div className="panel active-workout">
@@ -316,7 +317,9 @@ export function ActiveWorkout({
                 </td>
                 <td>
                   {formatWeight(s.weight, weightUnit)}
-                  {s.weight > priorBest && <span className="pr-badge">PR</span>}
+                  {s.weight > priorBest && isFirstAtWeightAndReps(currentExerciseLog.sets, i) && (
+                    <span className="pr-badge">PR</span>
+                  )}
                 </td>
                 <td>{s.reps}</td>
                 <td>{s.rpe}</td>
@@ -361,15 +364,22 @@ export function ActiveWorkout({
 
       <div className="wizard-actions">
         <div>
-          {!(isLastSetOfExercise && isLastExercise) ? (
+          {!isLastSetOfExercise ? (
             <button type="button" className="link-btn" onClick={skipRestOfExercise}>
               Skip to Next Exercise
             </button>
           ) : null}
         </div>
-        <button type="button" className="primary" onClick={logSet}>
-          {logSetLabel}
-        </button>
+        <div className="log-set-actions">
+          <button type="button" className="primary" onClick={logSet}>
+            {logSetLabel}
+          </button>
+          {isLastSetOfExercise && !isLastExercise && (
+            <button type="button" className="choice-btn" onClick={skipRestOfExercise}>
+              Start Next Exercise
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

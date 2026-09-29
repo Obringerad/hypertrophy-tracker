@@ -1,5 +1,12 @@
-import type { WorkoutSession } from '../types'
+import type { SetEntry, WorkoutSession } from '../types'
 import { convertWeight, sessionUnit, type WeightUnit } from './units'
+
+/** Whether this is the first set in the list at this exact weight+reps combo - used so a PR badge
+ * shown once for a new weight isn't repeated on every identical set logged after it. */
+export function isFirstAtWeightAndReps(sets: SetEntry[], index: number): boolean {
+  const { weight, reps } = sets[index]
+  return !sets.slice(0, index).some((s) => s.weight === weight && s.reps === reps)
+}
 
 /** Heaviest weight ever logged for this exercise across the given sessions, normalized to `targetUnit`. */
 export function maxWeightEver(sessions: WorkoutSession[], exerciseId: string, targetUnit: WeightUnit): number {

@@ -70,11 +70,15 @@ export function MonthCalendarGrid({ year, month, weeks, onPrevMonth, onNextMonth
                 }
               >
                 <span className="calendar-date">{day.dayOfMonth}</span>
-                {day.labels.map((label, idx) => (
-                  <span key={idx} className="calendar-day-label">
-                    {label}
+                {day.labels.length > 0 && (
+                  <span className="calendar-day-checks">
+                    {day.labels.map((_, idx) => (
+                      <span key={idx} className="calendar-day-check" aria-hidden="true">
+                        &#10003;
+                      </span>
+                    ))}
                   </span>
-                ))}
+                )}
               </div>
             )
           })}

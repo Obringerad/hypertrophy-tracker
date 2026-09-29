@@ -18,6 +18,7 @@ interface Props {
 export function RestTimer({ autoStartSignal }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
+  const [customOpen, setCustomOpen] = useState(false)
   const [customMinutes, setCustomMinutes] = useState('')
   const [customSeconds, setCustomSeconds] = useState('')
   const startedForSignal = useRef(autoStartSignal)
@@ -35,6 +36,7 @@ export function RestTimer({ autoStartSignal }: Props) {
     start(total)
     setCustomMinutes('')
     setCustomSeconds('')
+    setCustomOpen(false)
   }
 
   // Auto-start using the last-used duration whenever the caller signals a set was logged.
@@ -81,37 +83,45 @@ export function RestTimer({ autoStartSignal }: Props) {
               {formatClock(p)}
             </button>
           ))}
-        </div>
-        <div className="rest-timer-row rest-timer-custom">
-          <input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            placeholder="Min"
-            className="rest-timer-custom-input"
-            value={customMinutes}
-            onChange={(e) => setCustomMinutes(e.target.value)}
-          />
-          <span className="muted">:</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={59}
-            placeholder="Sec"
-            className="rest-timer-custom-input"
-            value={customSeconds}
-            onChange={(e) => setCustomSeconds(e.target.value)}
-          />
-          <button type="button" className="choice-btn" onClick={startCustom}>
-            Start Custom
-          </button>
-          {!lastMatchesPreset && (
-            <span className="muted rest-timer-next-custom">
-              <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>
-              Auto-starts at {formatClock(lastDuration)}
-            </span>
-          )}
+          <div className="rest-timer-custom-wrap">
+            <button
+              type="button"
+              className={!lastMatchesPreset ? 'choice-btn rest-timer-preset rest-timer-next' : 'choice-btn rest-timer-preset'}
+              onClick={() => setCustomOpen((open) => !open)}
+              title={!lastMatchesPreset ? `Auto-starts at ${formatClock(lastDuration)} after logging a set` : undefined}
+            >
+              {!lastMatchesPreset && <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>}
+              Custom
+            </button>
+            {customOpen && (
+              <div className="rest-timer-custom-popover">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  placeholder="Min"
+                  className="rest-timer-custom-input"
+                  autoFocus
+                  value={customMinutes}
+                  onChange={(e) => setCustomMinutes(e.target.value)}
+                />
+                <span className="muted">:</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={59}
+                  placeholder="Sec"
+                  className="rest-timer-custom-input"
+                  value={customSeconds}
+                  onChange={(e) => setCustomSeconds(e.target.value)}
+                />
+                <button type="button" className="choice-btn" onClick={startCustom}>
+                  Start
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     )

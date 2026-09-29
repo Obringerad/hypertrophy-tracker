@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
-import { maxWeightEver } from '../lib/records'
+import { maxWeightEver, isFirstAtWeightAndReps } from '../lib/records'
 import { formatWeight } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
@@ -242,7 +242,9 @@ export function FreeformWorkout({
                 </td>
                 <td>
                   {formatWeight(s.weight, weightUnit)}
-                  {s.weight > priorBest && <span className="pr-badge">PR</span>}
+                  {s.weight > priorBest && isFirstAtWeightAndReps(activeLog.sets, i) && (
+                    <span className="pr-badge">PR</span>
+                  )}
                 </td>
                 <td>{s.reps}</td>
                 <td>{s.rpe}</td>

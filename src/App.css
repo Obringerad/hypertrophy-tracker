@@ -794,13 +794,18 @@ li.exercise-list-item-editing {
   font-weight: 600;
 }
 
-.calendar-day-label {
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.calendar-day-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.calendar-day-check {
+  color: #3ba55d;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .toast {
@@ -1236,17 +1241,31 @@ li.exercise-list-item-editing {
   margin-right: 0.3rem;
 }
 
+.rest-timer-custom-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.rest-timer-custom-popover {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
 .rest-timer-custom-input {
   width: 3.2rem;
   padding: 0.3rem 0.4rem;
   font-size: 0.85rem;
   text-align: center;
-}
-
-.rest-timer-next-custom {
-  display: flex;
-  align-items: center;
-  font-size: 0.85rem;
 }
 
 .rest-timer-active {
@@ -1310,6 +1329,13 @@ li.exercise-list-item-editing {
 .wizard-actions > div {
   display: flex;
   gap: 1rem;
+}
+
+.log-set-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
 }
 
 .history-list {
