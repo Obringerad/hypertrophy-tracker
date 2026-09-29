@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -1246,6 +1246,20 @@ li.exercise-list-item-editing {
 
 .btn-delete:hover {
   background: color-mix(in srgb, #d9534f 15%, transparent);
+}
+
+.muscle-group-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--tag-color);
+  background: color-mix(in srgb, var(--tag-color) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tag-color) 45%, transparent);
+  white-space: nowrap;
 }
 
 .confirm-dialog-backdrop {

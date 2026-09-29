@@ -1,7 +1,7 @@
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { planProgress } from '../lib/planProgress'
 import { PlanCalendar } from './PlanCalendar'
-import { PlanDayEditor } from './PlanDayEditor'
+import { PlanDayEditor, type NewExerciseDetails } from './PlanDayEditor'
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -50,7 +50,7 @@ export function PlanDetail({
     })
   }
 
-  function addExercise(dayId: string, name: string) {
+  function addExercise(dayId: string, name: string, details?: NewExerciseDetails) {
     if (!name.trim()) return
     const existing = exercises.find((e) => e.name.toLowerCase() === name.trim().toLowerCase())
     const newExercises: Exercise[] = []
@@ -61,10 +61,10 @@ export function PlanDetail({
       const created: Exercise = {
         id: crypto.randomUUID(),
         name: name.trim(),
-        muscleGroup: 'General',
-        repRangeLow: 8,
-        repRangeHigh: 12,
-        weightIncrement: 2.5,
+        muscleGroup: details?.muscleGroup ?? 'General',
+        repRangeLow: details?.repRangeLow ?? 8,
+        repRangeHigh: details?.repRangeHigh ?? 12,
+        weightIncrement: details?.weightIncrement ?? 2.5,
       }
       newExercises.push(created)
       exerciseId = created.id
@@ -136,7 +136,7 @@ export function PlanDetail({
           day={day}
           exercises={exercises}
           onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
-          onAddExercise={(name) => addExercise(day.id, name)}
+          onAddExercise={(name, details) => addExercise(day.id, name, details)}
           onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
         />
       ))}

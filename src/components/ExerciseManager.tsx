@@ -5,6 +5,7 @@ import { historyForExercise } from '../lib/progression'
 import { bestEverWithDate } from '../lib/records'
 import { formatShortDate } from '../lib/dates'
 import { useSettings } from '../context/SettingsContext'
+import { MuscleGroupTag } from './MuscleGroupTag'
 
 interface Props {
   exercises: Exercise[]
@@ -200,11 +201,10 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
           ) : (
             <li key={ex.id}>
               <div>
-                <strong>{ex.name}</strong>
+                <strong>{ex.name}</strong> <MuscleGroupTag muscleGroup={ex.muscleGroup} />
                 <span className="muted">
                   {' '}
-                  &middot; {ex.muscleGroup} &middot; {ex.repRangeLow}-{ex.repRangeHigh} reps &middot; +
-                  {formatWeight(ex.weightIncrement, weightUnit)}
+                  &middot; {ex.repRangeLow}-{ex.repRangeHigh} reps &middot; +{formatWeight(ex.weightIncrement, weightUnit)}
                 </span>
                 <br />
                 <span className="muted">{lastPerformedSummary(sessions, ex.id, weightUnit)}</span>

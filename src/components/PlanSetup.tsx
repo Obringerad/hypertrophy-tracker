@@ -3,7 +3,7 @@ import type { Exercise, PlanDay, ScheduleType, WorkoutPlan } from '../types'
 import { SPLIT_TEMPLATES, type SplitTemplate } from '../lib/splitTemplates'
 import { materializePlan } from '../lib/planEngine'
 import { useSettings } from '../context/SettingsContext'
-import { PlanDayEditor } from './PlanDayEditor'
+import { PlanDayEditor, type NewExerciseDetails } from './PlanDayEditor'
 
 interface Props {
   existingExercises: Exercise[]
@@ -127,7 +127,7 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
     )
   }
 
-  function addExercise(dayId: string, name: string) {
+  function addExercise(dayId: string, name: string, details?: NewExerciseDetails) {
     if (!draftPlan || !name.trim()) return
     const pool = [...existingExercises, ...draftExercises]
     let exercise = pool.find((e) => e.name.toLowerCase() === name.trim().toLowerCase())
@@ -136,10 +136,10 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
       exercise = {
         id: crypto.randomUUID(),
         name: name.trim(),
-        muscleGroup: 'General',
-        repRangeLow: 8,
-        repRangeHigh: 12,
-        weightIncrement: 2.5,
+        muscleGroup: details?.muscleGroup ?? 'General',
+        repRangeLow: details?.repRangeLow ?? 8,
+        repRangeHigh: details?.repRangeHigh ?? 12,
+        weightIncrement: details?.weightIncrement ?? 2.5,
       }
       nextDraftExercises = [...draftExercises, exercise]
       setDraftExercises(nextDraftExercises)
@@ -375,7 +375,7 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
                 ...draftExercises,
               ]}
               onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
-              onAddExercise={(name) => addExercise(day.id, name)}
+              onAddExercise={(name, details) => addExercise(day.id, name, details)}
               onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
               weightUnit={weightUnit}
               onUpdateStartingWeight={updateStartingWeight}

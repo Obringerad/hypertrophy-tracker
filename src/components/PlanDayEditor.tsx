@@ -1,11 +1,20 @@
 import { useState } from 'react'
 import type { Exercise, PlanDay } from '../types'
+import { catalogExercisesForMuscleGroup, type CatalogExercise } from '../lib/exerciseCatalog'
+import { MuscleGroupTag } from './MuscleGroupTag'
+
+export interface NewExerciseDetails {
+  muscleGroup: string
+  repRangeLow: number
+  repRangeHigh: number
+  weightIncrement: number
+}
 
 interface Props {
   day: PlanDay
   exercises: Exercise[]
   onRemoveExercise: (exerciseId: string) => void
-  onAddExercise: (name: string) => void
+  onAddExercise: (name: string, details?: NewExerciseDetails) => void
   onUpdateTargetSets: (exerciseId: string, targetSets: number) => void
   /** Unit label and update handler for starting weights - only passed during initial plan setup, so
    * an already-saved plan being edited later doesn't show a weight field. */
@@ -13,9 +22,12 @@ interface Props {
   onUpdateStartingWeight?: (exerciseId: string, weight: number) => void
 }
 
+/** How many alternative exercises to suggest when one is removed from a day. */
+const MAX_SWAP_CANDIDATES = 6
+
 interface SwapSuggestion {
   muscleGroup: string
-  candidates: Exercise[]
+  candidates: CatalogExercise[]
 }
 
 export function PlanDayEditor({
@@ -53,14 +65,31 @@ export function PlanDayEditor({
     const remainingIds = new Set(
       day.exercises.filter((pe) => pe.exerciseId !== exerciseId).map((pe) => pe.exerciseId),
     )
-    const candidates = exercises.filter(
-      (e) => e.muscleGroup === removed.muscleGroup && e.id !== removed.id && !remainingIds.has(e.id),
+    const usedNames = new Set(
+      exercises.filter((e) => remainingIds.has(e.id)).map((e) => e.name.toLowerCase()),
     )
+    usedNames.add(removed.name.toLowerCase())
+
+    const ownCandidates = exercises.filter(
+      (e) => e.muscleGroup === removed.muscleGroup && !usedNames.has(e.name.toLowerCase()),
+    )
+    for (const c of ownCandidates) usedNames.add(c.name.toLowerCase())
+
+    const catalogCandidates = catalogExercisesForMuscleGroup(removed.muscleGroup).filter(
+      (c) => !usedNames.has(c.name.toLowerCase()),
+    )
+
+    const candidates = [...ownCandidates, ...catalogCandidates].slice(0, MAX_SWAP_CANDIDATES)
     setSwapSuggestion(candidates.length > 0 ? { muscleGroup: removed.muscleGroup, candidates } : null)
   }
 
-  function addSuggested(exercise: Exercise) {
-    onAddExercise(exercise.name)
+  function addSuggested(candidate: CatalogExercise) {
+    onAddExercise(candidate.name, {
+      muscleGroup: candidate.muscleGroup,
+      repRangeLow: candidate.repRangeLow,
+      repRangeHigh: candidate.repRangeHigh,
+      weightIncrement: candidate.weightIncrement,
+    })
     setSwapSuggestion(null)
   }
 
@@ -71,7 +100,8 @@ export function PlanDayEditor({
         {day.exercises.map((pe) => (
           <li key={pe.exerciseId}>
             <span className="plan-day-exercise-info">
-              {exerciseName(pe.exerciseId)}
+              {exerciseName(pe.exerciseId)}{' '}
+              {exercise(pe.exerciseId) && <MuscleGroupTag muscleGroup={exercise(pe.exerciseId)!.muscleGroup} />}
               <span className="plan-day-target-sets">
                 <input
                   type="number"
@@ -105,10 +135,12 @@ export function PlanDayEditor({
 
       {swapSuggestion && (
         <div className="exercise-swap-suggestion">
-          <p className="muted">Swap in another {swapSuggestion.muscleGroup} exercise?</p>
+          <p className="muted">
+            Swap in another <MuscleGroupTag muscleGroup={swapSuggestion.muscleGroup} /> exercise?
+          </p>
           <div className="exercise-swap-options">
             {swapSuggestion.candidates.map((c) => (
-              <button key={c.id} type="button" className="choice-btn" onClick={() => addSuggested(c)}>
+              <button key={c.name} type="button" className="choice-btn" onClick={() => addSuggested(c)}>
                 {c.name}
               </button>
             ))}
