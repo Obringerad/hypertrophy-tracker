@@ -1,4 +1,4 @@
-import type { PlanDay } from '../types'
+import type { PlanDay, WorkoutPlan } from '../types'
 
 const RECOVERY_LABELS: Record<number, string> = {
   1: 'Wrecked',
@@ -10,6 +10,10 @@ const RECOVERY_LABELS: Record<number, string> = {
 
 interface Props {
   planDay: PlanDay | null
+  /** The active plan, if any - lets today's session be swapped to a different one of its days
+   * (e.g. doing Legs instead of today's scheduled Pull day). */
+  plan?: WorkoutPlan | null
+  onSelectDay: (dayId: string | undefined) => void
   hasActivePlan: boolean
   recovery: number
   onRecoveryChange: (value: number) => void
@@ -32,6 +36,8 @@ function formatChosenDate(iso: string): string {
 
 export function WorkoutHome({
   planDay,
+  plan,
+  onSelectDay,
   hasActivePlan,
   recovery,
   onRecoveryChange,
@@ -41,6 +47,8 @@ export function WorkoutHome({
   isToday,
   onRepeatLast,
 }: Props) {
+  const showDayPicker = isToday && !!plan && plan.days.length > 0
+
   return (
     <div className="panel workout-home">
       <label className="workout-home-date-picker">
@@ -52,8 +60,30 @@ export function WorkoutHome({
         />
       </label>
       <p className="workout-home-date">{formatChosenDate(date)}</p>
-      <h2>{isToday && planDay ? planDay.label : 'Freeform Workout'}</h2>
-      {!(isToday && planDay) && (
+
+      {showDayPicker ? (
+        <label className="plan-name-field workout-day-picker">
+          Workout
+          <select
+            value={planDay?.id ?? ''}
+            onChange={(e) => onSelectDay(e.target.value || undefined)}
+          >
+            {!planDay && (
+              <option value="" disabled>
+                Select a workout
+              </option>
+            )}
+            {plan!.days.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <h2>{isToday && planDay ? planDay.label : 'Freeform Workout'}</h2>
+      )}
+      {!showDayPicker && !(isToday && planDay) && (
         <p className="muted">
           {isToday
             ? hasActivePlan

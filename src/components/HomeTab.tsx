@@ -91,7 +91,7 @@ export function HomeTab({
         )}
 
         <button type="button" className="primary start-workout-btn" onClick={onGoToLog}>
-          Log Workout
+          Start Workout
         </button>
       </div>
 

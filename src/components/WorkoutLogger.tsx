@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import type { Exercise, LoggedExercise, PlanDay, WorkoutSession } from '../types'
+import type { Exercise, LoggedExercise, WorkoutPlan, WorkoutSession } from '../types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
+import { resolveTodaysPlanDay } from '../lib/planEngine'
 import { WorkoutHome } from './WorkoutHome'
 import { ActiveWorkout, type QueueItem } from './ActiveWorkout'
 import { FreeformWorkout } from './FreeformWorkout'
@@ -10,7 +11,7 @@ interface Props {
   exercises: Exercise[]
   sessions: WorkoutSession[]
   onSave: (session: WorkoutSession) => void
-  planDay?: PlanDay | null
+  plan?: WorkoutPlan | null
   activePlanId?: string
   onShowPlates?: (weight: number) => void
 }
@@ -50,7 +51,7 @@ function clearDraftImmediately() {
   }
 }
 
-export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlanId, onShowPlates }: Props) {
+export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId, onShowPlates }: Props) {
   const [draft, setDraft] = useLocalStorage<WorkoutDraft | null>(DRAFT_KEY, null)
   const [started, setStarted] = useState(() => draft !== null)
   const [recovery, setRecovery] = useState(() => draft?.recovery ?? 3)
@@ -58,13 +59,18 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
   const [startedAt, setStartedAt] = useState<number | undefined>(() => draft?.startedAt)
   const [repeatExerciseId, setRepeatExerciseId] = useState<string | undefined>(undefined)
   const [confirmingCancel, setConfirmingCancel] = useState(false)
+  /** Overrides which of the plan's days today's workout uses, when the user swaps away from the
+   * one the schedule/rotation would normally pick (e.g. doing Legs instead of today's Pull). */
+  const [selectedDayId, setSelectedDayId] = useState<string | undefined>(() => draft?.planDayId)
 
   if (exercises.length === 0) {
     return <p className="muted">Add an exercise first, then come back here to log a workout.</p>
   }
 
   const isToday = date === todayIso()
-  const effectivePlanDay = isToday ? (planDay ?? null) : null
+  const scheduledPlanDay = plan ? resolveTodaysPlanDay(plan) : null
+  const selectedDay = selectedDayId ? plan?.days.find((d) => d.id === selectedDayId) : undefined
+  const effectivePlanDay = isToday ? (selectedDay ?? scheduledPlanDay) : null
 
   function start() {
     setStartedAt(Date.now())
@@ -87,6 +93,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
     setRepeatExerciseId(undefined)
     setRecovery(3)
     setDate(todayIso())
+    setSelectedDayId(undefined)
     setDraft(null)
   }
 
@@ -95,6 +102,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
     setStarted(false)
     setStartedAt(undefined)
     setRepeatExerciseId(undefined)
+    setSelectedDayId(undefined)
     setDraft(null)
   }
 
@@ -124,6 +132,8 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
     return (
       <WorkoutHome
         planDay={effectivePlanDay}
+        plan={plan}
+        onSelectDay={setSelectedDayId}
         hasActivePlan={activePlanId !== undefined}
         recovery={recovery}
         onRecoveryChange={setRecovery}

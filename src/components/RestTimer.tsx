@@ -18,11 +18,23 @@ interface Props {
 export function RestTimer({ autoStartSignal }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
+  const [customMinutes, setCustomMinutes] = useState('')
+  const [customSeconds, setCustomSeconds] = useState('')
   const startedForSignal = useRef(autoStartSignal)
 
   function start(seconds: number) {
     setLastDuration(seconds)
     setSecondsLeft(seconds)
+  }
+
+  function startCustom() {
+    const minutes = Number(customMinutes) || 0
+    const seconds = Number(customSeconds) || 0
+    const total = minutes * 60 + seconds
+    if (total <= 0) return
+    start(total)
+    setCustomMinutes('')
+    setCustomSeconds('')
   }
 
   // Auto-start using the last-used duration whenever the caller signals a set was logged.
@@ -52,14 +64,55 @@ export function RestTimer({ autoStartSignal }: Props) {
   }, [secondsLeft])
 
   if (secondsLeft === null) {
+    const lastMatchesPreset = PRESETS.includes(lastDuration)
     return (
       <div className="rest-timer">
-        <span className="muted">Rest timer:</span>
-        {PRESETS.map((p) => (
-          <button key={p} type="button" className="choice-btn rest-timer-preset" onClick={() => start(p)}>
-            {formatClock(p)}
+        <div className="rest-timer-row">
+          <span className="muted">Rest timer:</span>
+          {PRESETS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className={p === lastDuration ? 'choice-btn rest-timer-preset rest-timer-next' : 'choice-btn rest-timer-preset'}
+              onClick={() => start(p)}
+              title={p === lastDuration ? 'Auto-starts at this duration after logging a set' : undefined}
+            >
+              {p === lastDuration && <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>}
+              {formatClock(p)}
+            </button>
+          ))}
+        </div>
+        <div className="rest-timer-row rest-timer-custom">
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="Min"
+            className="rest-timer-custom-input"
+            value={customMinutes}
+            onChange={(e) => setCustomMinutes(e.target.value)}
+          />
+          <span className="muted">:</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={59}
+            placeholder="Sec"
+            className="rest-timer-custom-input"
+            value={customSeconds}
+            onChange={(e) => setCustomSeconds(e.target.value)}
+          />
+          <button type="button" className="choice-btn" onClick={startCustom}>
+            Start Custom
           </button>
-        ))}
+          {!lastMatchesPreset && (
+            <span className="muted rest-timer-next-custom">
+              <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>
+              Auto-starts at {formatClock(lastDuration)}
+            </span>
+          )}
+        </div>
       </div>
     )
   }

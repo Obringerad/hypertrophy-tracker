@@ -17,7 +17,7 @@ import { ToolsTab } from './components/ToolsTab'
 import { GuideTab } from './components/GuideTab'
 import { TabIcon, type TabIconName } from './components/TabIcon'
 import { SettingsProvider } from './context/SettingsContext'
-import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
+import { advancePlanRotation } from './lib/planEngine'
 import { formatDate } from './lib/dates'
 import './App.css'
 
@@ -228,7 +228,11 @@ export default function App() {
 
   function changeWeightUnit(fromUnit: WeightUnit, toUnit: WeightUnit, convertHistory: boolean) {
     setExercises((prev) =>
-      prev.map((e) => ({ ...e, weightIncrement: convertWeight(e.weightIncrement, fromUnit, toUnit) })),
+      prev.map((e) => ({
+        ...e,
+        weightIncrement: convertWeight(e.weightIncrement, fromUnit, toUnit),
+        startingWeight: e.startingWeight !== undefined ? convertWeight(e.startingWeight, fromUnit, toUnit) : undefined,
+      })),
     )
     if (convertHistory) {
       setSessions((prev) =>
@@ -260,8 +264,6 @@ export default function App() {
     setSelectedPlanId(null)
     setCreatingPlan(data.plans.length === 0)
   }
-
-  const todaysPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
 
   return (
     <SettingsProvider>
@@ -353,7 +355,7 @@ export default function App() {
             exercises={exercises}
             sessions={sessions}
             onSave={saveSession}
-            planDay={todaysPlanDay}
+            plan={activePlan}
             activePlanId={activePlan?.id}
             onShowPlates={showPlatesFor}
           />

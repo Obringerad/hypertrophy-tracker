@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -609,6 +609,20 @@ li.exercise-list-item-editing {
   font-size: 1rem;
 }
 
+.workout-day-picker {
+  margin: 0.25rem 0 0.5rem;
+}
+
+.workout-day-picker select {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
 .plans-list {
   display: flex;
   flex-direction: column;
@@ -1190,13 +1204,20 @@ li.exercise-list-item-editing {
 
 .rest-timer {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.5rem;
-  flex-wrap: wrap;
   margin-bottom: 1rem;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 8px;
+}
+
+.rest-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .rest-timer-preset {
@@ -1204,7 +1225,34 @@ li.exercise-list-item-editing {
   font-size: 0.85rem;
 }
 
+.rest-timer-next {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rest-timer-next-arrow {
+  font-size: 0.65em;
+  margin-right: 0.3rem;
+}
+
+.rest-timer-custom-input {
+  width: 3.2rem;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.rest-timer-next-custom {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
 .rest-timer-active {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
   border-color: var(--accent);
 }
 
