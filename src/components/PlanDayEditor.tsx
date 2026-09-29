@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Exercise, PlanDay } from '../types'
 import { catalogExercisesForMuscleGroup, findCatalogExerciseByName, type CatalogExercise } from '../lib/exerciseCatalog'
 import { MuscleGroupTag } from './MuscleGroupTag'
@@ -48,8 +48,21 @@ export function PlanDayEditor({
   const [dragPointer, setDragPointer] = useState<{ x: number; y: number } | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
 
+  // touch-action: none on the handle is usually enough, but some mobile browsers still let a
+  // scroll gesture win partway through - which fires a pointercancel and silently drops the drag.
+  // Blocking touchmove at the document level for the duration of the drag closes that gap.
+  useEffect(() => {
+    if (dragIndex === null) return
+    function blockScroll(e: TouchEvent) {
+      e.preventDefault()
+    }
+    document.addEventListener('touchmove', blockScroll, { passive: false })
+    return () => document.removeEventListener('touchmove', blockScroll)
+  }, [dragIndex])
+
   function handleDragHandlePointerDown(e: ReactPointerEvent<HTMLSpanElement>, index: number) {
     if (!onReorderExercises) return
+    e.preventDefault()
     e.currentTarget.setPointerCapture(e.pointerId)
     setDragIndex(index)
     setDragPointer({ x: e.clientX, y: e.clientY })
@@ -57,6 +70,7 @@ export function PlanDayEditor({
 
   function handleDragPointerMove(e: ReactPointerEvent<HTMLSpanElement>) {
     if (dragIndex === null || !onReorderExercises || !listRef.current) return
+    e.preventDefault()
     setDragPointer({ x: e.clientX, y: e.clientY })
     const y = e.clientY
     const rows = listRef.current.querySelectorAll<HTMLLIElement>('li[data-row-index]')
