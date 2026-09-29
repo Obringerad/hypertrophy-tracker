@@ -1,20 +1,51 @@
 import { useState } from 'react'
-import type { PlanDay } from '../types'
+import type { Exercise, PlanDay } from '../types'
 
 interface Props {
   day: PlanDay
-  exerciseName: (id: string) => string
+  exercises: Exercise[]
   onRemoveExercise: (exerciseId: string) => void
   onAddExercise: (name: string) => void
   onUpdateTargetSets: (exerciseId: string, targetSets: number) => void
 }
 
-export function PlanDayEditor({ day, exerciseName, onRemoveExercise, onAddExercise, onUpdateTargetSets }: Props) {
+interface SwapSuggestion {
+  muscleGroup: string
+  candidates: Exercise[]
+}
+
+export function PlanDayEditor({ day, exercises, onRemoveExercise, onAddExercise, onUpdateTargetSets }: Props) {
   const [newName, setNewName] = useState('')
+  const [swapSuggestion, setSwapSuggestion] = useState<SwapSuggestion | null>(null)
+
+  function exerciseName(id: string): string {
+    return exercises.find((e) => e.id === id)?.name ?? 'Unknown exercise'
+  }
 
   function submit() {
     onAddExercise(newName)
     setNewName('')
+  }
+
+  function removeExercise(exerciseId: string) {
+    const removed = exercises.find((e) => e.id === exerciseId)
+    onRemoveExercise(exerciseId)
+    if (!removed) {
+      setSwapSuggestion(null)
+      return
+    }
+    const remainingIds = new Set(
+      day.exercises.filter((pe) => pe.exerciseId !== exerciseId).map((pe) => pe.exerciseId),
+    )
+    const candidates = exercises.filter(
+      (e) => e.muscleGroup === removed.muscleGroup && e.id !== removed.id && !remainingIds.has(e.id),
+    )
+    setSwapSuggestion(candidates.length > 0 ? { muscleGroup: removed.muscleGroup, candidates } : null)
+  }
+
+  function addSuggested(exercise: Exercise) {
+    onAddExercise(exercise.name)
+    setSwapSuggestion(null)
   }
 
   return (
@@ -35,13 +66,30 @@ export function PlanDayEditor({ day, exerciseName, onRemoveExercise, onAddExerci
                 <span className="muted">sets</span>
               </span>
             </span>
-            <button className="link-btn" onClick={() => onRemoveExercise(pe.exerciseId)}>
+            <button className="link-btn" onClick={() => removeExercise(pe.exerciseId)}>
               Remove
             </button>
           </li>
         ))}
         {day.exercises.length === 0 && <p className="muted">No exercises yet.</p>}
       </ul>
+
+      {swapSuggestion && (
+        <div className="exercise-swap-suggestion">
+          <p className="muted">Swap in another {swapSuggestion.muscleGroup} exercise?</p>
+          <div className="exercise-swap-options">
+            {swapSuggestion.candidates.map((c) => (
+              <button key={c.id} type="button" className="choice-btn" onClick={() => addSuggested(c)}>
+                {c.name}
+              </button>
+            ))}
+            <button type="button" className="link-btn" onClick={() => setSwapSuggestion(null)}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="add-exercise-inline">
         <input
           placeholder="Add exercise"

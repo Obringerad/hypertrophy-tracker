@@ -20,7 +20,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
   const [durationWeeks, setDurationWeeks] = useState<number | ''>('')
   const [scheduleType, setScheduleType] = useState<ScheduleType>('fixed')
   const [fixedDays, setFixedDays] = useState<number[]>([1, 3, 5])
-  const [daysPerWeek, setDaysPerWeek] = useState(3)
+  const [daysPerWeek, setDaysPerWeek] = useState<number | ''>(3)
   const [draftPlan, setDraftPlan] = useState<WorkoutPlan | null>(null)
   const [draftExercises, setDraftExercises] = useState<Exercise[]>([])
 
@@ -34,7 +34,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
       template,
       scheduleType,
       fixedDays: scheduleType === 'fixed' ? fixedDays : undefined,
-      daysPerWeek: scheduleType === 'flexible' ? daysPerWeek : undefined,
+      daysPerWeek: scheduleType === 'flexible' && daysPerWeek !== '' ? daysPerWeek : undefined,
       durationWeeks: durationWeeks === '' ? undefined : durationWeeks,
       existingExercises,
     })
@@ -106,9 +106,6 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
     )
   }
 
-  function exerciseName(id: string): string {
-    return [...existingExercises, ...draftExercises].find((e) => e.id === id)?.name ?? 'Unknown exercise'
-  }
 
   return (
     <div className="panel">
@@ -169,7 +166,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
                 min={1}
                 max={7}
                 value={daysPerWeek}
-                onChange={(e) => setDaysPerWeek(Number(e.target.value))}
+                onChange={(e) => setDaysPerWeek(e.target.value === '' ? '' : Number(e.target.value))}
               />
             </label>
           )}
@@ -183,7 +180,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
             <button
               type="button"
               className="primary"
-              disabled={scheduleType === 'fixed' ? fixedDays.length === 0 : daysPerWeek < 1}
+              disabled={scheduleType === 'fixed' ? fixedDays.length === 0 : daysPerWeek === '' || daysPerWeek < 1}
               onClick={() => setStep('split')}
             >
               Next: Choose a Split
@@ -224,7 +221,7 @@ export function PlanSetup({ existingExercises, onSave, onCancel }: Props) {
             <PlanDayEditor
               key={day.id}
               day={day}
-              exerciseName={exerciseName}
+              exercises={[...existingExercises, ...draftExercises]}
               onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
               onAddExercise={(name) => addExercise(day.id, name)}
               onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}

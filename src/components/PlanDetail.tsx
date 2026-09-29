@@ -29,7 +29,6 @@ export function PlanDetail({
   onBack,
 }: Props) {
   const progress = planProgress(plan, sessions)
-  const exerciseName = (id: string) => exercises.find((e) => e.id === id)?.name ?? 'Unknown exercise'
 
   function removeExercise(dayId: string, exerciseId: string) {
     onUpdatePlan({
@@ -135,7 +134,7 @@ export function PlanDetail({
         <PlanDayEditor
           key={day.id}
           day={day}
-          exerciseName={exerciseName}
+          exercises={exercises}
           onRemoveExercise={(exerciseId) => removeExercise(day.id, exerciseId)}
           onAddExercise={(name) => addExercise(day.id, name)}
           onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}

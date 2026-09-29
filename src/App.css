@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -492,6 +492,21 @@ li.exercise-list-item-editing {
   border-radius: 6px;
   background: transparent;
   color: var(--text);
+}
+
+.exercise-swap-suggestion {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.exercise-swap-options {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.4rem;
 }
 
 .add-exercise-inline {

@@ -28,10 +28,12 @@ export function RestTimer({ autoStartSignal }: Props) {
   // Auto-start using the last-used duration whenever the caller signals a set was logged.
   // Compares against the signal value we last started for (rather than a "first render" flag)
   // so this stays correct even if effects double-fire on mount, e.g. under StrictMode.
+  // If a countdown is already running, leave it where it is instead of restarting it - logging
+  // another set mid-rest shouldn't push the clock back out to the full duration.
   useEffect(() => {
     if (autoStartSignal === undefined || autoStartSignal === startedForSignal.current) return
     startedForSignal.current = autoStartSignal
-    setSecondsLeft(lastDuration)
+    setSecondsLeft((current) => (current === null || current <= 0 ? lastDuration : current))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStartSignal])
 

@@ -56,7 +56,7 @@ export function WorkoutHome({
       )}
 
       <label className="recovery-field">
-        How are you feeling? (1 wrecked - 5 fresh)
+        How are you feeling? (1 Wrecked - 5 Fresh)
         <input
           type="range"
           min={1}
