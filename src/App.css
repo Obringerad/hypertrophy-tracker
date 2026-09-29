@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -1282,23 +1282,80 @@ li.exercise-list-item-editing {
   font-size: 1rem;
 }
 
-.progress-graph {
-  margin-top: 1rem;
+.progress-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
 }
 
-.progress-graph-label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.8rem;
+.progress-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem 1.1rem;
+  min-width: 0;
+}
+
+.progress-card-title {
+  margin: 0 0 0.3rem;
+}
+
+.progress-card-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.progress-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.progress-card-delta {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-card-delta.up {
+  color: #3ba55d;
+}
+
+.progress-card-delta.down {
+  color: #d9534f;
+}
+
+.progress-exercise-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.progress-exercise-controls .exercise-picker {
+  margin-bottom: 0;
+}
+
+.metric-toggle {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.line-chart-wrap {
+  position: relative;
 }
 
 .line-chart-svg {
   width: 100%;
-  height: 120px;
+  aspect-ratio: 600 / 220;
   display: block;
+  touch-action: pan-y;
+  overflow: visible;
 }
 
-.line-chart-axis {
+.line-chart-grid {
   stroke: var(--border);
   stroke-width: 1;
 }
@@ -1306,15 +1363,59 @@ li.exercise-list-item-editing {
 .line-chart-path {
   stroke: var(--accent);
   stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .line-chart-dot {
   fill: var(--accent);
+  stroke: var(--panel);
+  stroke-width: 2;
+}
+
+.line-chart-crosshair {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.5;
 }
 
 .line-chart-value-label {
   fill: var(--muted);
   font-size: 0.7rem;
+}
+
+.line-chart-end-label,
+.line-chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -135%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.line-chart-end-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.line-chart-tooltip {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.line-chart-tooltip-value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.line-chart-tooltip-label {
+  color: var(--muted);
+  margin-left: 0.4rem;
+  font-size: 0.75rem;
 }
 
 .line-chart-x-labels {
