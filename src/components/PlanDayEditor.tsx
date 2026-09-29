@@ -74,18 +74,28 @@ export function PlanDayEditor({
     setDragPointer({ x: e.clientX, y: e.clientY })
     const y = e.clientY
     const rows = listRef.current.querySelectorAll<HTMLLIElement>('li[data-row-index]')
+    if (rows.length === 0) return
+
+    // Whichever row's midpoint is nearest the pointer is the target - not "whichever row the
+    // pointer is inside," which broke as soon as the pointer overshot past the first/last row (or
+    // left the list bounds entirely, e.g. dragging near the top/bottom edge of the screen).
+    let closestIndex = dragIndex
+    let closestDistance = Infinity
     rows.forEach((row) => {
       const i = Number(row.dataset.rowIndex)
-      if (i === dragIndex) return
       const rect = row.getBoundingClientRect()
-      if (y < rect.top || y > rect.bottom) return
       const midpoint = rect.top + rect.height / 2
-      const crossedIntoRow = (i < dragIndex && y < midpoint) || (i > dragIndex && y > midpoint)
-      if (crossedIntoRow) {
-        onReorderExercises(dragIndex, i)
-        setDragIndex(i)
+      const distance = Math.abs(y - midpoint)
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestIndex = i
       }
     })
+
+    if (closestIndex !== dragIndex) {
+      onReorderExercises(dragIndex, closestIndex)
+      setDragIndex(closestIndex)
+    }
   }
 
   function handleDragPointerUp() {
