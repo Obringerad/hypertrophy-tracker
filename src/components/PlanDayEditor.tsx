@@ -1,7 +1,19 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useState, type CSSProperties } from 'react'
 import type { Exercise, PlanDay } from '../types'
 import { catalogExercisesForMuscleGroup, findCatalogExerciseByName, type CatalogExercise } from '../lib/exerciseCatalog'
 import { MuscleGroupTag } from './MuscleGroupTag'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 export interface NewExerciseDetails {
   muscleGroup: string
@@ -32,6 +44,82 @@ interface SwapSuggestion {
   candidates: CatalogExercise[]
 }
 
+interface ExerciseRowContentProps {
+  exerciseId: string
+  targetSets: number
+  info: Exercise | undefined
+  weightUnit?: string
+  onUpdateTargetSets: (exerciseId: string, targetSets: number) => void
+  onUpdateStartingWeight?: (exerciseId: string, weight: number) => void
+}
+
+function ExerciseRowContent({
+  exerciseId,
+  targetSets,
+  info,
+  weightUnit,
+  onUpdateTargetSets,
+  onUpdateStartingWeight,
+}: ExerciseRowContentProps) {
+  return (
+    <span className="plan-day-exercise-info">
+      {info?.name ?? 'Unknown exercise'} {info && <MuscleGroupTag muscleGroup={info.muscleGroup} />}
+      <span className="plan-day-target-sets">
+        <input
+          type="number"
+          min={1}
+          value={targetSets}
+          onChange={(e) => onUpdateTargetSets(exerciseId, Math.max(1, Number(e.target.value)))}
+        />
+        <span className="muted">sets</span>
+      </span>
+      {onUpdateStartingWeight && (
+        <span className="plan-day-target-sets">
+          <input
+            type="number"
+            className="starting-weight-input"
+            min={0}
+            placeholder="0"
+            value={info?.startingWeight ?? ''}
+            onChange={(e) => onUpdateStartingWeight(exerciseId, Number(e.target.value))}
+          />
+          <span className="muted">starting {weightUnit}</span>
+        </span>
+      )}
+    </span>
+  )
+}
+
+interface SortableExerciseRowProps extends ExerciseRowContentProps {
+  reorderable: boolean
+  onRemove: (exerciseId: string) => void
+}
+
+function SortableExerciseRow({ exerciseId, reorderable, onRemove, ...rest }: SortableExerciseRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: exerciseId,
+    disabled: !reorderable,
+  })
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition ?? undefined,
+  }
+
+  return (
+    <li ref={setNodeRef} style={style} className={isDragging ? 'exercise-row-dragging' : undefined}>
+      {reorderable && (
+        <span className="drag-handle" {...attributes} {...listeners} aria-hidden="true">
+          ⠿
+        </span>
+      )}
+      <ExerciseRowContent exerciseId={exerciseId} {...rest} />
+      <button className="link-btn" onClick={() => onRemove(exerciseId)}>
+        Remove
+      </button>
+    </li>
+  )
+}
+
 export function PlanDayEditor({
   day,
   exercises,
@@ -44,71 +132,11 @@ export function PlanDayEditor({
 }: Props) {
   const [newName, setNewName] = useState('')
   const [swapSuggestion, setSwapSuggestion] = useState<SwapSuggestion | null>(null)
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
-  const [dragPointer, setDragPointer] = useState<{ x: number; y: number } | null>(null)
-  const listRef = useRef<HTMLUListElement>(null)
-
-  // touch-action: none on the handle is usually enough, but some mobile browsers still let a
-  // scroll gesture win partway through - which fires a pointercancel and silently drops the drag.
-  // Blocking touchmove at the document level for the duration of the drag closes that gap.
-  useEffect(() => {
-    if (dragIndex === null) return
-    function blockScroll(e: TouchEvent) {
-      e.preventDefault()
-    }
-    document.addEventListener('touchmove', blockScroll, { passive: false })
-    return () => document.removeEventListener('touchmove', blockScroll)
-  }, [dragIndex])
-
-  function handleDragHandlePointerDown(e: ReactPointerEvent<HTMLSpanElement>, index: number) {
-    if (!onReorderExercises) return
-    e.preventDefault()
-    e.currentTarget.setPointerCapture(e.pointerId)
-    setDragIndex(index)
-    setDragPointer({ x: e.clientX, y: e.clientY })
-  }
-
-  function handleDragPointerMove(e: ReactPointerEvent<HTMLSpanElement>) {
-    if (dragIndex === null || !onReorderExercises || !listRef.current) return
-    e.preventDefault()
-    setDragPointer({ x: e.clientX, y: e.clientY })
-    const y = e.clientY
-    const rows = listRef.current.querySelectorAll<HTMLLIElement>('li[data-row-index]')
-    if (rows.length === 0) return
-
-    // Whichever row's midpoint is nearest the pointer is the target - not "whichever row the
-    // pointer is inside," which broke as soon as the pointer overshot past the first/last row (or
-    // left the list bounds entirely, e.g. dragging near the top/bottom edge of the screen).
-    let closestIndex = dragIndex
-    let closestDistance = Infinity
-    rows.forEach((row) => {
-      const i = Number(row.dataset.rowIndex)
-      const rect = row.getBoundingClientRect()
-      const midpoint = rect.top + rect.height / 2
-      const distance = Math.abs(y - midpoint)
-      if (distance < closestDistance) {
-        closestDistance = distance
-        closestIndex = i
-      }
-    })
-
-    if (closestIndex !== dragIndex) {
-      onReorderExercises(dragIndex, closestIndex)
-      setDragIndex(closestIndex)
-    }
-  }
-
-  function handleDragPointerUp() {
-    setDragIndex(null)
-    setDragPointer(null)
-  }
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
 
   function exercise(id: string): Exercise | undefined {
     return exercises.find((e) => e.id === id)
-  }
-
-  function exerciseName(id: string): string {
-    return exercise(id)?.name ?? 'Unknown exercise'
   }
 
   function submit() {
@@ -163,77 +191,63 @@ export function PlanDayEditor({
     setSwapSuggestion(null)
   }
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(String(event.active.id))
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null)
+    const { active, over } = event
+    if (!over || active.id === over.id || !onReorderExercises) return
+    const fromIndex = day.exercises.findIndex((pe) => pe.exerciseId === active.id)
+    const toIndex = day.exercises.findIndex((pe) => pe.exerciseId === over.id)
+    if (fromIndex === -1 || toIndex === -1) return
+    onReorderExercises(fromIndex, toIndex)
+  }
+
+  const activeExercise = activeId ? exercise(activeId) : undefined
+
   return (
     <div className="plan-day-editor">
       <h3>{day.label}</h3>
-      <ul className="exercise-list" ref={listRef}>
-        {day.exercises.map((pe, index) => (
-          <li
-            key={pe.exerciseId}
-            data-row-index={index}
-            className={dragIndex === index ? 'exercise-row-dragging' : undefined}
-          >
-            {onReorderExercises && (
-              <span
-                className="drag-handle"
-                onPointerDown={(e) => handleDragHandlePointerDown(e, index)}
-                onPointerMove={handleDragPointerMove}
-                onPointerUp={handleDragPointerUp}
-                onPointerCancel={handleDragPointerUp}
-                aria-hidden="true"
-              >
-                ⠿
-              </span>
-            )}
-            <span className="plan-day-exercise-info">
-              {exerciseName(pe.exerciseId)}{' '}
-              {exercise(pe.exerciseId) && <MuscleGroupTag muscleGroup={exercise(pe.exerciseId)!.muscleGroup} />}
-              <span className="plan-day-target-sets">
-                <input
-                  type="number"
-                  min={1}
-                  value={pe.targetSets}
-                  onChange={(e) => onUpdateTargetSets(pe.exerciseId, Math.max(1, Number(e.target.value)))}
-                />
-                <span className="muted">sets</span>
-              </span>
-              {onUpdateStartingWeight && (
-                <span className="plan-day-target-sets">
-                  <input
-                    type="number"
-                    className="starting-weight-input"
-                    min={0}
-                    placeholder="0"
-                    value={exercise(pe.exerciseId)?.startingWeight ?? ''}
-                    onChange={(e) => onUpdateStartingWeight(pe.exerciseId, Number(e.target.value))}
-                  />
-                  <span className="muted">starting {weightUnit}</span>
-                </span>
-              )}
-            </span>
-            <button className="link-btn" onClick={() => removeExercise(pe.exerciseId)}>
-              Remove
-            </button>
-          </li>
-        ))}
-        {day.exercises.length === 0 && <p className="muted">No exercises yet.</p>}
-      </ul>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}
+      >
+        <SortableContext items={day.exercises.map((pe) => pe.exerciseId)} strategy={verticalListSortingStrategy}>
+          <ul className="exercise-list">
+            {day.exercises.map((pe) => (
+              <SortableExerciseRow
+                key={pe.exerciseId}
+                exerciseId={pe.exerciseId}
+                targetSets={pe.targetSets}
+                info={exercise(pe.exerciseId)}
+                weightUnit={weightUnit}
+                onUpdateTargetSets={onUpdateTargetSets}
+                onUpdateStartingWeight={onUpdateStartingWeight}
+                reorderable={!!onReorderExercises}
+                onRemove={removeExercise}
+              />
+            ))}
+            {day.exercises.length === 0 && <p className="muted">No exercises yet.</p>}
+          </ul>
+        </SortableContext>
 
-      {dragIndex !== null &&
-        dragPointer &&
-        (() => {
-          const dragged = exercise(day.exercises[dragIndex]?.exerciseId)
-          if (!dragged) return null
-          return (
-            <div className="exercise-drag-ghost" style={{ left: dragPointer.x, top: dragPointer.y }}>
+        <DragOverlay>
+          {activeExercise && (
+            <div className="exercise-drag-ghost">
               <span className="drag-handle" aria-hidden="true">
                 ⠿
               </span>
-              {dragged.name}
-              <MuscleGroupTag muscleGroup={dragged.muscleGroup} />
+              {activeExercise.name}
+              <MuscleGroupTag muscleGroup={activeExercise.muscleGroup} />
             </div>
-          )
-        })()}
+          )}
+        </DragOverlay>
+      </DndContext>
 
       {swapSuggestion && (
         <div className="exercise-swap-suggestion">
