@@ -63,7 +63,7 @@ export function HomeTab({
         {plans.length === 0 ? (
           <div className="home-plan-picker">
             <p className="muted">No plan yet</p>
-            <button type="button" className="choice-btn" onClick={onCreatePlan}>
+            <button type="button" className="choice-btn create-plan-pulse" onClick={onCreatePlan}>
               Create a Plan
             </button>
           </div>

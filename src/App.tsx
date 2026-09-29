@@ -30,8 +30,8 @@ const UNDO_WINDOW_MS = 6000
 const MOBILE_PRIMARY_TABS: { key: Tab; label: string; icon: TabIconName }[] = [
   { key: 'home', label: 'Home', icon: 'home' },
   { key: 'log', label: 'Log', icon: 'log' },
-  { key: 'history', label: 'History', icon: 'history' },
   { key: 'plans', label: 'Plans', icon: 'plans' },
+  { key: 'history', label: 'History', icon: 'history' },
 ]
 const MOBILE_MORE_TABS: { key: Tab; label: string; icon: TabIconName }[] = [
   { key: 'calendar', label: 'Calendar', icon: 'calendar' },

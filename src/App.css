@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -449,6 +449,22 @@ li.exercise-list-item-editing {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
+}
+
+.create-plan-pulse {
+  animation: create-plan-glow 2s ease-out infinite;
+}
+
+@keyframes create-plan-glow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
+  }
 }
 
 .schedule-type-picker,
