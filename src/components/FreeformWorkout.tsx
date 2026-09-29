@@ -134,9 +134,8 @@ export function FreeformWorkout({
 
   return (
     <div className="panel">
-      <h2>Freeform Workout</h2>
-
       <div className="workout-sticky-header">
+        <h2>Freeform Workout</h2>
         {recentIds.length > 0 && (
           <div className="recent-exercise-chips">
             {recentIds.map((id) => {
