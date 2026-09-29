@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -182,8 +182,13 @@ button.primary:disabled {
 }
 
 .exercise-row-dragging {
-  opacity: 0.6;
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  opacity: 0.3;
+  border: 1px dashed var(--accent);
+  border-radius: 6px;
+}
+
+.exercise-row-dragging > *:not(.drag-handle) {
+  visibility: hidden;
 }
 
 .drag-handle {
@@ -198,6 +203,29 @@ button.primary:disabled {
 
 .drag-handle:active {
   cursor: grabbing;
+}
+
+.exercise-drag-ghost {
+  position: fixed;
+  transform: translate(4px, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  font-weight: 600;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
+}
+
+.exercise-drag-ghost .drag-handle {
+  padding: 0;
+  color: var(--accent);
 }
 
 .exercise-list-actions {

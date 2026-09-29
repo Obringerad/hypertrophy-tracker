@@ -6,6 +6,7 @@ import { bestEverWithDate } from '../lib/records'
 import { formatShortDate } from '../lib/dates'
 import { useSettings } from '../context/SettingsContext'
 import { MuscleGroupTag } from './MuscleGroupTag'
+import { findCatalogExerciseByName, KNOWN_MUSCLE_GROUPS } from '../lib/exerciseCatalog'
 
 interface Props {
   exercises: Exercise[]
@@ -48,6 +49,23 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
   const [filter, setFilter] = useState('')
 
   const filteredExercises = exercises.filter((ex) => ex.name.toLowerCase().includes(filter.toLowerCase()))
+  const muscleGroupOptions = Array.from(new Set([...KNOWN_MUSCLE_GROUPS, ...exercises.map((e) => e.muscleGroup)])).sort()
+
+  function handleNameChange(name: string) {
+    const known = findCatalogExerciseByName(name)
+    if (known && !form.muscleGroup.trim()) {
+      setForm({
+        ...form,
+        name,
+        muscleGroup: known.muscleGroup,
+        repRangeLow: known.repRangeLow,
+        repRangeHigh: known.repRangeHigh,
+        weightIncrement: known.weightIncrement,
+      })
+    } else {
+      setForm({ ...form, name })
+    }
+  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -94,14 +112,20 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
   return (
     <div className="panel">
       <h2>Exercises</h2>
+      <datalist id="muscle-group-options">
+        {muscleGroupOptions.map((mg) => (
+          <option key={mg} value={mg} />
+        ))}
+      </datalist>
       <form className="exercise-form" onSubmit={handleSubmit}>
         <input
           placeholder="Exercise name"
           value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          onChange={(e) => handleNameChange(e.target.value)}
         />
         <input
           placeholder="Muscle group"
+          list="muscle-group-options"
           value={form.muscleGroup}
           onChange={(e) => setForm({ ...form, muscleGroup: e.target.value })}
         />
@@ -159,6 +183,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
                 />
                 <input
                   placeholder="Muscle group"
+                  list="muscle-group-options"
                   value={editForm.muscleGroup}
                   onChange={(e) => setEditForm({ ...editForm, muscleGroup: e.target.value })}
                 />

@@ -1,6 +1,6 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Exercise, PlanDay } from '../types'
-import { catalogExercisesForMuscleGroup, type CatalogExercise } from '../lib/exerciseCatalog'
+import { catalogExercisesForMuscleGroup, findCatalogExerciseByName, type CatalogExercise } from '../lib/exerciseCatalog'
 import { MuscleGroupTag } from './MuscleGroupTag'
 
 export interface NewExerciseDetails {
@@ -45,16 +45,19 @@ export function PlanDayEditor({
   const [newName, setNewName] = useState('')
   const [swapSuggestion, setSwapSuggestion] = useState<SwapSuggestion | null>(null)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragPointer, setDragPointer] = useState<{ x: number; y: number } | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
 
   function handleDragHandlePointerDown(e: ReactPointerEvent<HTMLSpanElement>, index: number) {
     if (!onReorderExercises) return
     e.currentTarget.setPointerCapture(e.pointerId)
     setDragIndex(index)
+    setDragPointer({ x: e.clientX, y: e.clientY })
   }
 
   function handleDragPointerMove(e: ReactPointerEvent<HTMLSpanElement>) {
     if (dragIndex === null || !onReorderExercises || !listRef.current) return
+    setDragPointer({ x: e.clientX, y: e.clientY })
     const y = e.clientY
     const rows = listRef.current.querySelectorAll<HTMLLIElement>('li[data-row-index]')
     rows.forEach((row) => {
@@ -73,6 +76,7 @@ export function PlanDayEditor({
 
   function handleDragPointerUp() {
     setDragIndex(null)
+    setDragPointer(null)
   }
 
   function exercise(id: string): Exercise | undefined {
@@ -84,7 +88,16 @@ export function PlanDayEditor({
   }
 
   function submit() {
-    onAddExercise(newName)
+    const known = findCatalogExerciseByName(newName)
+    onAddExercise(
+      newName,
+      known && {
+        muscleGroup: known.muscleGroup,
+        repRangeLow: known.repRangeLow,
+        repRangeHigh: known.repRangeHigh,
+        weightIncrement: known.weightIncrement,
+      },
+    )
     setNewName('')
   }
 
@@ -181,6 +194,22 @@ export function PlanDayEditor({
         ))}
         {day.exercises.length === 0 && <p className="muted">No exercises yet.</p>}
       </ul>
+
+      {dragIndex !== null &&
+        dragPointer &&
+        (() => {
+          const dragged = exercise(day.exercises[dragIndex]?.exerciseId)
+          if (!dragged) return null
+          return (
+            <div className="exercise-drag-ghost" style={{ left: dragPointer.x, top: dragPointer.y }}>
+              <span className="drag-handle" aria-hidden="true">
+                ⠿
+              </span>
+              {dragged.name}
+              <MuscleGroupTag muscleGroup={dragged.muscleGroup} />
+            </div>
+          )
+        })()}
 
       {swapSuggestion && (
         <div className="exercise-swap-suggestion">
