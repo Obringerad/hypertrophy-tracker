@@ -11,6 +11,7 @@ import { PlanSetup } from './components/PlanSetup'
 import { PlansList } from './components/PlansList'
 import { PlanDetail } from './components/PlanDetail'
 import { Toast } from './components/Toast'
+import { ConfirmDialog } from './components/ConfirmDialog'
 import { SettingsTab } from './components/SettingsTab'
 import { ToolsTab } from './components/ToolsTab'
 import { GuideTab } from './components/GuideTab'
@@ -46,6 +47,7 @@ export default function App() {
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
   const undoTimeoutRef = useRef<number | null>(null)
   const [toolsPrefillWeight, setToolsPrefillWeight] = useState<number | null>(null)
+  const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null)
 
   function showPlatesFor(weight: number) {
     setToolsPrefillWeight(weight)
@@ -84,15 +86,19 @@ export default function App() {
       usageParts.length > 0
         ? `"${exercise.name}" is used in ${usageParts.join(' and ')}. Those will show "Unknown exercise" if you remove it. Delete anyway?`
         : `Delete "${exercise.name}"? This can't be undone.`
-    if (!window.confirm(message)) return
 
-    setExercises((prev) => prev.filter((e) => e.id !== id))
-    pushUndo(`Deleted "${exercise.name}"`, () => {
-      setExercises((prev) => {
-        const next = [...prev]
-        next.splice(index, 0, exercise)
-        return next
-      })
+    setConfirmState({
+      message,
+      onConfirm: () => {
+        setExercises((prev) => prev.filter((e) => e.id !== id))
+        pushUndo(`Deleted "${exercise.name}"`, () => {
+          setExercises((prev) => {
+            const next = [...prev]
+            next.splice(index, 0, exercise)
+            return next
+          })
+        })
+      },
     })
   }
 
@@ -146,20 +152,24 @@ export default function App() {
     const index = plans.findIndex((p) => p.id === planId)
     if (index === -1) return
     const plan = plans[index]
-    if (!window.confirm(`Delete "${plan.name}"? This can't be undone.`)) return
 
-    const wasActive = activePlanId === planId
-    setPlans((prev) => prev.filter((p) => p.id !== planId))
-    if (wasActive) setActivePlanId(null)
-    setSelectedPlanId(null)
+    setConfirmState({
+      message: `Delete "${plan.name}"? This can't be undone.`,
+      onConfirm: () => {
+        const wasActive = activePlanId === planId
+        setPlans((prev) => prev.filter((p) => p.id !== planId))
+        if (wasActive) setActivePlanId(null)
+        setSelectedPlanId(null)
 
-    pushUndo(`Deleted "${plan.name}"`, () => {
-      setPlans((prev) => {
-        const next = [...prev]
-        next.splice(index, 0, plan)
-        return next
-      })
-      if (wasActive) setActivePlanId(plan.id)
+        pushUndo(`Deleted "${plan.name}"`, () => {
+          setPlans((prev) => {
+            const next = [...prev]
+            next.splice(index, 0, plan)
+            return next
+          })
+          if (wasActive) setActivePlanId(plan.id)
+        })
+      },
     })
   }
 
@@ -372,6 +382,16 @@ export default function App() {
           onDismiss={dismissUndo}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmState !== null}
+        message={confirmState?.message ?? ''}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
+        onCancel={() => setConfirmState(null)}
+      />
     </div>
     </SettingsProvider>
   )

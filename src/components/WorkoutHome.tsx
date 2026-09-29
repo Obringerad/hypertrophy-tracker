@@ -1,5 +1,13 @@
 import type { PlanDay } from '../types'
 
+const RECOVERY_LABELS: Record<number, string> = {
+  1: 'Wrecked',
+  2: 'Sore',
+  3: 'Okay',
+  4: 'Good',
+  5: 'Fresh',
+}
+
 interface Props {
   planDay: PlanDay | null
   hasActivePlan: boolean
@@ -64,7 +72,9 @@ export function WorkoutHome({
           value={recovery}
           onChange={(e) => onRecoveryChange(Number(e.target.value))}
         />
-        <span>{recovery}</span>
+        <span>
+          {recovery} - {RECOVERY_LABELS[recovery]}
+        </span>
       </label>
 
       <button type="button" className="primary start-workout-btn" onClick={onStart}>

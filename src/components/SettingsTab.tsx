@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { sessionUnit, type WeightUnit } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface BackupData {
   version: 1
@@ -62,6 +63,7 @@ function toCsv(sessions: WorkoutSession[], exercises: Exercise[]): string {
 export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport, onChangeUnit }: Props) {
   const { weightUnit, setWeightUnit, textSize, setTextSize, theme, setTheme } = useSettings()
   const [pendingUnit, setPendingUnit] = useState<WeightUnit | null>(null)
+  const [pendingImport, setPendingImport] = useState<Partial<BackupData> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const hasLoggedWeights = sessions.some((s) => s.exercises.some((log) => log.sets.length > 0))
@@ -113,20 +115,25 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result as string) as Partial<BackupData>
-        if (!window.confirm('Import this backup? It will replace all current data on this device.')) return
-        onImport({
-          exercises: data.exercises ?? [],
-          sessions: data.sessions ?? [],
-          plans: data.plans ?? [],
-          activePlanId: data.activePlanId ?? null,
-        })
-        if (data.weightUnit === 'lb' || data.weightUnit === 'kg') setWeightUnit(data.weightUnit)
+        setPendingImport(data)
       } catch {
         window.alert('That file could not be read as a valid backup.')
       }
     }
     reader.readAsText(file)
     e.target.value = ''
+  }
+
+  function confirmImport() {
+    if (!pendingImport) return
+    onImport({
+      exercises: pendingImport.exercises ?? [],
+      sessions: pendingImport.sessions ?? [],
+      plans: pendingImport.plans ?? [],
+      activePlanId: pendingImport.activePlanId ?? null,
+    })
+    if (pendingImport.weightUnit === 'lb' || pendingImport.weightUnit === 'kg') setWeightUnit(pendingImport.weightUnit)
+    setPendingImport(null)
   }
 
   return (
@@ -250,6 +257,14 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingImport !== null}
+        message="Import this backup? It will replace all current data on this device."
+        confirmLabel="Import"
+        onConfirm={confirmImport}
+        onCancel={() => setPendingImport(null)}
+      />
     </div>
   )
 }

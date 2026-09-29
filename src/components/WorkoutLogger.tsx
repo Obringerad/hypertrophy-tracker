@@ -4,6 +4,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage'
 import { WorkoutHome } from './WorkoutHome'
 import { ActiveWorkout, type QueueItem } from './ActiveWorkout'
 import { FreeformWorkout } from './FreeformWorkout'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface Props {
   exercises: Exercise[]
@@ -56,6 +57,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
   const [date, setDate] = useState(() => draft?.date ?? todayIso())
   const [startedAt, setStartedAt] = useState<number | undefined>(() => draft?.startedAt)
   const [repeatExerciseId, setRepeatExerciseId] = useState<string | undefined>(undefined)
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
 
   if (exercises.length === 0) {
     return <p className="muted">Add an exercise first, then come back here to log a workout.</p>
@@ -88,15 +90,35 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
     setDraft(null)
   }
 
-  function cancelWorkout() {
-    const hasLoggedSets = (draft?.logged.length ?? 0) > 0
-    if (hasLoggedSets && !window.confirm('Discard this workout? All logged sets will be lost.')) return
+  function performCancelWorkout() {
     clearDraftImmediately()
     setStarted(false)
     setStartedAt(undefined)
     setRepeatExerciseId(undefined)
     setDraft(null)
   }
+
+  function cancelWorkout() {
+    const hasLoggedSets = (draft?.logged.length ?? 0) > 0
+    if (hasLoggedSets) {
+      setConfirmingCancel(true)
+      return
+    }
+    performCancelWorkout()
+  }
+
+  const confirmDialog = (
+    <ConfirmDialog
+      open={confirmingCancel}
+      message="Discard this workout? All logged sets will be lost."
+      confirmLabel="Discard"
+      onConfirm={() => {
+        setConfirmingCancel(false)
+        performCancelWorkout()
+      }}
+      onCancel={() => setConfirmingCancel(false)}
+    />
+  )
 
   if (!started) {
     return (
@@ -115,6 +137,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
   }
 
   return effectivePlanDay ? (
+    <>
     <ActiveWorkout
       planDay={effectivePlanDay}
       exercises={exercises}
@@ -141,7 +164,10 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
         })
       }
     />
+    {confirmDialog}
+    </>
   ) : (
+    <>
     <FreeformWorkout
       exercises={exercises}
       sessions={sessions}
@@ -160,5 +186,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
         setDraft({ date, recovery, startedAt, notes: progress.notes, logged: progress.logged, activeExerciseId: progress.activeExerciseId })
       }
     />
+    {confirmDialog}
+    </>
   )
 }
