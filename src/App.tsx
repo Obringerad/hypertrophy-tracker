@@ -15,6 +15,7 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { SettingsTab } from './components/SettingsTab'
 import { ToolsTab } from './components/ToolsTab'
 import { GuideTab } from './components/GuideTab'
+import { TabIcon, type TabIconName } from './components/TabIcon'
 import { SettingsProvider } from './context/SettingsContext'
 import { advancePlanRotation, resolveTodaysPlanDay } from './lib/planEngine'
 import { formatDate } from './lib/dates'
@@ -23,6 +24,22 @@ import './App.css'
 type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises' | 'tools' | 'guide' | 'settings'
 
 const UNDO_WINDOW_MS = 6000
+
+/** The bottom nav on mobile only has room for a handful of tabs before it gets cramped, so it
+ * shows these plus a "More" button, with the rest tucked into a popover. */
+const MOBILE_PRIMARY_TABS: { key: Tab; label: string; icon: TabIconName }[] = [
+  { key: 'home', label: 'Home', icon: 'home' },
+  { key: 'log', label: 'Log', icon: 'log' },
+  { key: 'history', label: 'History', icon: 'history' },
+  { key: 'plans', label: 'Plans', icon: 'plans' },
+]
+const MOBILE_MORE_TABS: { key: Tab; label: string; icon: TabIconName }[] = [
+  { key: 'calendar', label: 'Calendar', icon: 'calendar' },
+  { key: 'exercises', label: 'Exercises', icon: 'exercises' },
+  { key: 'tools', label: 'Tools', icon: 'tools' },
+  { key: 'guide', label: 'Guide', icon: 'guide' },
+  { key: 'settings', label: 'Settings', icon: 'settings' },
+]
 
 interface UndoAction {
   message: string
@@ -48,6 +65,16 @@ export default function App() {
   const undoTimeoutRef = useRef<number | null>(null)
   const [toolsPrefillWeight, setToolsPrefillWeight] = useState<number | null>(null)
   const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null)
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
+
+  function selectTab(key: Tab) {
+    if (key === 'plans') {
+      setSelectedPlanId(null)
+      setCreatingPlan(false)
+    }
+    setTab(key)
+    setMoreMenuOpen(false)
+  }
 
   function showPlatesFor(weight: number) {
     setToolsPrefillWeight(weight)
@@ -245,43 +272,65 @@ export default function App() {
           <span className="dev-deploy-marker" />
         </h1>
         <nav className="tabs">
-          <button className={tab === 'home' ? 'active' : ''} onClick={() => setTab('home')}>
+          <button className={tab === 'home' ? 'active' : ''} onClick={() => selectTab('home')}>
             Home
           </button>
-          <button className={tab === 'log' ? 'active' : ''} onClick={() => setTab('log')}>
-            <span className="tab-label-full">Log Workout</span>
-            <span className="tab-label-short">Log</span>
+          <button className={tab === 'log' ? 'active' : ''} onClick={() => selectTab('log')}>
+            Log Workout
           </button>
-          <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
+          <button className={tab === 'history' ? 'active' : ''} onClick={() => selectTab('history')}>
             History
           </button>
-          <button className={tab === 'calendar' ? 'active' : ''} onClick={() => setTab('calendar')}>
+          <button className={tab === 'calendar' ? 'active' : ''} onClick={() => selectTab('calendar')}>
             Calendar
           </button>
-          <button
-            className={tab === 'plans' ? 'active' : ''}
-            onClick={() => {
-              setTab('plans')
-              setSelectedPlanId(null)
-              setCreatingPlan(false)
-            }}
-          >
+          <button className={tab === 'plans' ? 'active' : ''} onClick={() => selectTab('plans')}>
             Plans
           </button>
-          <button className={tab === 'exercises' ? 'active' : ''} onClick={() => setTab('exercises')}>
+          <button className={tab === 'exercises' ? 'active' : ''} onClick={() => selectTab('exercises')}>
             Exercises
           </button>
-          <button className={tab === 'tools' ? 'active' : ''} onClick={() => setTab('tools')}>
+          <button className={tab === 'tools' ? 'active' : ''} onClick={() => selectTab('tools')}>
             Tools
           </button>
-          <button className={tab === 'guide' ? 'active' : ''} onClick={() => setTab('guide')}>
+          <button className={tab === 'guide' ? 'active' : ''} onClick={() => selectTab('guide')}>
             Guide
           </button>
-          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>
+          <button className={tab === 'settings' ? 'active' : ''} onClick={() => selectTab('settings')}>
             Settings
           </button>
         </nav>
       </header>
+
+      <nav className="tabs-mobile">
+        {MOBILE_PRIMARY_TABS.map(({ key, label, icon }) => (
+          <button key={key} className={tab === key ? 'active' : ''} onClick={() => selectTab(key)}>
+            <TabIcon name={icon} />
+            <span>{label}</span>
+          </button>
+        ))}
+        <button
+          className={MOBILE_MORE_TABS.some((t) => t.key === tab) || moreMenuOpen ? 'active' : ''}
+          onClick={() => setMoreMenuOpen((open) => !open)}
+        >
+          <TabIcon name="more" />
+          <span>More</span>
+        </button>
+      </nav>
+
+      {moreMenuOpen && (
+        <>
+          <div className="more-menu-backdrop" onClick={() => setMoreMenuOpen(false)} />
+          <div className="more-menu">
+            {MOBILE_MORE_TABS.map(({ key, label, icon }) => (
+              <button key={key} className={tab === key ? 'active' : ''} onClick={() => selectTab(key)}>
+                <TabIcon name={icon} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <main>
         {tab === 'home' && (
