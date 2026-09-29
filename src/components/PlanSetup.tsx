@@ -17,16 +17,22 @@ const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 type Step = 'intro' | 'schedule' | 'split' | 'weights' | 'review'
 
+/** Epley-formula working weight for a given rep target, derived from an estimated one-rep max. */
+function workingWeightFromOneRepMax(oneRepMax: number, reps: number, increment: number): number {
+  const raw = oneRepMax / (1 + reps / 30)
+  return Math.max(0, Math.round(raw / increment) * increment)
+}
+
 /** Rough estimate of another exercise's starting weight relative to a day's anchor lift, based on
  * how their target rep ranges compare (a higher rep ceiling usually means lighter accessory work). */
-function estimateStartingWeight(anchorWeight: number, anchor: Exercise, target: Exercise): number {
+function estimateStartingWeight(anchorWorkingWeight: number, anchor: Exercise, target: Exercise): number {
   const repCeilingDiff = target.repRangeHigh - anchor.repRangeHigh
   // Deliberately conservative - a higher rep target usually means a lighter, more isolated movement,
   // but this can't tell a barbell lift from a dumbbell or cable one, so it undershoots on purpose.
   // It's a starting point in an editable field, not a recommendation.
   const ratio = repCeilingDiff >= 3 ? 0.3 : repCeilingDiff > 0 ? 0.5 : 0.65
   const increment = target.weightIncrement || 2.5
-  return Math.max(0, Math.round((anchorWeight * ratio) / increment) * increment)
+  return Math.max(0, Math.round((anchorWorkingWeight * ratio) / increment) * increment)
 }
 
 export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: Props) {
@@ -61,8 +67,9 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
     setStep('weights')
   }
 
-  /** Applies each day's entered anchor weight to its first exercise, and estimates the rest of that
-   * day's exercises from it, before moving on to review. Days left blank are skipped entirely. */
+  /** Converts each day's entered one-rep-max guess into a working weight for its first exercise,
+   * and estimates the rest of that day's exercises from it, before moving on to review. Days left
+   * blank are skipped entirely. */
   function applyStartingWeights() {
     if (!draftPlan) return
     const pool = [...existingExercises, ...draftExercises]
@@ -71,19 +78,27 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
     for (const day of draftPlan.days) {
       if (day.exercises.length === 0) continue
       const raw = anchorWeights[day.id]
-      const anchorWeight = raw ? Number(raw) : NaN
-      if (!Number.isFinite(anchorWeight) || anchorWeight <= 0) continue
+      const oneRepMax = raw ? Number(raw) : NaN
+      if (!Number.isFinite(oneRepMax) || oneRepMax <= 0) continue
 
       const anchorId = day.exercises[0].exerciseId
       const anchor = pool.find((e) => e.id === anchorId)
       if (!anchor) continue
-      updates.set(anchor.id, { ...anchor, startingWeight: anchorWeight })
+      const anchorWorkingWeight = workingWeightFromOneRepMax(
+        oneRepMax,
+        anchor.repRangeLow,
+        anchor.weightIncrement || 2.5,
+      )
+      updates.set(anchor.id, { ...anchor, startingWeight: anchorWorkingWeight })
 
       for (const pe of day.exercises.slice(1)) {
         if (updates.has(pe.exerciseId)) continue
         const target = pool.find((e) => e.id === pe.exerciseId)
         if (!target) continue
-        updates.set(target.id, { ...target, startingWeight: estimateStartingWeight(anchorWeight, anchor, target) })
+        updates.set(target.id, {
+          ...target,
+          startingWeight: estimateStartingWeight(anchorWorkingWeight, anchor, target),
+        })
       }
     }
 
@@ -191,8 +206,8 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
               <strong>Split</strong> - a rotation of training days (or build your own from scratch).
             </li>
             <li>
-              <strong>Starting weights</strong> - what you currently lift for a few key exercises, so your
-              first workout isn't blank.
+              <strong>Starting weights</strong> - your best guess at your one-rep max for a few key
+              exercises, so your first workout isn't blank.
             </li>
             <li>
               <strong>Log workouts</strong> - after that, weight and rep suggestions come from how each
@@ -313,8 +328,9 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
       {step === 'weights' && draftPlan && (
         <div className="wizard-step">
           <p className="muted">
-            What do you currently lift for each day's main exercise, in {weightUnit}? Optional - we'll
-            estimate a starting point for the rest of that day from it. Leave any of these blank to skip.
+            What would you guess is your one-rep max for each day's main exercise, in {weightUnit}? Optional
+            - we'll work out a starting weight for it and estimate the rest of that day from there. Leave
+            any of these blank to skip.
           </p>
           {draftPlan.days
             .filter((day) => day.exercises.length > 0)
@@ -325,7 +341,7 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
               if (!anchor) return null
               return (
                 <label key={day.id} className="plan-name-field">
-                  {day.label}: {anchor.name}
+                  {day.label}: {anchor.name} (1RM)
                   <input
                     type="number"
                     min={0}
