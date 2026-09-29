@@ -20,6 +20,27 @@
   }
 }
 
+/* Explicit theme choice overrides the OS preference above. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e2e4e9;
+  --accent: #2f6feb;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #14161a;
+  --panel: #1e2126;
+  --text: #f0f1f3;
+  --muted: #9aa0aa;
+  --border: #2c3038;
+  --accent: #5b9bff;
+}
+
 * {
   box-sizing: border-box;
 }

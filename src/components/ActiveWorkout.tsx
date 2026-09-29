@@ -34,6 +34,7 @@ interface Props {
   initialProgress?: Partial<Pick<ActiveWorkoutProgress, 'queue' | 'stepIndex'>> &
     Pick<ActiveWorkoutProgress, 'logged' | 'notes'>
   onProgressChange: (progress: ActiveWorkoutProgress) => void
+  onShowPlates?: (weight: number) => void
 }
 
 function buildQueue(planDay: PlanDay): QueueItem[] {
@@ -57,6 +58,7 @@ export function ActiveWorkout({
   onCancel,
   initialProgress,
   onProgressChange,
+  onShowPlates,
 }: Props) {
   const { weightUnit } = useSettings()
   const [queue, setQueue] = useState<QueueItem[]>(() => initialProgress?.queue ?? buildQueue(planDay))
@@ -271,7 +273,7 @@ export function ActiveWorkout({
         </div>
       </div>
 
-      {suggestion && <SuggestionCard suggestion={suggestion} />}
+      {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
 
       <RestTimer autoStartSignal={restSignal} />
 
@@ -303,7 +305,10 @@ export function ActiveWorkout({
           </thead>
           <tbody>
             {currentExerciseLog.sets.map((s, i) => (
-              <tr key={i} className="set-table-logged-row">
+              <tr
+                key={i}
+                className={s.weight > priorBest ? 'set-table-logged-row set-table-logged-row-pr' : 'set-table-logged-row'}
+              >
                 <td>
                   <span className="set-logged-check">&#10003;</span> {i + 1}
                 </td>
@@ -356,7 +361,7 @@ export function ActiveWorkout({
         <div>
           {!(isLastSetOfExercise && isLastExercise) ? (
             <button type="button" className="link-btn" onClick={skipRestOfExercise}>
-              Skip rest of exercise
+              Skip to next exercise
             </button>
           ) : null}
         </div>

@@ -10,7 +10,12 @@ const ACTION_LABEL: Record<ProgressionSuggestion['action'], string> = {
   deload: 'Deload',
 }
 
-export function SuggestionCard({ suggestion }: { suggestion: ProgressionSuggestion }) {
+interface Props {
+  suggestion: ProgressionSuggestion
+  onShowPlates?: (weight: number) => void
+}
+
+export function SuggestionCard({ suggestion, onShowPlates }: Props) {
   const { weightUnit } = useSettings()
   return (
     <div className={`suggestion suggestion-${suggestion.action}`}>
@@ -21,6 +26,11 @@ export function SuggestionCard({ suggestion }: { suggestion: ProgressionSuggesti
         </span>
       </div>
       <p className="muted">{suggestion.reason}</p>
+      {onShowPlates && (
+        <button type="button" className="link-btn" onClick={() => onShowPlates(suggestion.suggestedWeight)}>
+          Plates for this weight
+        </button>
+      )}
     </div>
   )
 }

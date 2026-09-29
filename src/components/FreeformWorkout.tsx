@@ -24,6 +24,24 @@ interface Props {
   onCancel: () => void
   initialProgress?: FreeformWorkoutProgress
   onProgressChange: (progress: FreeformWorkoutProgress) => void
+  onShowPlates?: (weight: number) => void
+}
+
+/** Exercise ids in most-recently-logged order, deduped, oldest history first is skipped. */
+function recentExerciseIds(sessions: WorkoutSession[], limit: number): string[] {
+  const sorted = sessions.slice().sort((a, b) => b.date.localeCompare(a.date))
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const s of sorted) {
+    for (const log of s.exercises) {
+      if (!seen.has(log.exerciseId)) {
+        seen.add(log.exerciseId)
+        result.push(log.exerciseId)
+        if (result.length >= limit) return result
+      }
+    }
+  }
+  return result
 }
 
 export function FreeformWorkout({
@@ -36,6 +54,7 @@ export function FreeformWorkout({
   onCancel,
   initialProgress,
   onProgressChange,
+  onShowPlates,
 }: Props) {
   const { weightUnit } = useSettings()
   const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
@@ -62,6 +81,7 @@ export function FreeformWorkout({
   const priorBest = maxWeightEver(sessions, activeExerciseId, weightUnit)
 
   const filteredExercises = exercises.filter((e) => e.name.toLowerCase().includes(exerciseFilter.toLowerCase()))
+  const recentIds = useMemo(() => recentExerciseIds(sessions, 6), [sessions])
 
   function selectExercise(id: string) {
     setActiveExerciseId(id)
@@ -106,6 +126,24 @@ export function FreeformWorkout({
       <h2>Freeform workout</h2>
 
       <div className="workout-sticky-header">
+        {recentIds.length > 0 && (
+          <div className="recent-exercise-chips">
+            {recentIds.map((id) => {
+              const ex = exercises.find((e) => e.id === id)
+              if (!ex) return null
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={id === activeExerciseId ? 'choice-btn recent-exercise-chip active' : 'choice-btn recent-exercise-chip'}
+                  onClick={() => selectExercise(id)}
+                >
+                  {ex.name}
+                </button>
+              )
+            })}
+          </div>
+        )}
         <div className="exercise-picker freeform-exercise-picker">
           <input
             type="text"
@@ -130,7 +168,7 @@ export function FreeformWorkout({
           </select>
         </div>
 
-        {suggestion && <SuggestionCard suggestion={suggestion} />}
+        {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
       </div>
 
       <RestTimer autoStartSignal={restSignal} />
@@ -184,7 +222,10 @@ export function FreeformWorkout({
           </thead>
           <tbody>
             {activeLog.sets.map((s, i) => (
-              <tr key={i} className="set-table-logged-row">
+              <tr
+                key={i}
+                className={s.weight > priorBest ? 'set-table-logged-row set-table-logged-row-pr' : 'set-table-logged-row'}
+              >
                 <td>
                   <span className="set-logged-check">&#10003;</span> {i + 1}
                 </td>

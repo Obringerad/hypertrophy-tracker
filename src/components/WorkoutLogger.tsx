@@ -11,6 +11,7 @@ interface Props {
   onSave: (session: WorkoutSession) => void
   planDay?: PlanDay | null
   activePlanId?: string
+  onShowPlates?: (weight: number) => void
 }
 
 interface WorkoutDraft {
@@ -46,7 +47,7 @@ function clearDraftImmediately() {
   }
 }
 
-export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlanId }: Props) {
+export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlanId, onShowPlates }: Props) {
   const [draft, setDraft] = useLocalStorage<WorkoutDraft | null>(DRAFT_KEY, null)
   const [started, setStarted] = useState(() => draft !== null)
   const [recovery, setRecovery] = useState(() => draft?.recovery ?? 3)
@@ -101,6 +102,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
       activePlanId={activePlanId}
       onFinish={finishAndReset}
       onCancel={cancelWorkout}
+      onShowPlates={onShowPlates}
       initialProgress={
         draft ? { queue: draft.queue, stepIndex: draft.stepIndex, logged: draft.logged, notes: draft.notes } : undefined
       }
@@ -117,6 +119,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
       activePlanId={activePlanId}
       onFinish={finishAndReset}
       onCancel={cancelWorkout}
+      onShowPlates={onShowPlates}
       initialProgress={
         draft
           ? { logged: draft.logged, notes: draft.notes, activeExerciseId: draft.activeExerciseId ?? exercises[0]?.id ?? '' }

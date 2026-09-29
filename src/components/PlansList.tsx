@@ -1,5 +1,6 @@
 import type { WorkoutPlan, WorkoutSession } from '../types'
 import { planProgress } from '../lib/planProgress'
+import { resolveTodaysPlanDay } from '../lib/planEngine'
 
 interface Props {
   plans: WorkoutPlan[]
@@ -16,6 +17,8 @@ export function PlansList({ plans, sessions, activePlanId, onOpen, onNew }: Prop
       <div className="plans-list">
         {plans.map((plan) => {
           const progress = planProgress(plan, sessions)
+          const nextDay = resolveTodaysPlanDay(plan)
+          const nextLabel = plan.scheduleType === 'fixed' ? 'Today' : 'Next'
           return (
             <button key={plan.id} className="plan-card" onClick={() => onOpen(plan.id)}>
               <div className="plan-card-header">
@@ -29,6 +32,11 @@ export function PlansList({ plans, sessions, activePlanId, onOpen, onNew }: Prop
                   : `Week ${progress.week}`}{' '}
                 &middot; {progress.completedSessions} sessions logged
               </span>
+              {nextDay && (
+                <span className="meta-text">
+                  {nextLabel}: {nextDay.label}
+                </span>
+              )}
             </button>
           )
         })}

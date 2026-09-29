@@ -45,6 +45,12 @@ export default function App() {
   const [creatingPlan, setCreatingPlan] = useState(plans.length === 0)
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
   const undoTimeoutRef = useRef<number | null>(null)
+  const [toolsPrefillWeight, setToolsPrefillWeight] = useState<number | null>(null)
+
+  function showPlatesFor(weight: number) {
+    setToolsPrefillWeight(weight)
+    setTab('tools')
+  }
 
   function pushUndo(message: string, undo: () => void) {
     if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
@@ -272,6 +278,7 @@ export default function App() {
             onSave={saveSession}
             planDay={todaysPlanDay}
             activePlanId={activePlan?.id}
+            onShowPlates={showPlatesFor}
           />
         )}
         {tab === 'history' && (
@@ -314,12 +321,13 @@ export default function App() {
         {tab === 'exercises' && (
           <ExerciseManager
             exercises={exercises}
+            sessions={sessions}
             onAdd={addExercise}
             onRemove={removeExercise}
             onUpdate={updateExercise}
           />
         )}
-        {tab === 'tools' && <ToolsTab />}
+        {tab === 'tools' && <ToolsTab prefillWeight={toolsPrefillWeight} />}
         {tab === 'guide' && <GuideTab />}
         {tab === 'settings' && (
           <SettingsTab

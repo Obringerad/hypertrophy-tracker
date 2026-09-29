@@ -26,8 +26,17 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [draftSets, setDraftSets] = useState<SetEntry[]>([])
+  const [exerciseFilter, setExerciseFilter] = useState('')
 
-  const sorted = sessions.slice().sort((a, b) => b.date.localeCompare(a.date))
+  const loggedExerciseIds = new Set(sessions.flatMap((s) => s.exercises.map((log) => log.exerciseId)))
+  const filterableExercises = exercises
+    .filter((e) => loggedExerciseIds.has(e.id))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const sorted = sessions
+    .filter((s) => !exerciseFilter || s.exercises.some((log) => log.exerciseId === exerciseFilter))
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
 
   function toggle(id: string) {
     setExpanded((prev) => {
@@ -70,6 +79,22 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
   return (
     <div className="panel">
       <h2>History</h2>
+
+      {filterableExercises.length > 0 && (
+        <div className="exercise-picker history-exercise-filter">
+          <select value={exerciseFilter} onChange={(e) => setExerciseFilter(e.target.value)}>
+            <option value="">All exercises</option>
+            {filterableExercises.map((ex) => (
+              <option key={ex.id} value={ex.id}>
+                {ex.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {sorted.length === 0 && <p className="muted">No sessions match this filter.</p>}
+
       <div className="history-list">
         {sorted.map((session) => {
           const isOpen = expanded.has(session.id)

@@ -31,7 +31,7 @@ interface Props {
 const UNIT_LABEL: Record<WeightUnit, string> = { lb: 'Pounds (lb)', kg: 'Kilograms (kg)' }
 
 export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport, onChangeUnit }: Props) {
-  const { weightUnit, setWeightUnit, textSize, setTextSize } = useSettings()
+  const { weightUnit, setWeightUnit, textSize, setTextSize, theme, setTheme } = useSettings()
   const [pendingUnit, setPendingUnit] = useState<WeightUnit | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -150,6 +150,34 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
             onClick={() => setTextSize('large')}
           >
             Large
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h3>Theme</h3>
+        <p className="muted">Defaults to your device's setting. Override it to always use one or the other.</p>
+        <div className="schedule-type-picker">
+          <button
+            type="button"
+            className={theme === 'system' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setTheme('system')}
+          >
+            System
+          </button>
+          <button
+            type="button"
+            className={theme === 'light' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setTheme('light')}
+          >
+            Light
+          </button>
+          <button
+            type="button"
+            className={theme === 'dark' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setTheme('dark')}
+          >
+            Dark
           </button>
         </div>
       </div>

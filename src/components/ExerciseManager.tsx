@@ -1,13 +1,26 @@
 import { useState, type FormEvent } from 'react'
-import type { Exercise } from '../types'
-import { formatWeight } from '../lib/units'
+import type { Exercise, WorkoutSession } from '../types'
+import { formatWeight, sessionUnit, convertWeight, type WeightUnit } from '../lib/units'
+import { historyForExercise } from '../lib/progression'
+import { formatShortDate } from '../lib/dates'
 import { useSettings } from '../context/SettingsContext'
 
 interface Props {
   exercises: Exercise[]
+  sessions: WorkoutSession[]
   onAdd: (exercise: Exercise) => void
   onRemove: (id: string) => void
   onUpdate: (exercise: Exercise) => void
+}
+
+function lastPerformedSummary(sessions: WorkoutSession[], exerciseId: string, targetUnit: WeightUnit): string {
+  const history = historyForExercise(sessions, exerciseId)
+  if (history.length === 0) return 'Never logged'
+  const last = history[history.length - 1]
+  const log = last.exercises.find((l) => l.exerciseId === exerciseId)!
+  if (log.sets.length === 0) return `Last: ${formatShortDate(last.date)}`
+  const topWeight = Math.max(...log.sets.map((s) => convertWeight(s.weight, sessionUnit(last), targetUnit)))
+  return `Last: ${formatShortDate(last.date)} - ${formatWeight(Math.round(topWeight * 100) / 100, targetUnit)}`
 }
 
 const emptyForm = {
@@ -18,7 +31,7 @@ const emptyForm = {
   weightIncrement: 2.5,
 }
 
-export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props) {
+export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate }: Props) {
   const { weightUnit } = useSettings()
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -185,6 +198,8 @@ export function ExerciseManager({ exercises, onAdd, onRemove, onUpdate }: Props)
                   &middot; {ex.muscleGroup} &middot; {ex.repRangeLow}-{ex.repRangeHigh} reps &middot; +
                   {formatWeight(ex.weightIncrement, weightUnit)}
                 </span>
+                <br />
+                <span className="muted">{lastPerformedSummary(sessions, ex.id, weightUnit)}</span>
               </div>
               <div className="exercise-list-actions">
                 <button className="link-btn" onClick={() => startEdit(ex)}>

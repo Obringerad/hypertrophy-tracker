@@ -2,10 +2,12 @@ import { useState } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { buildMonthCalendar } from '../lib/calendar'
 import { weeklyGoalStatus } from '../lib/planProgress'
+import { resolveTodaysPlanDay } from '../lib/planEngine'
 import { MonthCalendarGrid } from './MonthCalendarGrid'
 import { DayWorkoutModal } from './DayWorkoutModal'
 import { WeeklyGoalFlag } from './WeeklyGoalFlag'
 import { ProgressGraphs } from './ProgressGraphs'
+import { TodayPlanPreview } from './TodayPlanPreview'
 
 interface Props {
   plans: WorkoutPlan[]
@@ -39,6 +41,10 @@ export function HomeTab({
   const selectedPlan = selectedPlanId === 'all' ? undefined : plans.find((p) => p.id === selectedPlanId)
   const weeks = buildMonthCalendar(sessions, year, month, { plan: selectedPlan, allPlans: plans })
   const goalStatus = selectedPlan ? weeklyGoalStatus(selectedPlan, sessions) : null
+
+  const activePlan = plans.find((p) => p.id === activePlanId)
+  const upcomingPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
+  const upcomingLabel = activePlan?.scheduleType === 'fixed' ? 'Today' : 'Next up'
 
   function shiftMonth(delta: number) {
     const next = new Date(year, month + delta, 1)
@@ -85,6 +91,10 @@ export function HomeTab({
           Log Workout
         </button>
       </div>
+
+      {upcomingPlanDay && (
+        <TodayPlanPreview label={upcomingLabel} planDay={upcomingPlanDay} exercises={exercises} sessions={sessions} />
+      )}
 
       {sessions.length === 0 && plans.length === 0 ? (
         <p className="muted">Set up a plan and log your first workout to start seeing your calendar here.</p>

@@ -1,4 +1,4 @@
-import { useState, type FocusEvent } from 'react'
+import { useEffect, useState, type FocusEvent } from 'react'
 import { convertWeight, type WeightUnit } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 
@@ -39,7 +39,12 @@ function weightForReps(oneRepMax: number, reps: number): number {
   return Math.round((oneRepMax / (1 + reps / 30)) * 10) / 10
 }
 
-export function ToolsTab() {
+interface Props {
+  /** Set (e.g. from a workout suggestion's "Plates for this weight" shortcut) to jump the plate calculator to that weight. */
+  prefillWeight?: number | null
+}
+
+export function ToolsTab({ prefillWeight }: Props) {
   const { weightUnit } = useSettings()
 
   const [lb, setLb] = useState('135')
@@ -59,6 +64,10 @@ export function ToolsTab() {
 
   const [targetWeight, setTargetWeight] = useState('225')
   const [barWeight, setBarWeight] = useState(() => String(DEFAULT_BAR_WEIGHT[weightUnit]))
+
+  useEffect(() => {
+    if (prefillWeight != null) setTargetWeight(String(prefillWeight))
+  }, [prefillWeight])
 
   const targetWeightNum = Number(targetWeight)
   const barWeightNum = Number(barWeight)
@@ -102,11 +111,11 @@ export function ToolsTab() {
         <div className="tool-inputs-row">
           <label>
             Target weight ({weightUnit})
-            <input type="number" inputMode="decimal" value={targetWeight} onFocus={selectAll} onChange={(e) => setTargetWeight(e.target.value)} />
+            <input type="number" inputMode="decimal" min={0} value={targetWeight} onFocus={selectAll} onChange={(e) => setTargetWeight(e.target.value)} />
           </label>
           <label>
             Bar weight ({weightUnit})
-            <input type="number" inputMode="decimal" value={barWeight} onFocus={selectAll} onChange={(e) => setBarWeight(e.target.value)} />
+            <input type="number" inputMode="decimal" min={0} value={barWeight} onFocus={selectAll} onChange={(e) => setBarWeight(e.target.value)} />
           </label>
         </div>
 
@@ -143,11 +152,11 @@ export function ToolsTab() {
         <div className="tool-inputs-row">
           <label>
             Weight lifted ({weightUnit})
-            <input type="number" inputMode="decimal" value={oneRmWeight} onFocus={selectAll} onChange={(e) => setOneRmWeight(e.target.value)} />
+            <input type="number" inputMode="decimal" min={0} value={oneRmWeight} onFocus={selectAll} onChange={(e) => setOneRmWeight(e.target.value)} />
           </label>
           <label>
             Reps performed
-            <input type="number" inputMode="numeric" value={oneRmReps} onFocus={selectAll} onChange={(e) => setOneRmReps(e.target.value)} />
+            <input type="number" inputMode="numeric" min={1} value={oneRmReps} onFocus={selectAll} onChange={(e) => setOneRmReps(e.target.value)} />
           </label>
         </div>
 
