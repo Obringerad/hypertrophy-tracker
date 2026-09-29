@@ -27,6 +27,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [draftSets, setDraftSets] = useState<SetEntry[]>([])
   const [exerciseFilter, setExerciseFilter] = useState('')
+  const [notesSearch, setNotesSearch] = useState('')
 
   const loggedExerciseIds = new Set(sessions.flatMap((s) => s.exercises.map((log) => log.exerciseId)))
   const filterableExercises = exercises
@@ -35,6 +36,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
 
   const sorted = sessions
     .filter((s) => !exerciseFilter || s.exercises.some((log) => log.exerciseId === exerciseFilter))
+    .filter((s) => !notesSearch || (s.notes ?? '').toLowerCase().includes(notesSearch.toLowerCase()))
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
 
@@ -80,18 +82,27 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
     <div className="panel">
       <h2>History</h2>
 
-      {filterableExercises.length > 0 && (
-        <div className="exercise-picker history-exercise-filter">
-          <select value={exerciseFilter} onChange={(e) => setExerciseFilter(e.target.value)}>
-            <option value="">All exercises</option>
-            {filterableExercises.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="history-filters">
+        {filterableExercises.length > 0 && (
+          <div className="exercise-picker history-exercise-filter">
+            <select value={exerciseFilter} onChange={(e) => setExerciseFilter(e.target.value)}>
+              <option value="">All exercises</option>
+              {filterableExercises.map((ex) => (
+                <option key={ex.id} value={ex.id}>
+                  {ex.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <input
+          type="text"
+          className="history-notes-search"
+          placeholder="Search notes..."
+          value={notesSearch}
+          onChange={(e) => setNotesSearch(e.target.value)}
+        />
+      </div>
 
       {sorted.length === 0 && <p className="muted">No sessions match this filter.</p>}
 
@@ -109,6 +120,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
                   <span className="muted">
                     {session.exercises.length} exercise{session.exercises.length === 1 ? '' : 's'} &middot; Recovery{' '}
                     {session.recovery}/5
+                    {session.durationMinutes ? ` · ${session.durationMinutes} min` : ''}
                   </span>
                 </button>
                 <button type="button" className="btn-delete" onClick={() => onDelete(session.id)}>

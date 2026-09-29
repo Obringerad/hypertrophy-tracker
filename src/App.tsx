@@ -124,6 +124,21 @@ export default function App() {
     setPlans((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
   }
 
+  function duplicatePlan(planId: string) {
+    const plan = plans.find((p) => p.id === planId)
+    if (!plan) return
+    const newPlan: WorkoutPlan = {
+      ...plan,
+      id: crypto.randomUUID(),
+      name: `${plan.name} (copy)`,
+      days: plan.days.map((d) => ({ ...d, id: crypto.randomUUID() })),
+      nextDayIndex: 0,
+      startDate: new Date().toISOString().slice(0, 10),
+    }
+    setPlans((prev) => [...prev, newPlan])
+    setSelectedPlanId(newPlan.id)
+  }
+
   function deletePlan(planId: string) {
     const index = plans.findIndex((p) => p.id === planId)
     if (index === -1) return
@@ -306,6 +321,7 @@ export default function App() {
               isActive={selectedPlan.id === activePlanId}
               onSetActive={() => setActivePlanId(selectedPlan.id)}
               onDelete={() => deletePlan(selectedPlan.id)}
+              onDuplicate={() => duplicatePlan(selectedPlan.id)}
               onUpdatePlan={updatePlan}
               onBack={() => setSelectedPlanId(null)}
             />

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import type { Exercise, WorkoutSession } from '../types'
 import { formatWeight, sessionUnit, convertWeight, type WeightUnit } from '../lib/units'
 import { historyForExercise } from '../lib/progression'
+import { bestEverWithDate } from '../lib/records'
 import { formatShortDate } from '../lib/dates'
 import { useSettings } from '../context/SettingsContext'
 
@@ -18,9 +19,16 @@ function lastPerformedSummary(sessions: WorkoutSession[], exerciseId: string, ta
   if (history.length === 0) return 'Never logged'
   const last = history[history.length - 1]
   const log = last.exercises.find((l) => l.exerciseId === exerciseId)!
-  if (log.sets.length === 0) return `Last: ${formatShortDate(last.date)}`
-  const topWeight = Math.max(...log.sets.map((s) => convertWeight(s.weight, sessionUnit(last), targetUnit)))
-  return `Last: ${formatShortDate(last.date)} - ${formatWeight(Math.round(topWeight * 100) / 100, targetUnit)}`
+  let summary = `Last: ${formatShortDate(last.date)}`
+  if (log.sets.length > 0) {
+    const topWeight = Math.max(...log.sets.map((s) => convertWeight(s.weight, sessionUnit(last), targetUnit)))
+    summary += ` - ${formatWeight(Math.round(topWeight * 100) / 100, targetUnit)}`
+  }
+  const best = bestEverWithDate(sessions, exerciseId, targetUnit)
+  if (best) {
+    summary += ` · Best: ${formatWeight(Math.round(best.weight * 100) / 100, targetUnit)} (${formatShortDate(best.date)})`
+  }
+  return summary
 }
 
 const emptyForm = {

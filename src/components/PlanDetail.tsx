@@ -12,11 +12,22 @@ interface Props {
   isActive: boolean
   onSetActive: () => void
   onDelete: () => void
+  onDuplicate: () => void
   onUpdatePlan: (plan: WorkoutPlan, newExercises?: Exercise[]) => void
   onBack: () => void
 }
 
-export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, onDelete, onUpdatePlan, onBack }: Props) {
+export function PlanDetail({
+  plan,
+  exercises,
+  sessions,
+  isActive,
+  onSetActive,
+  onDelete,
+  onDuplicate,
+  onUpdatePlan,
+  onBack,
+}: Props) {
   const progress = planProgress(plan, sessions)
   const exerciseName = (id: string) => exercises.find((e) => e.id === id)?.name ?? 'Unknown exercise'
 
@@ -130,6 +141,12 @@ export function PlanDetail({ plan, exercises, sessions, isActive, onSetActive, o
           onUpdateTargetSets={(exerciseId, targetSets) => updateTargetSets(day.id, exerciseId, targetSets)}
         />
       ))}
+
+      <div className="settings-actions">
+        <button type="button" className="choice-btn" onClick={onDuplicate}>
+          Duplicate plan
+        </button>
+      </div>
 
       <div className="plan-detail-danger-zone">
         <button type="button" className="btn-delete" onClick={onDelete}>

@@ -36,7 +36,9 @@ export function DayWorkoutModal({ date, sessions, exercises, onClose }: Props) {
 
         {daySessions.map((session) => (
           <div key={session.id} className="modal-session">
-            <p className="muted">Recovery {session.recovery}/5</p>
+            <p className="muted">
+              Recovery {session.recovery}/5{session.durationMinutes ? ` · ${session.durationMinutes} min` : ''}
+            </p>
             {session.notes && <p className="history-entry-notes muted">"{session.notes}"</p>}
             {session.exercises.map((log) => {
               const exercise = exercises.find((e) => e.id === log.exerciseId)

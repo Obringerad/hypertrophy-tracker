@@ -36,6 +36,8 @@ export interface WorkoutSession {
   planDayId?: string
   /** Unit the weights in this session were logged in. Missing on sessions predating this field, which default to lb. */
   unit?: WeightUnit
+  /** Wall-clock time from starting to finishing the workout, in minutes. */
+  durationMinutes?: number
 }
 
 export interface PlanExercise {

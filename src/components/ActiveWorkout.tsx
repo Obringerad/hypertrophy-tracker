@@ -7,6 +7,7 @@ import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
+import { LastTimeSets } from './LastTimeSets'
 
 export interface QueueItem {
   exerciseId: string
@@ -274,6 +275,7 @@ export function ActiveWorkout({
       </div>
 
       {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
+      <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
 
       <RestTimer autoStartSignal={restSignal} />
 

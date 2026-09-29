@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
-import type { WeightUnit } from '../lib/units'
+import { sessionUnit, type WeightUnit } from '../lib/units'
 import { useSettings } from '../context/SettingsContext'
 
 interface BackupData {
@@ -29,6 +29,35 @@ interface Props {
 }
 
 const UNIT_LABEL: Record<WeightUnit, string> = { lb: 'Pounds (lb)', kg: 'Kilograms (kg)' }
+
+function csvEscape(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
+}
+
+function toCsv(sessions: WorkoutSession[], exercises: Exercise[]): string {
+  const header = ['Date', 'Exercise', 'Set', 'Weight', 'Unit', 'Reps', 'RPE', 'Recovery', 'Notes']
+  const rows: string[][] = [header]
+  for (const s of sessions.slice().sort((a, b) => a.date.localeCompare(b.date))) {
+    const unit = sessionUnit(s)
+    for (const log of s.exercises) {
+      const name = exercises.find((e) => e.id === log.exerciseId)?.name ?? 'Unknown exercise'
+      log.sets.forEach((set, i) => {
+        rows.push([
+          s.date,
+          name,
+          String(i + 1),
+          String(set.weight),
+          unit,
+          String(set.reps),
+          String(set.rpe),
+          String(s.recovery),
+          s.notes ?? '',
+        ])
+      })
+    }
+  }
+  return rows.map((row) => row.map(csvEscape).join(',')).join('\n')
+}
 
 export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport, onChangeUnit }: Props) {
   const { weightUnit, setWeightUnit, textSize, setTextSize, theme, setTheme } = useSettings()
@@ -62,6 +91,17 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
     const a = document.createElement('a')
     a.href = url
     a.download = `hypertrophy-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleExportCsv() {
+    const csv = toCsv(sessions, exercises)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `hypertrophy-data-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -202,6 +242,12 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
+        </div>
+        <p className="muted">Want your raw data for a spreadsheet instead?</p>
+        <div className="settings-actions">
+          <button type="button" className="choice-btn" onClick={handleExportCsv}>
+            Export CSV
+          </button>
         </div>
       </div>
     </div>

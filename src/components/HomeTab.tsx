@@ -3,11 +3,13 @@ import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { buildMonthCalendar } from '../lib/calendar'
 import { weeklyGoalStatus } from '../lib/planProgress'
 import { resolveTodaysPlanDay } from '../lib/planEngine'
+import { recentRecoveryIsLow } from '../lib/recovery'
 import { MonthCalendarGrid } from './MonthCalendarGrid'
 import { DayWorkoutModal } from './DayWorkoutModal'
 import { WeeklyGoalFlag } from './WeeklyGoalFlag'
 import { ProgressGraphs } from './ProgressGraphs'
 import { TodayPlanPreview } from './TodayPlanPreview'
+import { MuscleGroupVolumeCard } from './MuscleGroupVolumeCard'
 
 interface Props {
   plans: WorkoutPlan[]
@@ -45,6 +47,7 @@ export function HomeTab({
   const activePlan = plans.find((p) => p.id === activePlanId)
   const upcomingPlanDay = activePlan ? resolveTodaysPlanDay(activePlan) : null
   const upcomingLabel = activePlan?.scheduleType === 'fixed' ? 'Today' : 'Next up'
+  const showDeloadNudge = recentRecoveryIsLow(sessions)
 
   function shiftMonth(delta: number) {
     const next = new Date(year, month + delta, 1)
@@ -92,9 +95,20 @@ export function HomeTab({
         </button>
       </div>
 
+      {showDeloadNudge && (
+        <div className="deload-nudge">
+          <strong>Recovery's been low</strong>
+          <p className="muted">
+            Your last 2 sessions were both rated 2/5 or worse. Consider an easier week before pushing again.
+          </p>
+        </div>
+      )}
+
       {upcomingPlanDay && (
         <TodayPlanPreview label={upcomingLabel} planDay={upcomingPlanDay} exercises={exercises} sessions={sessions} />
       )}
+
+      <MuscleGroupVolumeCard sessions={sessions} exercises={exercises} />
 
       {sessions.length === 0 && plans.length === 0 ? (
         <p className="muted">Set up a plan and log your first workout to start seeing your calendar here.</p>

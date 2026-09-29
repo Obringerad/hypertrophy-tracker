@@ -9,6 +9,8 @@ interface Props {
   date: string
   onDateChange: (date: string) => void
   isToday: boolean
+  /** Shown as a secondary option when this will be a freeform session and there's a prior one to repeat. */
+  onRepeatLast?: () => void
 }
 
 function todayIso(): string {
@@ -29,6 +31,7 @@ export function WorkoutHome({
   date,
   onDateChange,
   isToday,
+  onRepeatLast,
 }: Props) {
   return (
     <div className="panel workout-home">
@@ -67,6 +70,11 @@ export function WorkoutHome({
       <button type="button" className="primary start-workout-btn" onClick={onStart}>
         Start Workout
       </button>
+      {onRepeatLast && (
+        <button type="button" className="link-btn repeat-last-btn" onClick={onRepeatLast}>
+          Repeat last workout
+        </button>
+      )}
     </div>
   )
 }

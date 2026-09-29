@@ -7,6 +7,7 @@ import { useSettings } from '../context/SettingsContext'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
+import { LastTimeSets } from './LastTimeSets'
 
 export interface FreeformWorkoutProgress {
   logged: LoggedExercise[]
@@ -77,6 +78,16 @@ export function FreeformWorkout({
     () => (activeExercise ? suggestNextSession(activeExercise, sessions, weightUnit) : null),
     [activeExercise, sessions, weightUnit],
   )
+  // Prefill weight/reps from the suggestion (i.e. what you did last time) whenever the active exercise changes.
+  useEffect(() => {
+    if (suggestion) {
+      setSetForm({ weight: suggestion.suggestedWeight, reps: suggestion.suggestedReps, rpe: 8 })
+    } else {
+      setSetForm({ weight: 0, reps: 0, rpe: 8 })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeExerciseId])
+
   const activeLog = logged.find((l) => l.exerciseId === activeExerciseId)
   const priorBest = maxWeightEver(sessions, activeExerciseId, weightUnit)
 
@@ -169,6 +180,7 @@ export function FreeformWorkout({
         </div>
 
         {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
+        {activeExerciseId && <LastTimeSets sessions={sessions} exerciseId={activeExerciseId} targetUnit={weightUnit} />}
       </div>
 
       <RestTimer autoStartSignal={restSignal} />

@@ -19,6 +19,8 @@ interface WorkoutDraft {
   recovery: number
   notes: string
   logged: LoggedExercise[]
+  /** When this workout was started, so a finished session's duration survives a backgrounded/reloaded tab. */
+  startedAt?: number
   /** Present only when the draft was started as a guided (plan-based) workout. */
   planDayId?: string
   queue?: QueueItem[]
@@ -52,6 +54,8 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
   const [started, setStarted] = useState(() => draft !== null)
   const [recovery, setRecovery] = useState(() => draft?.recovery ?? 3)
   const [date, setDate] = useState(() => draft?.date ?? todayIso())
+  const [startedAt, setStartedAt] = useState<number | undefined>(() => draft?.startedAt)
+  const [repeatExerciseId, setRepeatExerciseId] = useState<string | undefined>(undefined)
 
   if (exercises.length === 0) {
     return <p className="muted">Add an exercise first, then come back here to log a workout.</p>
@@ -60,10 +64,25 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
   const isToday = date === todayIso()
   const effectivePlanDay = isToday ? (planDay ?? null) : null
 
+  function start() {
+    setStartedAt(Date.now())
+    setStarted(true)
+  }
+
+  function startRepeatLast() {
+    const lastSession = sessions.slice().sort((a, b) => b.date.localeCompare(a.date))[0]
+    setRepeatExerciseId(lastSession?.exercises[0]?.exerciseId)
+    setStartedAt(Date.now())
+    setStarted(true)
+  }
+
   function finishAndReset(session: WorkoutSession) {
+    const durationMinutes = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 60_000)) : undefined
     clearDraftImmediately()
-    onSave(session)
+    onSave({ ...session, durationMinutes })
     setStarted(false)
+    setStartedAt(undefined)
+    setRepeatExerciseId(undefined)
     setRecovery(3)
     setDate(todayIso())
     setDraft(null)
@@ -74,6 +93,8 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
     if (hasLoggedSets && !window.confirm('Discard this workout? All logged sets will be lost.')) return
     clearDraftImmediately()
     setStarted(false)
+    setStartedAt(undefined)
+    setRepeatExerciseId(undefined)
     setDraft(null)
   }
 
@@ -84,7 +105,8 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
         hasActivePlan={activePlanId !== undefined}
         recovery={recovery}
         onRecoveryChange={setRecovery}
-        onStart={() => setStarted(true)}
+        onStart={start}
+        onRepeatLast={!effectivePlanDay && sessions.length > 0 ? startRepeatLast : undefined}
         date={date}
         onDateChange={setDate}
         isToday={isToday}
@@ -107,7 +129,16 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
         draft ? { queue: draft.queue, stepIndex: draft.stepIndex, logged: draft.logged, notes: draft.notes } : undefined
       }
       onProgressChange={(progress) =>
-        setDraft({ date, recovery, notes: progress.notes, logged: progress.logged, planDayId: effectivePlanDay.id, queue: progress.queue, stepIndex: progress.stepIndex })
+        setDraft({
+          date,
+          recovery,
+          startedAt,
+          notes: progress.notes,
+          logged: progress.logged,
+          planDayId: effectivePlanDay.id,
+          queue: progress.queue,
+          stepIndex: progress.stepIndex,
+        })
       }
     />
   ) : (
@@ -123,10 +154,10 @@ export function WorkoutLogger({ exercises, sessions, onSave, planDay, activePlan
       initialProgress={
         draft
           ? { logged: draft.logged, notes: draft.notes, activeExerciseId: draft.activeExerciseId ?? exercises[0]?.id ?? '' }
-          : undefined
+          : { logged: [], notes: '', activeExerciseId: repeatExerciseId ?? exercises[0]?.id ?? '' }
       }
       onProgressChange={(progress) =>
-        setDraft({ date, recovery, notes: progress.notes, logged: progress.logged, activeExerciseId: progress.activeExerciseId })
+        setDraft({ date, recovery, startedAt, notes: progress.notes, logged: progress.logged, activeExerciseId: progress.activeExerciseId })
       }
     />
   )
