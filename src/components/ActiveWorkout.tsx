@@ -99,6 +99,8 @@ export function ActiveWorkout({
   function logSet() {
     if (!current) return
     const isLastSetOfExercise = current.setNumber >= current.targetSets
+    const exerciseNumberForCurrent = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
+    const isLastExerciseForCurrent = exerciseNumberForCurrent >= planDay.exercises.length
     setLogged((prev) => {
       const existing = prev.find((l) => l.exerciseId === current.exerciseId)
       const newSet: SetEntry = { ...form }
@@ -107,10 +109,19 @@ export function ActiveWorkout({
       }
       return [...prev, { exerciseId: current.exerciseId, sets: [newSet] }]
     })
-    setStepIndex((i) => i + 1)
+    // Logging the last set of an exercise (that isn't the workout's last) doesn't advance the
+    // queue on its own - it waits for an explicit "Start Next Exercise" click, so moving on takes
+    // a deliberate second tap instead of being one click away from skipping the set entirely.
+    if (!(isLastSetOfExercise && !isLastExerciseForCurrent)) {
+      setStepIndex((i) => i + 1)
+    }
     // Only auto-start the rest timer between sets of the same exercise - finishing an exercise (or
     // the whole workout) moves on to something else, not a rest interval to count down.
     if (!isLastSetOfExercise) setRestSignal((n) => n + 1)
+  }
+
+  function advanceToNextExercise() {
+    setStepIndex((i) => i + 1)
   }
 
   function skipRestOfExercise() {
@@ -259,6 +270,10 @@ export function ActiveWorkout({
   const isLastSetOfExercise = current.setNumber >= current.targetSets
   const isLastExercise = exerciseNumber >= planDay.exercises.length
   const logSetLabel = isLastSetOfExercise && isLastExercise ? 'Log Set and Finish Workout' : 'Log Set'
+  // True right after logging an exercise's final set (when it isn't the workout's last exercise) -
+  // the queue hasn't advanced yet, so the form below is swapped for a "Start Next Exercise" prompt.
+  const pendingAdvance =
+    isLastSetOfExercise && !isLastExercise && (currentExerciseLog?.sets.length ?? 0) >= current.targetSets
 
   return (
     <div className="panel active-workout">
@@ -350,68 +365,85 @@ export function ActiveWorkout({
         </table>
       )}
 
-      <div className="set-form">
-        <label>
-          Weight
-          <NumberStepper
-            value={form.weight}
-            step={currentExercise?.weightIncrement ?? 2.5}
-            min={0}
-            onChange={(weight) => setForm({ ...form, weight })}
-          />
-        </label>
-        <label>
-          Reps
-          <NumberStepper
-            value={form.reps}
-            step={1}
-            min={0}
-            inputMode="numeric"
-            onChange={(reps) => setForm({ ...form, reps })}
-          />
-        </label>
-        <label>
-          RPE
-          <NumberStepper
-            value={form.rpe}
-            step={1}
-            min={1}
-            max={10}
-            inputMode="numeric"
-            onChange={(rpe) => setForm({ ...form, rpe })}
-          />
-        </label>
-      </div>
-
-      <div className="wizard-actions">
-        <div className="log-set-actions">
-          {stepIndex > 0 && (
+      {pendingAdvance ? (
+        <div className="wizard-actions">
+          <div className="log-set-actions">
             <button
               type="button"
               className="link-btn"
-              onClick={goToPreviousStep}
-              title="Go back a set - if it was already logged, that log is removed so you can redo it"
+              onClick={() => removeSet(current.exerciseId, current.setNumber - 1)}
+              title="Remove that last set so you can redo it"
             >
-              &#8592; Back
+              &#8592; Undo Last Set
             </button>
-          )}
-          {!isLastSetOfExercise ? (
-            <button type="button" className="link-btn" onClick={skipRestOfExercise}>
-              Skip to Next Exercise
-            </button>
-          ) : null}
-        </div>
-        <div className="log-set-actions">
-          <button type="button" className="primary" onClick={logSet}>
-            {logSetLabel}
-          </button>
-          {isLastSetOfExercise && !isLastExercise && (
-            <button type="button" className="choice-btn" onClick={skipRestOfExercise}>
+          </div>
+          <div className="log-set-actions">
+            <button type="button" className="primary" onClick={advanceToNextExercise}>
               Start Next Exercise
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="set-form">
+            <label>
+              Weight
+              <NumberStepper
+                value={form.weight}
+                step={currentExercise?.weightIncrement ?? 2.5}
+                min={0}
+                onChange={(weight) => setForm({ ...form, weight })}
+              />
+            </label>
+            <label>
+              Reps
+              <NumberStepper
+                value={form.reps}
+                step={1}
+                min={0}
+                inputMode="numeric"
+                onChange={(reps) => setForm({ ...form, reps })}
+              />
+            </label>
+            <label>
+              RPE
+              <NumberStepper
+                value={form.rpe}
+                step={1}
+                min={1}
+                max={10}
+                inputMode="numeric"
+                onChange={(rpe) => setForm({ ...form, rpe })}
+              />
+            </label>
+          </div>
+
+          <div className="wizard-actions">
+            <div className="log-set-actions">
+              {stepIndex > 0 && (
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={goToPreviousStep}
+                  title="Go back a set - if it was already logged, that log is removed so you can redo it"
+                >
+                  &#8592; Back
+                </button>
+              )}
+              {!isLastSetOfExercise ? (
+                <button type="button" className="link-btn" onClick={skipRestOfExercise}>
+                  Skip to Next Exercise
+                </button>
+              ) : null}
+            </div>
+            <div className="log-set-actions">
+              <button type="button" className="primary" onClick={logSet}>
+                {logSetLabel}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

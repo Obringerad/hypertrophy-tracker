@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: purple;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -1762,6 +1762,12 @@ li.exercise-list-item-editing {
   font-size: 1.1rem;
   line-height: 1;
   padding: 0;
+}
+
+.set-count-buttons .link-btn {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
 }
 
 .stepper-btn:active {
