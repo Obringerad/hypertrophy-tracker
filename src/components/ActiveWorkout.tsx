@@ -319,51 +319,6 @@ export function ActiveWorkout({
             </button>
           </div>
         </div>
-
-        {pendingAdvance ? (
-          <div className="wizard-actions">
-            <div className="log-set-actions">
-              <button
-                type="button"
-                className="link-btn"
-                onClick={() => removeSet(current.exerciseId, current.setNumber - 1)}
-                title="Remove that last set so you can redo it"
-              >
-                &#8592; Undo Last Set
-              </button>
-            </div>
-            <div className="log-set-actions">
-              <button type="button" className="primary" onClick={advanceToNextExercise}>
-                Start Next Exercise
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="wizard-actions">
-            <div className="log-set-actions">
-              {stepIndex > 0 && (
-                <button
-                  type="button"
-                  className="link-btn"
-                  onClick={goToPreviousStep}
-                  title="Go back a set - if it was already logged, that log is removed so you can redo it"
-                >
-                  &#8592; Back
-                </button>
-              )}
-              {!isLastSetOfExercise ? (
-                <button type="button" className="link-btn" onClick={skipRestOfExercise}>
-                  Skip to Next Exercise
-                </button>
-              ) : null}
-            </div>
-            <div className="log-set-actions">
-              <button type="button" className="primary" onClick={logSet}>
-                {logSetLabel}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
@@ -450,6 +405,51 @@ export function ActiveWorkout({
               onChange={(rpe) => setForm({ ...form, rpe })}
             />
           </label>
+        </div>
+      )}
+
+      {pendingAdvance ? (
+        <div className="wizard-actions">
+          <div className="log-set-actions">
+            <button
+              type="button"
+              className="link-btn"
+              onClick={() => removeSet(current.exerciseId, current.setNumber - 1)}
+              title="Remove that last set so you can redo it"
+            >
+              &#8592; Undo Last Set
+            </button>
+          </div>
+          <div className="log-set-actions">
+            <button type="button" className="primary" onClick={advanceToNextExercise}>
+              Start Next Exercise
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="wizard-actions">
+          <div className="log-set-actions">
+            {stepIndex > 0 && (
+              <button
+                type="button"
+                className="link-btn"
+                onClick={goToPreviousStep}
+                title="Go back a set - if it was already logged, that log is removed so you can redo it"
+              >
+                &#8592; Back
+              </button>
+            )}
+            {!isLastSetOfExercise ? (
+              <button type="button" className="link-btn" onClick={skipRestOfExercise}>
+                Skip to Next Exercise
+              </button>
+            ) : null}
+          </div>
+          <div className="log-set-actions">
+            <button type="button" className="primary" onClick={logSet}>
+              {logSetLabel}
+            </button>
+          </div>
         </div>
       )}
 
