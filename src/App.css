@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: green;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -560,6 +560,10 @@ li.exercise-list-item-editing {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.active-workout .wizard-actions {
+  margin-bottom: 1.5rem;
 }
 
 .split-list {

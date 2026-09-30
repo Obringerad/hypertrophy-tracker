@@ -340,39 +340,6 @@ export function ActiveWorkout({
         </button>
       )}
 
-      {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
-        <table className="set-table">
-          <thead>
-            <tr>
-              <th>Set</th>
-              <th>Weight</th>
-              <th>Reps</th>
-              <th>RPE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentExerciseLog.sets.map((s, i) => (
-              <tr
-                key={i}
-                className={s.weight > priorBest ? 'set-table-logged-row set-table-logged-row-pr' : 'set-table-logged-row'}
-              >
-                <td>
-                  <span className="set-logged-check">&#10003;</span> {i + 1}
-                </td>
-                <td>
-                  {formatWeight(s.weight, weightUnit)}
-                  {s.weight > priorBest && isFirstAtWeightAndReps(currentExerciseLog.sets, i) && (
-                    <span className="pr-badge">PR</span>
-                  )}
-                </td>
-                <td>{s.reps}</td>
-                <td>{s.rpe}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
       {!pendingAdvance && (
         <div className="set-form">
           <label>
@@ -454,6 +421,39 @@ export function ActiveWorkout({
       )}
 
       <RestTimer autoStartSignal={restSignal} cancelSignal={restCancelSignal} />
+
+      {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
+        <table className="set-table">
+          <thead>
+            <tr>
+              <th>Set</th>
+              <th>Weight</th>
+              <th>Reps</th>
+              <th>RPE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentExerciseLog.sets.map((s, i) => (
+              <tr
+                key={i}
+                className={s.weight > priorBest ? 'set-table-logged-row set-table-logged-row-pr' : 'set-table-logged-row'}
+              >
+                <td>
+                  <span className="set-logged-check">&#10003;</span> {i + 1}
+                </td>
+                <td>
+                  {formatWeight(s.weight, weightUnit)}
+                  {s.weight > priorBest && isFirstAtWeightAndReps(currentExerciseLog.sets, i) && (
+                    <span className="pr-badge">PR</span>
+                  )}
+                </td>
+                <td>{s.reps}</td>
+                <td>{s.rpe}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   )
 }
