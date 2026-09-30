@@ -20,13 +20,22 @@ interface Props {
 
 export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
-  const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
+  // The countdown is driven by a real end timestamp rather than a decrementing counter - a plain
+  // tick-based counter drifts (or stalls entirely) once the interval below gets throttled or paused,
+  // which mobile browsers do aggressively while the screen is locked or the tab is backgrounded.
+  // Deriving the remaining time from `endAt` means it's always correct the instant it's recomputed,
+  // no matter how long ticks were paused for.
+  const [endAt, setEndAt] = useState<number | null>(null)
+  const [nowTick, setNowTick] = useState(() => Date.now())
   const [customOpen, setCustomOpen] = useState(false)
   const [customMinutes, setCustomMinutes] = useState('')
   const [customSeconds, setCustomSeconds] = useState('')
   const startedForSignal = useRef(autoStartSignal)
   const canceledForSignal = useRef(cancelSignal)
+  const alertedForEndAt = useRef<number | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
+
+  const secondsLeft = endAt === null ? null : Math.max(0, Math.ceil((endAt - nowTick) / 1000))
 
   // Vibration only fires reliably when triggered directly by a user tap - by the time a countdown
   // reaches zero, the browser no longer treats it as one, so most phones silently ignore it. A short
@@ -77,7 +86,8 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
   function start(seconds: number) {
     primeAlertSound()
     setLastDuration(seconds)
-    setSecondsLeft(seconds)
+    setEndAt(Date.now() + seconds * 1000)
+    setNowTick(Date.now())
   }
 
   function startCustom() {
@@ -100,30 +110,45 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
     if (autoStartSignal === undefined || autoStartSignal === startedForSignal.current) return
     startedForSignal.current = autoStartSignal
     primeAlertSound()
-    setSecondsLeft((current) => (current === null || current <= 0 ? lastDuration : current))
+    const now = Date.now()
+    setEndAt((current) => (current === null || current <= now ? now + lastDuration * 1000 : current))
+    setNowTick(now)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStartSignal])
 
   useEffect(() => {
     if (cancelSignal === undefined || cancelSignal === canceledForSignal.current) return
     canceledForSignal.current = cancelSignal
-    setSecondsLeft(null)
+    setEndAt(null)
   }, [cancelSignal])
 
+  // Keeps the displayed countdown live, and - critically - snaps it back in sync the instant the tab
+  // regains focus, so a countdown that finished while the screen was locked shows "Rest complete" (and
+  // fires the alert) right away instead of whenever the throttled interval next happens to fire.
   useEffect(() => {
-    if (secondsLeft === null) return
-    if (secondsLeft <= 0) {
-      try {
-        navigator.vibrate?.([200, 100, 200])
-      } catch {
-        // Vibration unsupported/blocked - nothing we can do about it here.
-      }
-      playAlertSound()
-      return
+    if (endAt === null) return
+    function tick() {
+      setNowTick(Date.now())
     }
-    const id = window.setTimeout(() => setSecondsLeft((s) => (s === null ? null : s - 1)), 1000)
-    return () => window.clearTimeout(id)
-  }, [secondsLeft])
+    const id = window.setInterval(tick, 1000)
+    document.addEventListener('visibilitychange', tick)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', tick)
+    }
+  }, [endAt])
+
+  useEffect(() => {
+    if (endAt === null || secondsLeft === null || secondsLeft > 0) return
+    if (alertedForEndAt.current === endAt) return
+    alertedForEndAt.current = endAt
+    try {
+      navigator.vibrate?.([200, 100, 200])
+    } catch {
+      // Vibration unsupported/blocked - nothing we can do about it here.
+    }
+    playAlertSound()
+  }, [endAt, secondsLeft])
 
   if (secondsLeft === null) {
     const lastMatchesPreset = PRESETS.includes(lastDuration)
@@ -193,7 +218,7 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
     <div className={`rest-timer rest-timer-active ${done ? 'rest-timer-done' : ''}`}>
       <span className="rest-timer-clock">{formatClock(secondsLeft)}</span>
       <span className="muted">{done ? 'Rest complete' : 'resting...'}</span>
-      <button type="button" className="link-btn" onClick={() => setSecondsLeft(null)}>
+      <button type="button" className="link-btn" onClick={() => setEndAt(null)}>
         {done ? 'Dismiss' : 'Cancel'}
       </button>
     </div>

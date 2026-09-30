@@ -70,9 +70,16 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
   const isToday = date === todayIso()
   const scheduledPlanDay = plan ? resolveTodaysPlanDay(plan) : null
   const selectedDay = selectedDayId ? plan?.days.find((d) => d.id === selectedDayId) : undefined
-  const effectivePlanDay = isToday ? (selectedDay ?? scheduledPlanDay) : null
+  // Once a workout has actually started, keep using whichever plan day it was started as (locked in
+  // via selectedDayId, including a resumed guided draft's planDayId) instead of re-deriving it from
+  // today's date - otherwise a guided workout still open past midnight would suddenly look freeform,
+  // silently losing its exercise order and set targets.
+  const effectivePlanDay = started ? (selectedDay ?? null) : isToday ? (selectedDay ?? scheduledPlanDay) : null
 
   function start() {
+    if (isToday && !selectedDayId && scheduledPlanDay) {
+      setSelectedDayId(scheduledPlanDay.id)
+    }
     setStartedAt(Date.now())
     setStarted(true)
   }
