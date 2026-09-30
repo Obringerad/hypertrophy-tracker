@@ -279,7 +279,7 @@ export default function App() {
   return (
     <SettingsProvider>
     <div className="app">
-      <header className="app-header">
+      <header className={tab === 'log' ? 'app-header app-header-compact' : 'app-header'}>
         <h1>
           Hypertrophy Tracker {/* TEMP dev marker, delete this span + .dev-deploy-marker CSS when done testing deploys */}
           <span className="dev-deploy-marker" />

@@ -226,24 +226,26 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
               </div>
             </li>
           ) : (
-            <li key={ex.id}>
-              <div>
-                <strong>{ex.name}</strong> <MuscleGroupTag muscleGroup={ex.muscleGroup} />
+            <li key={ex.id} className="exercise-row">
+              <div className="exercise-name-row">
+                <strong>{ex.name}</strong>
+                <MuscleGroupTag muscleGroup={ex.muscleGroup} />
+              </div>
+              <div className="exercise-row-bottom">
                 <span className="muted exercise-meta">
-                  <span className="exercise-meta-item">&middot; {ex.repRangeLow}-{ex.repRangeHigh} reps</span>
+                  <span className="exercise-meta-item">{ex.repRangeLow}-{ex.repRangeHigh} reps</span>
                   <span className="exercise-meta-item">&middot; +{formatWeight(ex.weightIncrement, weightUnit)}</span>
                 </span>
-                <br />
-                <span className="muted">{lastPerformedSummary(sessions, ex.id, weightUnit)}</span>
+                <div className="exercise-list-actions">
+                  <button className="link-btn" onClick={() => startEdit(ex)}>
+                    Edit
+                  </button>
+                  <button className="link-btn" onClick={() => onRemove(ex.id)}>
+                    Remove
+                  </button>
+                </div>
               </div>
-              <div className="exercise-list-actions">
-                <button className="link-btn" onClick={() => startEdit(ex)}>
-                  Edit
-                </button>
-                <button className="link-btn" onClick={() => onRemove(ex.id)}>
-                  Remove
-                </button>
-              </div>
+              <span className="muted">{lastPerformedSummary(sessions, ex.id, weightUnit)}</span>
             </li>
           ),
         )}

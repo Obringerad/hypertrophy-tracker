@@ -215,24 +215,26 @@ export function ToolsTab({ prefillWeight }: Props) {
             <p className="one-rm-result">
               {estimatedOneRm} {weightUnit} <span className="muted">estimated 1RM</span>
             </p>
-            <table className="set-table">
-              <thead>
-                <tr>
-                  <th>Reps</th>
-                  {REP_TARGETS.map((r) => (
-                    <th key={r}>{r}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{weightUnit}</td>
-                  {REP_TARGETS.map((r) => (
-                    <td key={r}>{weightForReps(estimatedOneRm, r)}</td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+            <div className="table-scroll">
+              <table className="set-table one-rm-table">
+                <thead>
+                  <tr>
+                    <th>Reps</th>
+                    {REP_TARGETS.map((r) => (
+                      <th key={r}>{r}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{weightUnit}</td>
+                    {REP_TARGETS.map((r) => (
+                      <td key={r}>{weightForReps(estimatedOneRm, r)}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <p className="muted">Estimates use the Epley formula - most accurate under ~10 reps.</p>
           </>
         )}

@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -183,6 +183,28 @@ button.primary:disabled {
   align-items: center;
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border);
+}
+
+.exercise-list li.exercise-row {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.2rem;
+}
+
+.exercise-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.exercise-row-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .exercise-meta {
@@ -400,6 +422,19 @@ li.exercise-list-item-editing {
 .set-table td .link-btn {
   font-size: 0.85rem;
   font-weight: 400;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.one-rm-table th,
+.one-rm-table td {
+  padding: 0.4rem 0.35rem;
+}
+
+.one-rm-table td {
+  font-size: 0.9rem;
 }
 
 .set-table-logged-row {
@@ -1334,7 +1369,7 @@ li.exercise-list-item-editing {
   justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.35rem;
 }
 
 .set-count-buttons {
@@ -1733,8 +1768,8 @@ li.exercise-list-item-editing {
   top: 0;
   z-index: 5;
   background: var(--panel);
-  margin: -1.25rem -1.25rem 0.75rem;
-  padding: 1.25rem 1.25rem 0.5rem;
+  margin: -1.25rem -1.25rem 0.35rem;
+  padding: 1.25rem 1.25rem 0.3rem;
 }
 
 .number-stepper {
@@ -1864,5 +1899,11 @@ li.exercise-list-item-editing {
 
   .workout-sticky-header {
     top: -1px;
+  }
+
+  /* Reclaims vertical space while actively logging a workout, where the mobile bottom nav
+     already covers navigation - the title bar just eats into an already-tight screen. */
+  .app-header-compact {
+    display: none;
   }
 }
