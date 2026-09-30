@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import type { Exercise, SetEntry, WorkoutPlan, WorkoutSession } from './types'
 import { convertWeight, sessionUnit, type WeightUnit } from './lib/units'
@@ -42,6 +42,7 @@ const MOBILE_MORE_TABS: { key: Tab; label: string; icon: TabIconName }[] = [
 ]
 
 interface UndoAction {
+  id: string
   message: string
   undo: () => void
 }
@@ -61,7 +62,9 @@ export default function App() {
   })
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [creatingPlan, setCreatingPlan] = useState(plans.length === 0)
-  const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
+  // A queue rather than a single slot - deleting two things within the undo window used to silently
+  // drop the first one's undo the moment the second delete happened, with no indication it happened.
+  const [undoQueue, setUndoQueue] = useState<UndoAction[]>([])
   const undoTimeoutRef = useRef<number | null>(null)
   const [toolsPrefillWeight, setToolsPrefillWeight] = useState<number | null>(null)
   const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null)
@@ -82,15 +85,23 @@ export default function App() {
   }
 
   function pushUndo(message: string, undo: () => void) {
-    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
-    setUndoAction({ message, undo })
-    undoTimeoutRef.current = window.setTimeout(() => setUndoAction(null), UNDO_WINDOW_MS)
+    setUndoQueue((prev) => [...prev, { id: crypto.randomUUID(), message, undo }])
   }
 
   function dismissUndo() {
-    if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
-    setUndoAction(null)
+    setUndoQueue((prev) => prev.slice(1))
   }
+
+  // Gives whichever undo is currently shown its own full window, restarting it whenever a new one
+  // reaches the front of the queue - including one that was queued up behind an earlier toast.
+  const frontUndoId = undoQueue[0]?.id
+  useEffect(() => {
+    if (frontUndoId === undefined) return
+    undoTimeoutRef.current = window.setTimeout(() => setUndoQueue((prev) => prev.slice(1)), UNDO_WINDOW_MS)
+    return () => {
+      if (undoTimeoutRef.current) window.clearTimeout(undoTimeoutRef.current)
+    }
+  }, [frontUndoId])
 
   const activePlan = plans.find((p) => p.id === activePlanId) ?? null
   const selectedPlan = plans.find((p) => p.id === selectedPlanId) ?? null
@@ -425,12 +436,16 @@ export default function App() {
         )}
       </main>
 
-      {undoAction && (
+      {undoQueue.length > 0 && (
         <Toast
-          message={undoAction.message}
+          message={
+            undoQueue.length > 1
+              ? `${undoQueue[0].message} (+${undoQueue.length - 1} more pending)`
+              : undoQueue[0].message
+          }
           actionLabel="Undo"
           onAction={() => {
-            undoAction.undo()
+            undoQueue[0].undo()
             dismissUndo()
           }}
           onDismiss={dismissUndo}

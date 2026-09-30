@@ -32,7 +32,9 @@ function isValidSession(value: unknown): boolean {
   if (!isNonEmptyString(value.id) || !isNonEmptyString(value.date) || !isFiniteNumber(value.recovery)) return false
   if (!Array.isArray(value.exercises)) return false
   return value.exercises.every((log) => {
-    if (!isRecord(log) || !isNonEmptyString(log.exerciseId) || !Array.isArray(log.sets)) return false
+    if (!isRecord(log) || !isNonEmptyString(log.exerciseId) || !Array.isArray(log.sets) || log.sets.length === 0) {
+      return false
+    }
     return log.sets.every(isValidSetEntry)
   })
 }
