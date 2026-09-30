@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 import type { Exercise, PlanDay } from '../types'
 import { catalogExercisesForMuscleGroup, findCatalogExerciseByName, type CatalogExercise } from '../lib/exerciseCatalog'
+import { useSettings } from '../context/SettingsContext'
 import { MuscleGroupTag } from './MuscleGroupTag'
 import {
   DndContext,
@@ -138,13 +139,17 @@ export function PlanDayEditor({
   const [swapSuggestion, setSwapSuggestion] = useState<SwapSuggestion | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
+  // Always read the live setting here (rather than relying on the `weightUnit` prop, which is only
+  // passed during initial plan setup) so the databank's lb-authored increments get converted whenever
+  // an exercise is auto-filled or suggested, whether that's during setup or editing a saved plan later.
+  const { weightUnit: activeWeightUnit } = useSettings()
 
   function exercise(id: string): Exercise | undefined {
     return exercises.find((e) => e.id === id)
   }
 
   function submit() {
-    const known = findCatalogExerciseByName(newName)
+    const known = findCatalogExerciseByName(newName, activeWeightUnit)
     onAddExercise(
       newName,
       known && {
@@ -177,7 +182,7 @@ export function PlanDayEditor({
     )
     for (const c of ownCandidates) usedNames.add(c.name.toLowerCase())
 
-    const catalogCandidates = catalogExercisesForMuscleGroup(removed.muscleGroup).filter(
+    const catalogCandidates = catalogExercisesForMuscleGroup(removed.muscleGroup, activeWeightUnit).filter(
       (c) => !usedNames.has(c.name.toLowerCase()),
     )
 

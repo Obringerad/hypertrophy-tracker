@@ -52,7 +52,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
   const muscleGroupOptions = Array.from(new Set([...KNOWN_MUSCLE_GROUPS, ...exercises.map((e) => e.muscleGroup)])).sort()
 
   function handleNameChange(name: string) {
-    const known = findCatalogExerciseByName(name)
+    const known = findCatalogExerciseByName(name, weightUnit)
     if (known && !form.muscleGroup.trim()) {
       setForm({
         ...form,

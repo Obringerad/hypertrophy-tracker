@@ -350,7 +350,10 @@ export default function App() {
             }}
           />
         )}
-        {tab === 'log' && (
+        {/* Kept mounted (just hidden) rather than unmounted on tab switch, unlike the other tabs below -
+            otherwise navigating away mid-workout (e.g. to check plates for a suggested weight) would
+            reset the in-progress rest timer countdown and any not-yet-logged set inputs. */}
+        <div className={tab === 'log' ? undefined : 'tab-hidden'}>
           <WorkoutLogger
             exercises={exercises}
             sessions={sessions}
@@ -359,7 +362,7 @@ export default function App() {
             activePlanId={activePlan?.id}
             onShowPlates={showPlatesFor}
           />
-        )}
+        </div>
         {tab === 'history' && (
           <HistoryView
             exercises={exercises}

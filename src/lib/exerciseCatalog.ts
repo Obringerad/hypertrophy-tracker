@@ -1,4 +1,5 @@
 import { SPLIT_TEMPLATES } from './splitTemplates'
+import { convertWeight, type WeightUnit } from './units'
 
 export interface CatalogExercise {
   name: string
@@ -138,17 +139,26 @@ const ALL_CATALOG_EXERCISES: CatalogExercise[] = (() => {
   return result
 })()
 
-export function catalogExercisesForMuscleGroup(muscleGroup: string): CatalogExercise[] {
+/** The databank's weightIncrement values are all authored in lb - converts one to whatever unit the
+ * app is actually using, so a kg user doesn't get an increment that's really meant in pounds (e.g.
+ * a "2.5" meant as 2.5 lb showing up as a 2.5 kg jump, more than double what it should be). */
+function toTargetUnit(exercise: CatalogExercise, targetUnit: WeightUnit): CatalogExercise {
+  if (targetUnit === 'lb') return exercise
+  return { ...exercise, weightIncrement: convertWeight(exercise.weightIncrement, 'lb', targetUnit) }
+}
+
+export function catalogExercisesForMuscleGroup(muscleGroup: string, targetUnit: WeightUnit = 'lb'): CatalogExercise[] {
   const key = muscleGroup.trim().toLowerCase()
-  return ALL_CATALOG_EXERCISES.filter((e) => e.muscleGroup.toLowerCase() === key)
+  return ALL_CATALOG_EXERCISES.filter((e) => e.muscleGroup.toLowerCase() === key).map((e) => toTargetUnit(e, targetUnit))
 }
 
 /** Looks up a typed exercise name against the databank (exact match, case-insensitive) so its
  * muscle group and other details can be filled in automatically instead of defaulting to blank. */
-export function findCatalogExerciseByName(name: string): CatalogExercise | undefined {
+export function findCatalogExerciseByName(name: string, targetUnit: WeightUnit = 'lb'): CatalogExercise | undefined {
   const key = name.trim().toLowerCase()
   if (!key) return undefined
-  return ALL_CATALOG_EXERCISES.find((e) => e.name.toLowerCase() === key)
+  const found = ALL_CATALOG_EXERCISES.find((e) => e.name.toLowerCase() === key)
+  return found && toTargetUnit(found, targetUnit)
 }
 
 /** Every distinct muscle group name in the databank, for autocomplete suggestions. */

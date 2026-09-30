@@ -1,5 +1,6 @@
 import type { Exercise, PlanDay, WorkoutPlan } from '../types'
 import type { SplitTemplate, TemplateDay } from './splitTemplates'
+import { convertWeight, type WeightUnit } from './units'
 
 interface MaterializeOptions {
   name: string
@@ -9,6 +10,8 @@ interface MaterializeOptions {
   daysPerWeek?: number
   durationWeeks?: number
   existingExercises: Exercise[]
+  /** Split templates are authored in lb - new exercises' weightIncrement is converted to this unit. */
+  weightUnit: WeightUnit
 }
 
 interface MaterializeResult {
@@ -35,6 +38,7 @@ export function materializePlan({
   daysPerWeek,
   durationWeeks,
   existingExercises,
+  weightUnit,
 }: MaterializeOptions): MaterializeResult {
   const templateDays =
     template.days.length > 0 ? template.days : blankDaysFor(fixedDays?.length ?? daysPerWeek ?? 1)
@@ -51,7 +55,7 @@ export function materializePlan({
       muscleGroup,
       repRangeLow: repLow,
       repRangeHigh: repHigh,
-      weightIncrement: increment,
+      weightIncrement: convertWeight(increment, 'lb', weightUnit),
     }
     newExercises.push(created)
     return created

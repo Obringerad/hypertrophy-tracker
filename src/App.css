@@ -4,6 +4,10 @@
   padding: 1rem 1rem 3rem;
 }
 
+.tab-hidden {
+  display: none;
+}
+
 .app-header h1 {
   font-size: 1.4rem;
   margin-bottom: 0.75rem;
@@ -15,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: red;
   margin-left: 8px;
   vertical-align: middle;
 }

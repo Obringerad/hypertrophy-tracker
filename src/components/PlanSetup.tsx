@@ -84,6 +84,7 @@ export function PlanSetup({ existingExercises, isFirstPlan, onSave, onCancel }: 
       daysPerWeek: scheduleType === 'flexible' && daysPerWeek !== '' ? daysPerWeek : undefined,
       durationWeeks: durationWeeks === '' ? undefined : durationWeeks,
       existingExercises,
+      weightUnit,
     })
     setDraftPlan(plan)
     setDraftExercises(newExercises)
