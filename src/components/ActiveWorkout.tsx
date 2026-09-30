@@ -117,9 +117,20 @@ export function ActiveWorkout({
   }
 
   /** Steps back one set at a time, including into a prior exercise - for undoing a misclick like
-   * an accidental skip, without touching anything already logged. */
+   * an accidental skip or a bad log. If the set being stepped back onto was already logged, that
+   * log is removed too, so it's ready to be redone rather than left as a stale duplicate. */
   function goToPreviousStep() {
-    setStepIndex((i) => Math.max(0, i - 1))
+    if (stepIndex === 0) return
+    const newIndex = stepIndex - 1
+    const target = queue[newIndex]
+    setLogged((prev) => {
+      const entry = prev.find((l) => l.exerciseId === target.exerciseId)
+      if (!entry || entry.sets.length < target.setNumber) return prev
+      const trimmedSets = entry.sets.slice(0, target.setNumber - 1)
+      if (trimmedSets.length === 0) return prev.filter((l) => l.exerciseId !== target.exerciseId)
+      return prev.map((l) => (l.exerciseId === target.exerciseId ? { ...l, sets: trimmedSets } : l))
+    })
+    setStepIndex(newIndex)
   }
 
   function addPlannedSet() {
@@ -371,7 +382,12 @@ export function ActiveWorkout({
       <div className="wizard-actions">
         <div className="log-set-actions">
           {stepIndex > 0 && (
-            <button type="button" className="link-btn" onClick={goToPreviousStep} title="Go back to a previous set or exercise">
+            <button
+              type="button"
+              className="link-btn"
+              onClick={goToPreviousStep}
+              title="Go back a set - if it was already logged, that log is removed so you can redo it"
+            >
               &#8592; Back
             </button>
           )}
