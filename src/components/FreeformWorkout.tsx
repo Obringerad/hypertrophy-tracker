@@ -184,8 +184,6 @@ export function FreeformWorkout({
         {activeExerciseId && <LastTimeSets sessions={sessions} exerciseId={activeExerciseId} targetUnit={weightUnit} />}
       </div>
 
-      <RestTimer autoStartSignal={restSignal} />
-
       <div className="set-form">
         <label>
           Weight
@@ -221,6 +219,8 @@ export function FreeformWorkout({
           Add Set
         </button>
       </div>
+
+      <RestTimer autoStartSignal={restSignal} />
 
       {activeLog && activeLog.sets.length > 0 && (
         <table className="set-table">

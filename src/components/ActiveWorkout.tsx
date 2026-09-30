@@ -116,8 +116,14 @@ export function ActiveWorkout({
       setStepIndex((i) => i + 1)
     }
     // Only auto-start the rest timer between sets of the same exercise - finishing an exercise (or
-    // the whole workout) moves on to something else, not a rest interval to count down.
-    if (!isLastSetOfExercise) setRestSignal((n) => n + 1)
+    // the whole workout) moves on to something else, not a rest interval to count down. If that was
+    // the last set, also cancel any countdown still running from the set before it - the exercise is
+    // done, so there's nothing left to rest for even before "Start Next Exercise" is clicked.
+    if (!isLastSetOfExercise) {
+      setRestSignal((n) => n + 1)
+    } else {
+      setRestCancelSignal((n) => n + 1)
+    }
   }
 
   function advanceToNextExercise() {
@@ -363,8 +369,6 @@ export function ActiveWorkout({
       {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
       <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
 
-      <RestTimer autoStartSignal={restSignal} cancelSignal={restCancelSignal} />
-
       {notesOpen || notes ? (
         <label className="session-notes-field">
           Notes (Optional)
@@ -448,6 +452,8 @@ export function ActiveWorkout({
           </label>
         </div>
       )}
+
+      <RestTimer autoStartSignal={restSignal} cancelSignal={restCancelSignal} />
     </div>
   )
 }
