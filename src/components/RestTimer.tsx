@@ -26,8 +26,56 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
   const [customSeconds, setCustomSeconds] = useState('')
   const startedForSignal = useRef(autoStartSignal)
   const canceledForSignal = useRef(cancelSignal)
+  const audioCtxRef = useRef<AudioContext | null>(null)
+
+  // Vibration only fires reliably when triggered directly by a user tap - by the time a countdown
+  // reaches zero, the browser no longer treats it as one, so most phones silently ignore it. A short
+  // tone is the reliable cross-device alert instead. Its AudioContext has the same restriction, so it
+  // has to be created/resumed here, at countdown-start time (still close enough to a real tap to
+  // count), then just reused - already unlocked - whenever the countdown actually finishes later.
+  function primeAlertSound() {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContextCtor =
+          window.AudioContext ??
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+        if (!AudioContextCtor) return
+        audioCtxRef.current = new AudioContextCtor()
+      }
+      if (audioCtxRef.current.state === 'suspended') {
+        void audioCtxRef.current.resume()
+      }
+    } catch {
+      // Web Audio unsupported/blocked - nothing we can do about it here.
+    }
+  }
+
+  function playAlertSound() {
+    const ctx = audioCtxRef.current
+    if (!ctx) return
+    try {
+      const beep = (startTime: number) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'sine'
+        osc.frequency.value = 880
+        gain.gain.setValueAtTime(0.0001, startTime)
+        gain.gain.exponentialRampToValueAtTime(0.35, startTime + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.28)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(startTime)
+        osc.stop(startTime + 0.3)
+      }
+      beep(ctx.currentTime)
+      beep(ctx.currentTime + 0.35)
+    } catch {
+      // Playback failed - nothing we can do about it here.
+    }
+  }
 
   function start(seconds: number) {
+    primeAlertSound()
     setLastDuration(seconds)
     setSecondsLeft(seconds)
   }
@@ -51,6 +99,7 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
   useEffect(() => {
     if (autoStartSignal === undefined || autoStartSignal === startedForSignal.current) return
     startedForSignal.current = autoStartSignal
+    primeAlertSound()
     setSecondsLeft((current) => (current === null || current <= 0 ? lastDuration : current))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStartSignal])
@@ -69,6 +118,7 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
       } catch {
         // Vibration unsupported/blocked - nothing we can do about it here.
       }
+      playAlertSound()
       return
     }
     const id = window.setTimeout(() => setSecondsLeft((s) => (s === null ? null : s - 1)), 1000)
