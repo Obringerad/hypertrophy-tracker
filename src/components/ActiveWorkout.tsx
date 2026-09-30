@@ -366,7 +366,7 @@ export function ActiveWorkout({
       )}
 
       {pendingAdvance ? (
-        <div className="wizard-actions">
+        <div className="wizard-actions log-actions-sticky">
           <div className="log-set-actions">
             <button
               type="button"
@@ -418,7 +418,7 @@ export function ActiveWorkout({
             </label>
           </div>
 
-          <div className="wizard-actions">
+          <div className="wizard-actions log-actions-sticky">
             <div className="log-set-actions">
               {stepIndex > 0 && (
                 <button

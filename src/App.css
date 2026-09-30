@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: green;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -1905,5 +1905,18 @@ li.exercise-list-item-editing {
      already covers navigation - the title bar just eats into an already-tight screen. */
   .app-header-compact {
     display: none;
+  }
+
+  /* Pins the primary set-logging action (Log Set / Start Next Exercise) just above the bottom
+     nav, so it's always reachable without scrolling no matter how tall the suggestion card,
+     last-time chips, or rest timer above it get. */
+  .log-actions-sticky {
+    position: sticky;
+    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    z-index: 6;
+    background: var(--panel);
+    margin: 0.75rem -1.25rem -1.25rem;
+    padding: 0.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
   }
 }
