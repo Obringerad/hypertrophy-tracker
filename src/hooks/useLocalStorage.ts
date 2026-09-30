@@ -18,5 +18,22 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     }
   }, [key, value])
 
+  // Stay in sync with this same key changing in another tab - the browser only fires this in OTHER
+  // tabs, never the one that made the change, so this can't create a feedback loop. Without it, two
+  // tabs open at once silently diverge, and whichever saves last wins, clobbering the other's data.
+  useEffect(() => {
+    function handleStorage(e: StorageEvent) {
+      if (e.key !== key) return
+      try {
+        setValue(e.newValue !== null ? (JSON.parse(e.newValue) as T) : initialValue)
+      } catch {
+        // Malformed value written elsewhere - ignore and keep what we have.
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
+
   return [value, setValue] as const
 }

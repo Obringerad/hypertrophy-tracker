@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { sessionUnit, type WeightUnit } from '../lib/units'
+import { validateBackupData } from '../lib/backupValidation'
 import { useSettings } from '../context/SettingsContext'
 import { ConfirmDialog } from './ConfirmDialog'
 
@@ -115,6 +116,11 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result as string) as Partial<BackupData>
+        const error = validateBackupData(data)
+        if (error) {
+          window.alert(error)
+          return
+        }
         setPendingImport(data)
       } catch {
         window.alert('That file could not be read as a valid backup.')
