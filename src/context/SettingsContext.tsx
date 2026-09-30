@@ -12,6 +12,8 @@ interface SettingsContextValue {
   setTextSize: (size: TextSize) => void
   theme: Theme
   setTheme: (theme: Theme) => void
+  restTimerAutoStart: boolean
+  setRestTimerAutoStart: (value: boolean) => void
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null)
@@ -24,6 +26,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [weightUnit, setWeightUnit] = useLocalStorage<WeightUnit>('hypertrophy.weightUnit', 'lb')
   const [textSize, setTextSize] = useLocalStorage<TextSize>('hypertrophy.textSize', 'normal')
   const [theme, setTheme] = useLocalStorage<Theme>('hypertrophy.theme', 'system')
+  const [restTimerAutoStart, setRestTimerAutoStart] = useLocalStorage('hypertrophy.restTimerAutoStart', false)
 
   useEffect(() => {
     document.documentElement.style.fontSize = ROOT_FONT_SIZE[textSize]
@@ -39,7 +42,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   return (
     <SettingsContext.Provider
-      value={{ weightUnit, setWeightUnit, textSize, setTextSize, theme, setTheme }}
+      value={{
+        weightUnit,
+        setWeightUnit,
+        textSize,
+        setTextSize,
+        theme,
+        setTheme,
+        restTimerAutoStart,
+        setRestTimerAutoStart,
+      }}
     >
       {children}
     </SettingsContext.Provider>

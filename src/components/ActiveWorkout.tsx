@@ -7,6 +7,7 @@ import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
 import { LastTimeSets } from './LastTimeSets'
+import { useSettings } from '../context/SettingsContext'
 
 export interface QueueItem {
   exerciseId: string
@@ -64,6 +65,7 @@ export function ActiveWorkout({
   onProgressChange,
   onShowPlates,
 }: Props) {
+  const { restTimerAutoStart } = useSettings()
   const [queue, setQueue] = useState<QueueItem[]>(() => initialProgress?.queue ?? buildQueue(planDay))
   const [stepIndex, setStepIndex] = useState(() => initialProgress?.stepIndex ?? 0)
   const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
@@ -115,12 +117,13 @@ export function ActiveWorkout({
     if (!(isLastSetOfExercise && !isLastExerciseForCurrent)) {
       setStepIndex((i) => i + 1)
     }
-    // Only auto-start the rest timer between sets of the same exercise - finishing an exercise (or
-    // the whole workout) moves on to something else, not a rest interval to count down. If that was
-    // the last set, also cancel any countdown still running from the set before it - the exercise is
-    // done, so there's nothing left to rest for even before "Start Next Exercise" is clicked.
+    // Only auto-start the rest timer between sets of the same exercise (and only when the setting
+    // is on) - finishing an exercise (or the whole workout) moves on to something else, not a rest
+    // interval to count down. If that was the last set, also cancel any countdown still running
+    // from the set before it - the exercise is done, so there's nothing left to rest for even
+    // before "Start Next Exercise" is clicked.
     if (!isLastSetOfExercise) {
-      setRestSignal((n) => n + 1)
+      if (restTimerAutoStart) setRestSignal((n) => n + 1)
     } else {
       setRestCancelSignal((n) => n + 1)
     }

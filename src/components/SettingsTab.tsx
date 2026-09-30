@@ -62,7 +62,16 @@ function toCsv(sessions: WorkoutSession[], exercises: Exercise[]): string {
 }
 
 export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport, onChangeUnit }: Props) {
-  const { weightUnit, setWeightUnit, textSize, setTextSize, theme, setTheme } = useSettings()
+  const {
+    weightUnit,
+    setWeightUnit,
+    textSize,
+    setTextSize,
+    theme,
+    setTheme,
+    restTimerAutoStart,
+    setRestTimerAutoStart,
+  } = useSettings()
   const [pendingUnit, setPendingUnit] = useState<WeightUnit | null>(null)
   const [pendingImport, setPendingImport] = useState<Partial<BackupData> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -231,6 +240,27 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
             onClick={() => setTheme('dark')}
           >
             Dark
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h3>Rest Timer</h3>
+        <p className="muted">Automatically start the rest timer after logging a set, using whichever duration you used last.</p>
+        <div className="schedule-type-picker">
+          <button
+            type="button"
+            className={!restTimerAutoStart ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setRestTimerAutoStart(false)}
+          >
+            Off
+          </button>
+          <button
+            type="button"
+            className={restTimerAutoStart ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setRestTimerAutoStart(true)}
+          >
+            Auto-start
           </button>
         </div>
       </div>

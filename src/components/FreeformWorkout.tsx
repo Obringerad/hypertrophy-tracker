@@ -7,6 +7,7 @@ import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
 import { LastTimeSets } from './LastTimeSets'
+import { useSettings } from '../context/SettingsContext'
 
 export interface FreeformWorkoutProgress {
   logged: LoggedExercise[]
@@ -60,6 +61,7 @@ export function FreeformWorkout({
   onProgressChange,
   onShowPlates,
 }: Props) {
+  const { restTimerAutoStart } = useSettings()
   const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
   const [activeExerciseId, setActiveExerciseId] = useState(
     () => initialProgress?.activeExerciseId ?? exercises[0]?.id ?? '',
@@ -110,7 +112,7 @@ export function FreeformWorkout({
       }
       return [...prev, { exerciseId: activeExerciseId, sets: [newSet] }]
     })
-    setRestSignal((n) => n + 1)
+    if (restTimerAutoStart) setRestSignal((n) => n + 1)
   }
 
   function removeSet(exerciseId: string, index: number) {
