@@ -73,7 +73,6 @@ export function ActiveWorkout({
   const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
   const [notesOpen, setNotesOpen] = useState(() => !!initialProgress?.notes)
   const [restSignal, setRestSignal] = useState(0)
-  const [restCancelSignal, setRestCancelSignal] = useState(0)
 
   // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
   useEffect(() => {
@@ -117,30 +116,24 @@ export function ActiveWorkout({
     if (!(isLastSetOfExercise && !isLastExerciseForCurrent)) {
       setStepIndex((i) => i + 1)
     }
-    // Only auto-start the rest timer between sets of the same exercise (and only when the setting
-    // is on) - finishing an exercise (or the whole workout) moves on to something else, not a rest
-    // interval to count down. If that was the last set, also cancel any countdown still running
-    // from the set before it - the exercise is done, so there's nothing left to rest for even
-    // before "Start Next Exercise" is clicked.
-    if (!isLastSetOfExercise) {
-      if (restTimerAutoStart) setRestSignal((n) => n + 1)
-    } else {
-      setRestCancelSignal((n) => n + 1)
+    // Only auto-start the rest timer between sets of the same exercise, and only when the setting
+    // is on - finishing an exercise (or the whole workout) moves on to something else, not a rest
+    // interval to count down on its own. A countdown that's already running (started manually, or
+    // from a prior set) is left alone either way - moving between sets or exercises isn't a reason
+    // to cut a rest period short.
+    if (!isLastSetOfExercise && restTimerAutoStart) {
+      setRestSignal((n) => n + 1)
     }
   }
 
   function advanceToNextExercise() {
     setStepIndex((i) => i + 1)
-    // A rest countdown from the finished exercise's last inter-set rest may still be running -
-    // moving on to a new exercise isn't a rest interval, so it shouldn't carry over.
-    setRestCancelSignal((n) => n + 1)
   }
 
   function skipRestOfExercise() {
     if (!current) return
     const nextIndex = queue.findIndex((q, i) => i > stepIndex && q.exerciseId !== current.exerciseId)
     setStepIndex(nextIndex === -1 ? queue.length : nextIndex)
-    setRestCancelSignal((n) => n + 1)
   }
 
   /** Steps back one set at a time, including into a prior exercise - for undoing a misclick like
@@ -158,7 +151,6 @@ export function ActiveWorkout({
       return prev.map((l) => (l.exerciseId === target.exerciseId ? { ...l, sets: trimmedSets } : l))
     })
     setStepIndex(newIndex)
-    setRestCancelSignal((n) => n + 1)
   }
 
   function addPlannedSet() {
@@ -407,7 +399,7 @@ export function ActiveWorkout({
         </div>
       )}
 
-      <RestTimer autoStartSignal={restSignal} cancelSignal={restCancelSignal} />
+      <RestTimer autoStartSignal={restSignal} />
 
       {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
         <table className="set-table">

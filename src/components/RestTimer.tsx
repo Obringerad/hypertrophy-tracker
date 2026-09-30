@@ -13,12 +13,9 @@ function formatClock(totalSeconds: number): string {
 interface Props {
   /** Bump this (e.g. after logging a set) to auto-start a countdown using the last-used duration. */
   autoStartSignal?: number
-  /** Bump this to stop an in-progress countdown, e.g. when the workout steps backward - reaching
-   * a set that way isn't a rest interval to count down. */
-  cancelSignal?: number
 }
 
-export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
+export function RestTimer({ autoStartSignal }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
   // The countdown is driven by a real end timestamp rather than a decrementing counter - a plain
   // tick-based counter drifts (or stalls entirely) once the interval below gets throttled or paused,
@@ -31,7 +28,6 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
   const [customMinutes, setCustomMinutes] = useState('')
   const [customSeconds, setCustomSeconds] = useState('')
   const startedForSignal = useRef(autoStartSignal)
-  const canceledForSignal = useRef(cancelSignal)
   const alertedForEndAt = useRef<number | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
 
@@ -116,12 +112,6 @@ export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
     setNowTick(now)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStartSignal])
-
-  useEffect(() => {
-    if (cancelSignal === undefined || cancelSignal === canceledForSignal.current) return
-    canceledForSignal.current = cancelSignal
-    setEndAt(null)
-  }, [cancelSignal])
 
   // Keeps the displayed countdown live, and - critically - snaps it back in sync the instant the tab
   // regains focus, so a countdown that finished while the screen was locked shows "Rest complete" (and
