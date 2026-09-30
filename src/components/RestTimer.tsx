@@ -13,15 +13,19 @@ function formatClock(totalSeconds: number): string {
 interface Props {
   /** Bump this (e.g. after logging a set) to auto-start a countdown using the last-used duration. */
   autoStartSignal?: number
+  /** Bump this to stop an in-progress countdown, e.g. when the workout steps backward - reaching
+   * a set that way isn't a rest interval to count down. */
+  cancelSignal?: number
 }
 
-export function RestTimer({ autoStartSignal }: Props) {
+export function RestTimer({ autoStartSignal, cancelSignal }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
   const [customOpen, setCustomOpen] = useState(false)
   const [customMinutes, setCustomMinutes] = useState('')
   const [customSeconds, setCustomSeconds] = useState('')
   const startedForSignal = useRef(autoStartSignal)
+  const canceledForSignal = useRef(cancelSignal)
 
   function start(seconds: number) {
     setLastDuration(seconds)
@@ -50,6 +54,12 @@ export function RestTimer({ autoStartSignal }: Props) {
     setSecondsLeft((current) => (current === null || current <= 0 ? lastDuration : current))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStartSignal])
+
+  useEffect(() => {
+    if (cancelSignal === undefined || cancelSignal === canceledForSignal.current) return
+    canceledForSignal.current = cancelSignal
+    setSecondsLeft(null)
+  }, [cancelSignal])
 
   useEffect(() => {
     if (secondsLeft === null) return

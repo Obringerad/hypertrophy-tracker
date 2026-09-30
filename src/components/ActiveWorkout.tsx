@@ -69,6 +69,7 @@ export function ActiveWorkout({
   const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
   const [notesOpen, setNotesOpen] = useState(() => !!initialProgress?.notes)
   const [restSignal, setRestSignal] = useState(0)
+  const [restCancelSignal, setRestCancelSignal] = useState(0)
 
   // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
   useEffect(() => {
@@ -131,6 +132,7 @@ export function ActiveWorkout({
       return prev.map((l) => (l.exerciseId === target.exerciseId ? { ...l, sets: trimmedSets } : l))
     })
     setStepIndex(newIndex)
+    setRestCancelSignal((n) => n + 1)
   }
 
   function addPlannedSet() {
@@ -295,7 +297,7 @@ export function ActiveWorkout({
       {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
       <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
 
-      <RestTimer autoStartSignal={restSignal} />
+      <RestTimer autoStartSignal={restSignal} cancelSignal={restCancelSignal} />
 
       {notesOpen || notes ? (
         <label className="session-notes-field">
