@@ -409,7 +409,7 @@ export function ActiveWorkout({
                 &#8592; Back
               </button>
             )}
-            {!isLastSetOfExercise ? (
+            {!isLastExercise ? (
               <button type="button" className="link-btn" onClick={skipRestOfExercise}>
                 Skip to Next Exercise
               </button>
