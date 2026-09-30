@@ -227,9 +227,9 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
             <li key={ex.id}>
               <div>
                 <strong>{ex.name}</strong> <MuscleGroupTag muscleGroup={ex.muscleGroup} />
-                <span className="muted">
-                  {' '}
-                  &middot; {ex.repRangeLow}-{ex.repRangeHigh} reps &middot; +{formatWeight(ex.weightIncrement, weightUnit)}
+                <span className="muted exercise-meta">
+                  <span className="exercise-meta-item">&middot; {ex.repRangeLow}-{ex.repRangeHigh} reps</span>
+                  <span className="exercise-meta-item">&middot; +{formatWeight(ex.weightIncrement, weightUnit)}</span>
                 </span>
                 <br />
                 <span className="muted">{lastPerformedSummary(sessions, ex.id, weightUnit)}</span>

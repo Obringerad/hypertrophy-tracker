@@ -114,8 +114,10 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
             <div key={session.id} className="history-entry">
               <div className="history-entry-header">
                 <button type="button" className="history-toggle" onClick={() => toggle(session.id)}>
-                  <span className={`history-caret ${isOpen ? 'open' : ''}`}>&#9656;</span>
-                  <span className="history-entry-date">{formatDate(session.date)}</span>
+                  <span className="history-toggle-title">
+                    <span className={`history-caret ${isOpen ? 'open' : ''}`}>&#9656;</span>
+                    <span className="history-entry-date">{formatDate(session.date)}</span>
+                  </span>
                   {dayLabel && <span className="muted">{dayLabel}</span>}
                   <span className="muted">
                     {session.exercises.length} exercise{session.exercises.length === 1 ? '' : 's'} &middot; Recovery{' '}

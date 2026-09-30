@@ -63,29 +63,33 @@ function ExerciseRowContent({
 }: ExerciseRowContentProps) {
   return (
     <span className="plan-day-exercise-info">
-      {info?.name ?? 'Unknown exercise'} {info && <MuscleGroupTag muscleGroup={info.muscleGroup} />}
-      <span className="plan-day-target-sets">
-        <input
-          type="number"
-          min={1}
-          value={targetSets}
-          onChange={(e) => onUpdateTargetSets(exerciseId, Math.max(1, Number(e.target.value)))}
-        />
-        <span className="muted">sets</span>
+      <span className="plan-day-exercise-name">
+        {info?.name ?? 'Unknown exercise'} {info && <MuscleGroupTag muscleGroup={info.muscleGroup} />}
       </span>
-      {onUpdateStartingWeight && (
+      <span className="plan-day-exercise-controls">
         <span className="plan-day-target-sets">
           <input
             type="number"
-            className="starting-weight-input"
-            min={0}
-            placeholder="0"
-            value={info?.startingWeight ?? ''}
-            onChange={(e) => onUpdateStartingWeight(exerciseId, Number(e.target.value))}
+            min={1}
+            value={targetSets}
+            onChange={(e) => onUpdateTargetSets(exerciseId, Math.max(1, Number(e.target.value)))}
           />
-          <span className="muted">starting {weightUnit}</span>
+          <span className="muted">sets</span>
         </span>
-      )}
+        {onUpdateStartingWeight && (
+          <span className="plan-day-target-sets">
+            <input
+              type="number"
+              className="starting-weight-input"
+              min={0}
+              placeholder="0"
+              value={info?.startingWeight ?? ''}
+              onChange={(e) => onUpdateStartingWeight(exerciseId, Number(e.target.value))}
+            />
+            <span className="muted">starting {weightUnit}</span>
+          </span>
+        )}
+      </span>
     </span>
   )
 }

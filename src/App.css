@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -181,6 +181,16 @@ button.primary:disabled {
   border-bottom: 1px solid var(--border);
 }
 
+.exercise-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 0.4rem;
+}
+
+.exercise-meta-item {
+  white-space: nowrap;
+}
+
 .exercise-row-dragging {
   opacity: 0.3;
   border: 1px dashed var(--accent);
@@ -236,10 +246,24 @@ button.primary:disabled {
 
 .plan-day-exercise-info {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.plan-day-exercise-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.plan-day-exercise-controls {
+  display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  flex: 1;
 }
 
 .plan-day-target-sets {
@@ -1372,6 +1396,21 @@ li.exercise-list-item-editing {
   flex-wrap: wrap;
 }
 
+.history-toggle-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.history-toggle-title .history-entry-date {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .btn-delete {
   flex-shrink: 0;
   background: transparent;
@@ -1433,6 +1472,7 @@ li.exercise-list-item-editing {
 
 .history-caret {
   display: inline-block;
+  flex-shrink: 0;
   color: var(--muted);
   transition: transform 0.15s ease;
   font-size: 0.8rem;
@@ -1774,6 +1814,7 @@ li.exercise-list-item-editing {
     position: fixed;
     inset: 0;
     z-index: 49;
+    background: rgba(0, 0, 0, 0.35);
   }
 
   .more-menu {
