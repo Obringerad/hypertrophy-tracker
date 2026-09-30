@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { Exercise, WorkoutSession } from '../types'
 import { formatDate } from '../lib/dates'
-import { maxWeightEver } from '../lib/records'
+import { isFirstAtWeightAndReps, maxWeightEver } from '../lib/records'
 import { formatWeight, sessionUnit } from '../lib/units'
 
 interface Props {
@@ -61,7 +61,9 @@ export function DayWorkoutModal({ date, sessions, exercises, onClose }: Props) {
                           <td>{i + 1}</td>
                           <td>
                             {formatWeight(s.weight, sessionUnit(session))}
-                            {s.weight > 0 && s.weight === priorBest && <span className="pr-badge">PR</span>}
+                            {s.weight > 0 && s.weight === priorBest && isFirstAtWeightAndReps(log.sets, i) && (
+                              <span className="pr-badge">PR</span>
+                            )}
                           </td>
                           <td>{s.reps}</td>
                           <td>{s.rpe}</td>

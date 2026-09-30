@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Exercise, SetEntry, WorkoutPlan, WorkoutSession } from '../types'
 import { formatDate } from '../lib/dates'
-import { maxWeightEver } from '../lib/records'
+import { isFirstAtWeightAndReps, maxWeightEver } from '../lib/records'
 import { formatWeight, sessionUnit } from '../lib/units'
 
 interface Props {
@@ -210,7 +210,7 @@ export function HistoryView({ exercises, sessions, plans, onDelete, onUpdateExer
                                   <>
                                     <td>
                                       {formatWeight(s.weight, sessionUnit(session))}
-                                      {s.weight > 0 && s.weight === priorBest && (
+                                      {s.weight > 0 && s.weight === priorBest && isFirstAtWeightAndReps(log.sets, i) && (
                                         <span className="pr-badge">PR</span>
                                       )}
                                     </td>

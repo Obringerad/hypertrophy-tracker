@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, PlanDay, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
 import { maxWeightEver, isFirstAtWeightAndReps } from '../lib/records'
-import { formatWeight } from '../lib/units'
-import { useSettings } from '../context/SettingsContext'
+import { formatWeight, type WeightUnit } from '../lib/units'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
@@ -28,6 +27,9 @@ interface Props {
   sessions: WorkoutSession[]
   recovery: number
   date: string
+  /** Pinned to whatever was active when this workout started, not the live setting - so switching
+   * units in Settings mid-workout can't mislabel sets already logged under a different one. */
+  weightUnit: WeightUnit
   activePlanId?: string
   onFinish: (session: WorkoutSession) => void
   onCancel: () => void
@@ -54,6 +56,7 @@ export function ActiveWorkout({
   sessions,
   recovery,
   date,
+  weightUnit,
   activePlanId,
   onFinish,
   onCancel,
@@ -61,7 +64,6 @@ export function ActiveWorkout({
   onProgressChange,
   onShowPlates,
 }: Props) {
-  const { weightUnit } = useSettings()
   const [queue, setQueue] = useState<QueueItem[]>(() => initialProgress?.queue ?? buildQueue(planDay))
   const [stepIndex, setStepIndex] = useState(() => initialProgress?.stepIndex ?? 0)
   const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
@@ -294,7 +296,7 @@ export function ActiveWorkout({
         </div>
       </div>
 
-      {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
+      {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
       <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
 
       <RestTimer autoStartSignal={restSignal} cancelSignal={restCancelSignal} />

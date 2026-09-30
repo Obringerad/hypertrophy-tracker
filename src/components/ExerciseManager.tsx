@@ -98,6 +98,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
 
   function saveEdit(id: string) {
     if (!editForm.name.trim()) return
+    const original = exercises.find((e) => e.id === id)
     onUpdate({
       id,
       name: editForm.name.trim(),
@@ -105,6 +106,7 @@ export function ExerciseManager({ exercises, sessions, onAdd, onRemove, onUpdate
       repRangeLow: editForm.repRangeLow,
       repRangeHigh: editForm.repRangeHigh,
       weightIncrement: editForm.weightIncrement,
+      startingWeight: original?.startingWeight,
     })
     setEditingId(null)
   }

@@ -1,6 +1,5 @@
 import type { ProgressionSuggestion } from '../types'
-import { formatWeight } from '../lib/units'
-import { useSettings } from '../context/SettingsContext'
+import { formatWeight, type WeightUnit } from '../lib/units'
 
 const ACTION_LABEL: Record<ProgressionSuggestion['action'], string> = {
   increase_weight: 'Add Weight',
@@ -12,11 +11,11 @@ const ACTION_LABEL: Record<ProgressionSuggestion['action'], string> = {
 
 interface Props {
   suggestion: ProgressionSuggestion
+  weightUnit: WeightUnit
   onShowPlates?: (weight: number) => void
 }
 
-export function SuggestionCard({ suggestion, onShowPlates }: Props) {
-  const { weightUnit } = useSettings()
+export function SuggestionCard({ suggestion, weightUnit, onShowPlates }: Props) {
   return (
     <div className={`suggestion suggestion-${suggestion.action}`}>
       <div className="suggestion-header">

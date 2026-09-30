@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { Exercise, LoggedExercise, WorkoutPlan, WorkoutSession } from '../types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { resolveTodaysPlanDay } from '../lib/planEngine'
+import { type WeightUnit } from '../lib/units'
+import { useSettings } from '../context/SettingsContext'
 import { WorkoutHome } from './WorkoutHome'
 import { ActiveWorkout, type QueueItem } from './ActiveWorkout'
 import { FreeformWorkout } from './FreeformWorkout'
@@ -29,6 +31,9 @@ interface WorkoutDraft {
   stepIndex?: number
   /** Present only when the draft was started as a freeform workout. */
   activeExerciseId?: string
+  /** The weight unit active when this workout started - pinned for its whole duration so switching
+   * units mid-workout can't mislabel sets already logged under a different one. */
+  unit?: WeightUnit
 }
 
 const DRAFT_KEY = 'hypertrophy.workoutDraft'
@@ -52,6 +57,7 @@ function clearDraftImmediately() {
 }
 
 export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId, onShowPlates }: Props) {
+  const { weightUnit: liveWeightUnit } = useSettings()
   const [draft, setDraft] = useLocalStorage<WorkoutDraft | null>(DRAFT_KEY, null)
   const [started, setStarted] = useState(() => draft !== null)
   const [recovery, setRecovery] = useState(() => draft?.recovery ?? 3)
@@ -62,6 +68,10 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
   /** Overrides which of the plan's days today's workout uses, when the user swaps away from the
    * one the schedule/rotation would normally pick (e.g. doing Legs instead of today's Pull). */
   const [selectedDayId, setSelectedDayId] = useState<string | undefined>(() => draft?.planDayId)
+  // Pinned to whatever unit was active the moment the workout started, so switching units in
+  // Settings mid-workout can't retroactively mislabel sets already logged under a different one.
+  const [pinnedUnit, setPinnedUnit] = useState<WeightUnit | undefined>(() => draft?.unit)
+  const workoutUnit = pinnedUnit ?? liveWeightUnit
 
   if (exercises.length === 0) {
     return <p className="muted">Add an exercise first, then come back here to log a workout.</p>
@@ -80,6 +90,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
     if (isToday && !selectedDayId && scheduledPlanDay) {
       setSelectedDayId(scheduledPlanDay.id)
     }
+    setPinnedUnit(liveWeightUnit)
     setStartedAt(Date.now())
     setStarted(true)
   }
@@ -87,6 +98,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
   function startRepeatLast() {
     const lastSession = sessions.slice().sort((a, b) => b.date.localeCompare(a.date))[0]
     setRepeatExerciseId(lastSession?.exercises[0]?.exerciseId)
+    setPinnedUnit(liveWeightUnit)
     setStartedAt(Date.now())
     setStarted(true)
   }
@@ -101,6 +113,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
     setRecovery(3)
     setDate(todayIso())
     setSelectedDayId(undefined)
+    setPinnedUnit(undefined)
     setDraft(null)
   }
 
@@ -110,6 +123,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
     setStartedAt(undefined)
     setRepeatExerciseId(undefined)
     setSelectedDayId(undefined)
+    setPinnedUnit(undefined)
     setDraft(null)
   }
 
@@ -161,6 +175,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
       sessions={sessions}
       recovery={recovery}
       date={date}
+      weightUnit={workoutUnit}
       activePlanId={activePlanId}
       onFinish={finishAndReset}
       onCancel={cancelWorkout}
@@ -178,6 +193,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
           planDayId: effectivePlanDay.id,
           queue: progress.queue,
           stepIndex: progress.stepIndex,
+          unit: workoutUnit,
         })
       }
     />
@@ -190,6 +206,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
       sessions={sessions}
       recovery={recovery}
       date={date}
+      weightUnit={workoutUnit}
       activePlanId={activePlanId}
       onFinish={finishAndReset}
       onCancel={cancelWorkout}
@@ -200,7 +217,15 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
           : { logged: [], notes: '', activeExerciseId: repeatExerciseId ?? exercises[0]?.id ?? '' }
       }
       onProgressChange={(progress) =>
-        setDraft({ date, recovery, startedAt, notes: progress.notes, logged: progress.logged, activeExerciseId: progress.activeExerciseId })
+        setDraft({
+          date,
+          recovery,
+          startedAt,
+          notes: progress.notes,
+          logged: progress.logged,
+          activeExerciseId: progress.activeExerciseId,
+          unit: workoutUnit,
+        })
       }
     />
     {confirmDialog}

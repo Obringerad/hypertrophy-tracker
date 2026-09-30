@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Exercise, LoggedExercise, SetEntry, WorkoutSession } from '../types'
 import { suggestNextSession } from '../lib/progression'
 import { maxWeightEver, isFirstAtWeightAndReps } from '../lib/records'
-import { formatWeight } from '../lib/units'
-import { useSettings } from '../context/SettingsContext'
+import { formatWeight, type WeightUnit } from '../lib/units'
 import { SuggestionCard } from './SuggestionCard'
 import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
@@ -20,6 +19,9 @@ interface Props {
   sessions: WorkoutSession[]
   recovery: number
   date: string
+  /** Pinned to whatever was active when this workout started, not the live setting - so switching
+   * units in Settings mid-workout can't mislabel sets already logged under a different one. */
+  weightUnit: WeightUnit
   activePlanId?: string
   onFinish: (session: WorkoutSession) => void
   onCancel: () => void
@@ -50,6 +52,7 @@ export function FreeformWorkout({
   sessions,
   recovery,
   date,
+  weightUnit,
   activePlanId,
   onFinish,
   onCancel,
@@ -57,7 +60,6 @@ export function FreeformWorkout({
   onProgressChange,
   onShowPlates,
 }: Props) {
-  const { weightUnit } = useSettings()
   const [logged, setLogged] = useState<LoggedExercise[]>(() => initialProgress?.logged ?? [])
   const [activeExerciseId, setActiveExerciseId] = useState(
     () => initialProgress?.activeExerciseId ?? exercises[0]?.id ?? '',
@@ -178,7 +180,7 @@ export function FreeformWorkout({
           </select>
         </div>
 
-        {suggestion && <SuggestionCard suggestion={suggestion} onShowPlates={onShowPlates} />}
+        {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
         {activeExerciseId && <LastTimeSets sessions={sessions} exerciseId={activeExerciseId} targetUnit={weightUnit} />}
       </div>
 
