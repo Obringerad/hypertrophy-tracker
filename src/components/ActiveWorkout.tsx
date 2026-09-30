@@ -327,22 +327,6 @@ export function ActiveWorkout({
       {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
       <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
 
-      {notesOpen || notes ? (
-        <label className="session-notes-field">
-          Notes (Optional)
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="How did it feel? Anything to remember for next time?"
-            rows={2}
-          />
-        </label>
-      ) : (
-        <button type="button" className="link-btn add-note-btn" onClick={() => setNotesOpen(true)}>
-          + Add a Note
-        </button>
-      )}
-
       {!pendingAdvance && (
         <div className="set-form">
           <label>
@@ -456,6 +440,22 @@ export function ActiveWorkout({
             ))}
           </tbody>
         </table>
+      )}
+
+      {notesOpen || notes ? (
+        <label className="session-notes-field">
+          Notes (Optional)
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="How did it feel? Anything to remember for next time?"
+            rows={2}
+          />
+        </label>
+      ) : (
+        <button type="button" className="link-btn add-note-btn" onClick={() => setNotesOpen(true)}>
+          + Add a Note
+        </button>
       )}
     </div>
   )
