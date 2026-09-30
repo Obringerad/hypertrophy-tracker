@@ -116,6 +116,12 @@ export function ActiveWorkout({
     setStepIndex(nextIndex === -1 ? queue.length : nextIndex)
   }
 
+  /** Steps back one set at a time, including into a prior exercise - for undoing a misclick like
+   * an accidental skip, without touching anything already logged. */
+  function goToPreviousStep() {
+    setStepIndex((i) => Math.max(0, i - 1))
+  }
+
   function addPlannedSet() {
     if (!current) return
     const exerciseId = current.exerciseId
@@ -363,7 +369,12 @@ export function ActiveWorkout({
       </div>
 
       <div className="wizard-actions">
-        <div>
+        <div className="log-set-actions">
+          {stepIndex > 0 && (
+            <button type="button" className="link-btn" onClick={goToPreviousStep} title="Go back to a previous set or exercise">
+              &#8592; Back
+            </button>
+          )}
           {!isLastSetOfExercise ? (
             <button type="button" className="link-btn" onClick={skipRestOfExercise}>
               Skip to Next Exercise
