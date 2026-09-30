@@ -68,8 +68,14 @@ function calculatePlates(perSide: number, plateSizes: number[]): PlateResult {
 
 const REP_TARGETS = [1, 3, 5, 8, 10]
 
+/** Rounds to the nearest half-unit, matching how weights are tracked everywhere else in the app -
+ * gym weights are practically always loaded in whole or half plates, not arbitrary decimals. */
+function roundToHalf(value: number): number {
+  return Math.round(value * 2) / 2
+}
+
 function weightForReps(oneRepMax: number, reps: number): number {
-  return Math.round((oneRepMax / (1 + reps / 30)) * 10) / 10
+  return roundToHalf(oneRepMax / (1 + reps / 30))
 }
 
 interface Props {
@@ -117,7 +123,7 @@ export function ToolsTab({ prefillWeight }: Props) {
   const oneRmWeightNum = Number(oneRmWeight)
   const oneRmRepsNum = Number(oneRmReps)
   const estimatedOneRm =
-    oneRmWeightNum > 0 && oneRmRepsNum > 0 ? Math.round(oneRmWeightNum * (1 + oneRmRepsNum / 30) * 10) / 10 : null
+    oneRmWeightNum > 0 && oneRmRepsNum > 0 ? roundToHalf(oneRmWeightNum * (1 + oneRmRepsNum / 30)) : null
 
   return (
     <div className="panel">
