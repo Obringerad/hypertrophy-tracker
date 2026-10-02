@@ -71,6 +71,9 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
     setTheme,
     restTimerAutoStart,
     setRestTimerAutoStart,
+    layoutMode,
+    setLayoutMode,
+    effectiveLayout,
   } = useSettings()
   const [pendingUnit, setPendingUnit] = useState<WeightUnit | null>(null)
   const [pendingImport, setPendingImport] = useState<Partial<BackupData> | null>(null)
@@ -240,6 +243,38 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
             onClick={() => setTheme('dark')}
           >
             Dark
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h3>Screen Layout</h3>
+        <p className="muted">
+          Browser mode tightens the workout screens for when your browser's toolbars take up part of the screen. App
+          mode uses the full height - best after adding this to your home screen. Auto picks based on how you opened
+          it (currently using the {effectiveLayout} layout).
+        </p>
+        <div className="schedule-type-picker">
+          <button
+            type="button"
+            className={layoutMode === 'auto' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setLayoutMode('auto')}
+          >
+            Auto
+          </button>
+          <button
+            type="button"
+            className={layoutMode === 'browser' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setLayoutMode('browser')}
+          >
+            Browser
+          </button>
+          <button
+            type="button"
+            className={layoutMode === 'app' ? 'choice-btn active' : 'choice-btn'}
+            onClick={() => setLayoutMode('app')}
+          >
+            App
           </button>
         </div>
       </div>

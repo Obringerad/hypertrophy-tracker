@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -2482,4 +2482,113 @@ button.primary,
 .logger-context {
   gap: 0.35rem;
   padding: 0.1rem 0 0.5rem;
+}
+
+/* Browser layout: the same screens, tightened for phones where browser toolbars eat into the height. */
+@media (max-width: 640px) {
+  html[data-layout='browser'] .logger-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 0.5rem;
+    flex: none;
+  }
+
+  html[data-layout='browser'] .logger-tile {
+    min-height: 4.4rem;
+    padding: 0.45rem 0.25rem;
+    gap: 0.25rem;
+  }
+
+  html[data-layout='browser'] .logger-tile .number-stepper {
+    max-width: 100%;
+    gap: 0.3rem;
+  }
+
+  html[data-layout='browser'] .logger-tile .number-stepper input {
+    font-size: 1.6rem;
+  }
+
+  html[data-layout='browser'] .logger-tile .number-stepper .stepper-btn {
+    height: 1.9rem;
+    font-size: 1.1rem;
+  }
+
+  html[data-layout='browser'] .logger-tile-repeat {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    min-height: 2.4rem;
+    gap: 0.6rem;
+  }
+
+  html[data-layout='browser'] .logger-repeat-icon {
+    font-size: 1.2rem;
+  }
+
+  html[data-layout='browser'] .logger-done {
+    flex: none;
+    min-height: 8rem;
+  }
+
+  html[data-layout='browser'] .set-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  html[data-layout='browser'] button.primary.logger-cta {
+    height: 3rem;
+  }
+
+  html[data-layout='browser'] .logger-screen {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  html[data-layout='browser'] .logger-tile {
+    min-height: 4rem;
+  }
+
+  html[data-layout='browser'] .logger-screen {
+    gap: 0.4rem;
+  }
+
+  html[data-layout='browser'] .logger-context {
+    gap: 0.3rem;
+    padding-bottom: 0.35rem;
+  }
+
+  html[data-layout='browser'] .choice-btn.rest-timer-preset {
+    min-height: 1.8rem;
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+  }
+
+  html[data-layout='browser'] .suggestion-compact {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+  }
+
+  html[data-layout='browser'] .logger-context .last-time-chip {
+    padding: 0.1rem 0.5rem;
+  }
+
+  html[data-layout='browser'] .logger-context .exercise-picker input,
+  html[data-layout='browser'] .logger-context .exercise-picker select {
+    min-height: 2.2rem;
+  }
+
+  html[data-layout='browser'] .logger-context .recent-exercise-chip {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    min-height: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  html[data-layout='browser'] .logger-tile.logger-tile-repeat {
+    min-height: 2.4rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
 }
