@@ -13,12 +13,9 @@ function formatClock(totalSeconds: number): string {
 interface Props {
   /** Bump this (e.g. after logging a set) to auto-start a countdown using the last-used duration. */
   autoStartSignal?: number
-  /** "ring" shows the countdown as a large progress ring with the presets underneath. */
-  variant?: 'box' | 'ring'
+  /** "bar" shows the countdown as a draining progress bar with the presets underneath. */
+  variant?: 'box' | 'bar'
 }
-
-const RING_RADIUS = 44
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 export function RestTimer({ autoStartSignal, variant = 'box' }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
@@ -206,36 +203,27 @@ export function RestTimer({ autoStartSignal, variant = 'box' }: Props) {
     </>
   )
 
-  if (variant === 'ring') {
+  if (variant === 'bar') {
     const done = secondsLeft === 0
     const fraction = secondsLeft === null ? 0 : Math.min(1, secondsLeft / Math.max(1, duration))
     return (
-      <div className="rest-ring-wrap">
-        <div className={done ? 'rest-ring rest-ring-done' : 'rest-ring'}>
-          <svg viewBox="0 0 100 100" aria-hidden="true">
-            <circle className="rest-ring-track" cx="50" cy="50" r={RING_RADIUS} />
-            <circle
-              className="rest-ring-progress"
-              cx="50"
-              cy="50"
-              r={RING_RADIUS}
-              strokeDasharray={RING_CIRCUMFERENCE}
-              strokeDashoffset={RING_CIRCUMFERENCE * (1 - fraction)}
-            />
-          </svg>
-          <div className="rest-ring-label">
-            <span className="rest-ring-time">{formatClock(secondsLeft ?? lastDuration)}</span>
-            <span className="muted">{secondsLeft === null ? 'rest' : done ? 'done' : 'resting'}</span>
+      <div className="rest-bar-wrap">
+        <div className="rest-bar-row">
+          <span className={secondsLeft === null ? 'rest-bar-time rest-bar-time-idle' : 'rest-bar-time'}>
+            {formatClock(secondsLeft ?? lastDuration)}
+          </span>
+          <div className={done ? 'rest-bar-track rest-bar-done' : 'rest-bar-track'}>
+            <div className="rest-bar-fill" style={{ width: `${fraction * 100}%` }} />
           </div>
+          {secondsLeft !== null ? (
+            <button type="button" className="link-btn rest-bar-cancel" onClick={() => setEndAt(null)}>
+              {done ? 'Dismiss' : 'Cancel'}
+            </button>
+          ) : (
+            <span className="muted rest-bar-cancel">rest</span>
+          )}
         </div>
-        {secondsLeft !== null && (
-          <button type="button" className="link-btn rest-ring-cancel" onClick={() => setEndAt(null)}>
-            {done ? 'Dismiss' : 'Cancel'}
-          </button>
-        )}
-        <div className="rest-timer-row rest-ring-presets">
-          {presetControls}
-        </div>
+        <div className="rest-timer-row rest-bar-presets">{presetControls}</div>
       </div>
     )
   }

@@ -197,11 +197,21 @@ export function FreeformWorkout({
               ))}
             </select>
           </div>
+          <div className="set-dots" role="img" aria-label={`${activeLog?.sets.length ?? 0} sets logged`}>
+            {Array.from({ length: (activeLog?.sets.length ?? 0) + 1 }, (_, i) => {
+              const done = i < (activeLog?.sets.length ?? 0)
+              return (
+                <span key={i} className={done ? 'set-dot set-dot-done' : 'set-dot set-dot-current'}>
+                  {done ? '✓' : i + 1}
+                </span>
+              )
+            })}
+          </div>
           {suggestion && (
             <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} compact />
           )}
           {activeExerciseId && <LastTimeSets sessions={sessions} exerciseId={activeExerciseId} targetUnit={weightUnit} />}
-          <RestTimer autoStartSignal={restSignal} variant="ring" />
+          <RestTimer autoStartSignal={restSignal} variant="bar" />
         </div>
 
         <div className="logger-grid">

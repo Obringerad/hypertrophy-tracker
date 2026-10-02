@@ -322,11 +322,22 @@ export function ActiveWorkout({
               </button>
             </div>
           </div>
+          <div className="set-dots" role="img" aria-label={`Set ${current.setNumber} of ${current.targetSets}`}>
+            {Array.from({ length: current.targetSets }, (_, i) => {
+              const loggedCount = currentExerciseLog?.sets.length ?? 0
+              const state = i < loggedCount ? 'done' : i === loggedCount ? 'current' : 'todo'
+              return (
+                <span key={i} className={`set-dot set-dot-${state}`}>
+                  {state === 'done' ? '✓' : i + 1}
+                </span>
+              )
+            })}
+          </div>
           {suggestion && (
             <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} compact />
           )}
           <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
-          <RestTimer autoStartSignal={restSignal} variant="ring" />
+          <RestTimer autoStartSignal={restSignal} variant="bar" />
         </div>
 
         {pendingAdvance ? (
