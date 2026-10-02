@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: green;
+  background: purple;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -2209,4 +2209,204 @@ button.primary.logger-cta {
   flex: 1;
   min-width: 0;
   box-sizing: border-box;
+}
+
+/* Shared design layer: the tile, control, and button language from the logger, applied app-wide. */
+:root {
+  --tile-bg: color-mix(in srgb, var(--text) 5%, transparent);
+  --r-tile: 14px;
+  --r-ctl: 12px;
+}
+
+.panel {
+  border-radius: 18px;
+}
+
+.panel h2 {
+  font-size: 1.4rem;
+}
+
+.suggestion:not(.suggestion-compact),
+.split-card,
+.exercise-swap-suggestion,
+.plan-card,
+.today-plan-preview,
+.muscle-volume-card,
+.history-entry,
+.progress-card {
+  border-radius: var(--r-tile);
+  background: var(--tile-bg);
+  padding: 1rem;
+}
+
+.suggestion:not(.suggestion-compact) {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.choice-btn {
+  border-radius: var(--r-ctl);
+  background: var(--tile-bg);
+  padding: 0.6rem 1rem;
+  min-height: 2.5rem;
+}
+
+.choice-btn.active {
+  background: var(--accent);
+}
+
+button.primary,
+.set-form button {
+  border-radius: var(--r-ctl);
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+
+.exercise-search input,
+.plan-day-target-sets input,
+.exercise-picker select,
+.freeform-exercise-picker input,
+.session-notes-field textarea,
+.days-per-week-picker input,
+.add-exercise-inline input,
+.plan-name-field input,
+.plan-name-field select,
+.workout-day-picker select,
+.workout-home-date-picker input,
+.history-notes-search,
+.tool-inputs-row input,
+.home-active-plan-field select,
+.exercise-form input,
+.rep-range-inputs input {
+  border-radius: var(--r-ctl);
+  background: var(--tile-bg);
+  min-height: 2.6rem;
+  box-sizing: border-box;
+}
+
+.last-time-chip {
+  border-radius: 999px;
+}
+
+.stepper-btn,
+.number-stepper input {
+  border-radius: 10px;
+}
+
+.calendar-cell {
+  border-radius: 8px;
+}
+
+.toast {
+  border-radius: var(--r-tile);
+}
+
+.confirm-dialog {
+  border-radius: 18px;
+}
+
+.more-menu {
+  border-radius: 16px;
+}
+
+.workout-home {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.workout-home > .workout-home-date-picker,
+.workout-home > .workout-home-date {
+  margin: 0 auto;
+}
+
+.workout-home .workout-day-picker,
+.workout-home .recovery-field,
+.workout-home > h2 {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-tile);
+  background: var(--tile-bg);
+}
+
+.workout-home > .muted {
+  margin: 0;
+}
+
+.workout-home .recovery-field {
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.workout-home .recovery-field input {
+  width: 100%;
+}
+
+.workout-home .start-workout-btn {
+  width: 100%;
+  height: 3.4rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  padding: 0;
+}
+
+.workout-home .repeat-last-btn {
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .workout-home {
+    min-height: calc(100dvh - 5.85rem - env(safe-area-inset-bottom));
+  }
+
+  .workout-home .workout-day-picker,
+  .workout-home .recovery-field,
+  .workout-home > h2 {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .workout-home .start-workout-btn {
+    margin-top: auto;
+  }
+
+  main > .panel,
+  main > div > .panel:not(.workout-home):not(.active-workout) {
+    min-height: calc(100dvh - 9.4rem - env(safe-area-inset-bottom));
+  }
+}
+
+.start-workout-btn {
+  width: 100%;
+  height: 3.4rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  padding: 0;
+}
+
+.history-entry-date {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.settings-section {
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-tile);
+  background: var(--tile-bg);
+}
+
+.exercise-list li.exercise-row,
+.exercise-list li.exercise-list-item-editing {
+  margin-bottom: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-tile);
+  background: var(--tile-bg);
 }
