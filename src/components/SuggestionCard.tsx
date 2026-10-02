@@ -13,9 +13,24 @@ interface Props {
   suggestion: ProgressionSuggestion
   weightUnit: WeightUnit
   onShowPlates?: (weight: number) => void
+  /** One-line version for tight layouts - the reason text moves into a tooltip. */
+  compact?: boolean
 }
 
-export function SuggestionCard({ suggestion, weightUnit, onShowPlates }: Props) {
+export function SuggestionCard({ suggestion, weightUnit, onShowPlates, compact }: Props) {
+  if (compact) {
+    return (
+      <div className={`suggestion suggestion-compact suggestion-${suggestion.action}`} title={suggestion.reason}>
+        <span className="suggestion-badge">{ACTION_LABEL[suggestion.action]}</span>
+        <span>Next: {formatWeight(suggestion.suggestedWeight, weightUnit)} x {suggestion.suggestedReps}</span>
+        {onShowPlates && (
+          <button type="button" className="link-btn" onClick={() => onShowPlates(suggestion.suggestedWeight)}>
+            Plates
+          </button>
+        )}
+      </div>
+    )
+  }
   return (
     <div className={`suggestion suggestion-${suggestion.action}`}>
       <div className="suggestion-header">

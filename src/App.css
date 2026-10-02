@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: red;
+  background: blue;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -1910,4 +1910,278 @@ li.exercise-list-item-editing {
   .app-header-compact {
     display: none;
   }
+}
+
+.logger-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.logger-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logger-topbar .link-btn-danger {
+  padding: 0;
+}
+
+.logger-context {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 0.45rem;
+  padding: 0.25rem 0 0.7rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.logger-title-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logger-title-row h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  text-align: left;
+}
+
+.suggestion-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.logger-context .last-time-sets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.logger-context .last-time-sets p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.rest-ring-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.rest-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.rest-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.rest-ring-track,
+.rest-ring-progress {
+  fill: none;
+  stroke-width: 7;
+}
+
+.rest-ring-track {
+  stroke: var(--border);
+}
+
+.rest-ring-progress {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.rest-ring-done .rest-ring-progress {
+  stroke: #3ba55d;
+}
+
+.rest-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rest-ring-time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.rest-ring-presets {
+  justify-content: center;
+}
+
+.logger-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 0.6rem;
+}
+
+.logger-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 6.25rem;
+  padding: 0.6rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+  font: inherit;
+}
+
+.logger-tile-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.logger-tile .number-stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: 'val val' 'minus plus';
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 11rem;
+}
+
+.logger-tile .number-stepper input {
+  grid-area: val;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.logger-tile .number-stepper input::-webkit-outer-spin-button,
+.logger-tile .number-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.logger-tile .number-stepper .stepper-btn {
+  width: auto;
+  height: 2.4rem;
+  border-radius: 10px;
+  font-size: 1.3rem;
+}
+
+.logger-tile .number-stepper .stepper-btn:first-child {
+  grid-area: minus;
+}
+
+.logger-tile .number-stepper .stepper-btn:last-child {
+  grid-area: plus;
+}
+
+.logger-tile-repeat {
+  cursor: pointer;
+}
+
+.logger-repeat-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.logger-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 13rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.logger-done p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.logger-done-icon {
+  font-size: 2.2rem;
+  color: #3ba55d;
+}
+
+.logger-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+button.primary.logger-cta {
+  width: 100%;
+  height: 3.4rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.logger-secondary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .logger-screen {
+    min-height: calc(100dvh - 8.5rem - env(safe-area-inset-bottom));
+  }
+
+  .logger-context {
+    flex: 1.1;
+  }
+
+  .logger-grid {
+    flex: 1.2;
+  }
+
+  .logger-done {
+    flex: 1.2;
+  }
+}
+
+.rest-ring-cancel {
+  position: absolute;
+  right: 0;
+  top: 1.6rem;
 }

@@ -280,126 +280,151 @@ export function ActiveWorkout({
   const pendingAdvance =
     isLastSetOfExercise && !isLastExercise && (currentExerciseLog?.sets.length ?? 0) >= current.targetSets
 
+  const lastLoggedSet = currentExerciseLog?.sets[currentExerciseLog.sets.length - 1]
+  const repeatSource: SetEntry | undefined =
+    lastLoggedSet ??
+    (suggestion ? { weight: suggestion.suggestedWeight, reps: suggestion.suggestedReps, rpe: form.rpe } : undefined)
+  const repeatLabel = lastLoggedSet ? 'Same as last' : suggestion ? 'Use suggested' : 'No history yet'
+
   return (
     <div className="panel active-workout">
-      <div className="workout-sticky-header">
-        <div className="workout-progress-header">
-          <span className="workout-progress meta-text">
-            Exercise {exerciseNumber} of {planDay.exercises.length}
-          </span>
+      <div className="logger-screen">
+        <div className="logger-topbar">
           <button type="button" className="link-btn-danger" onClick={onCancel}>
             Cancel Workout
           </button>
+          <span className="meta-text">
+            Exercise {exerciseNumber} of {planDay.exercises.length}
+          </span>
+          <span className="meta-text logger-topbar-set">
+            Set {current.setNumber} of {current.targetSets}
+          </span>
         </div>
         <div className="progress-bar">
           <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
         </div>
-        <h2>{currentExercise?.name ?? 'Unknown exercise'}</h2>
-        <div className="set-count-row">
-          <p className="meta-text">
-            Set {current.setNumber} of {current.targetSets}
-          </p>
-          <div className="set-count-buttons">
-            <button
-              type="button"
-              className="link-btn"
-              onClick={removePlannedSet}
-              disabled={!canRemovePlannedSet}
-              title="Remove a set from this exercise"
-            >
-              − Set
-            </button>
-            <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
-              + Set
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
-      <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
-
-      {!pendingAdvance && (
-        <div className="set-form">
-          <label>
-            Weight
-            <NumberStepper
-              value={form.weight}
-              step={currentExercise?.weightIncrement ?? 2.5}
-              min={0}
-              onChange={(weight) => setForm({ ...form, weight })}
-            />
-          </label>
-          <label>
-            Reps
-            <NumberStepper
-              value={form.reps}
-              step={1}
-              min={0}
-              inputMode="numeric"
-              onChange={(reps) => setForm({ ...form, reps })}
-            />
-          </label>
-          <label>
-            RPE
-            <NumberStepper
-              value={form.rpe}
-              step={1}
-              min={1}
-              max={10}
-              inputMode="numeric"
-              onChange={(rpe) => setForm({ ...form, rpe })}
-            />
-          </label>
-        </div>
-      )}
-
-      {pendingAdvance ? (
-        <div className="wizard-actions">
-          <div className="log-set-actions">
-            <button
-              type="button"
-              className="link-btn"
-              onClick={() => removeSet(current.exerciseId, current.setNumber - 1)}
-              title="Remove that last set so you can redo it"
-            >
-              &#8592; Undo Last Set
-            </button>
-          </div>
-          <div className="log-set-actions">
-            <button type="button" className="primary" onClick={advanceToNextExercise}>
-              Start Next Exercise
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="wizard-actions">
-          <div className="log-set-actions">
-            {stepIndex > 0 && (
+        <div className="logger-context">
+          <div className="logger-title-row">
+            <h2>{currentExercise?.name ?? 'Unknown exercise'}</h2>
+            <div className="set-count-buttons">
               <button
                 type="button"
                 className="link-btn"
-                onClick={goToPreviousStep}
-                title="Go back a set - if it was already logged, that log is removed so you can redo it"
+                onClick={removePlannedSet}
+                disabled={!canRemovePlannedSet}
+                title="Remove a set from this exercise"
               >
-                &#8592; Back
+                − Set
               </button>
-            )}
-            {!isLastExercise ? (
-              <button type="button" className="link-btn" onClick={skipRestOfExercise}>
-                Skip to Next Exercise
+              <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
+                + Set
               </button>
-            ) : null}
+            </div>
           </div>
-          <div className="log-set-actions">
-            <button type="button" className="primary" onClick={logSet}>
-              {logSetLabel}
+          {suggestion && (
+            <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} compact />
+          )}
+          <LastTimeSets sessions={sessions} exerciseId={current.exerciseId} targetUnit={weightUnit} />
+          <RestTimer autoStartSignal={restSignal} variant="ring" />
+        </div>
+
+        {pendingAdvance ? (
+          <div className="logger-done">
+            <span className="logger-done-icon">&#10003;</span>
+            <p>{currentExercise?.name ?? 'Exercise'} complete</p>
+          </div>
+        ) : (
+          <div className="logger-grid">
+            <div className="logger-tile">
+              <span className="logger-tile-label">Weight ({weightUnit})</span>
+              <NumberStepper
+                value={form.weight}
+                step={currentExercise?.weightIncrement ?? 2.5}
+                min={0}
+                onChange={(weight) => setForm({ ...form, weight })}
+              />
+            </div>
+            <div className="logger-tile">
+              <span className="logger-tile-label">Reps</span>
+              <NumberStepper
+                value={form.reps}
+                step={1}
+                min={0}
+                inputMode="numeric"
+                onChange={(reps) => setForm({ ...form, reps })}
+              />
+            </div>
+            <div className="logger-tile">
+              <span className="logger-tile-label">RPE</span>
+              <NumberStepper
+                value={form.rpe}
+                step={1}
+                min={1}
+                max={10}
+                inputMode="numeric"
+                onChange={(rpe) => setForm({ ...form, rpe })}
+              />
+            </div>
+            <button
+              type="button"
+              className="logger-tile logger-tile-repeat"
+              onClick={() => repeatSource && setForm({ ...repeatSource })}
+            >
+              <span className="logger-tile-label">{repeatLabel}</span>
+              <span className="logger-repeat-icon">&#8635;</span>
+              <span className="logger-tile-label">
+                {repeatSource ? `${repeatSource.weight} x ${repeatSource.reps}` : '-'}
+              </span>
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      <RestTimer autoStartSignal={restSignal} />
+        <div className="logger-actions">
+          {pendingAdvance ? (
+            <>
+              <button type="button" className="primary logger-cta" onClick={advanceToNextExercise}>
+                Start Next Exercise
+              </button>
+              <div className="logger-secondary-row">
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => removeSet(current.exerciseId, current.setNumber - 1)}
+                  title="Remove that last set so you can redo it"
+                >
+                  &#8592; Undo Last Set
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <button type="button" className="primary logger-cta" onClick={logSet}>
+                {logSetLabel}
+              </button>
+              <div className="logger-secondary-row">
+                {stepIndex > 0 ? (
+                  <button
+                    type="button"
+                    className="link-btn"
+                    onClick={goToPreviousStep}
+                    title="Go back a set - if it was already logged, that log is removed so you can redo it"
+                  >
+                    &#8592; Back
+                  </button>
+                ) : (
+                  <span />
+                )}
+                {!isLastExercise && (
+                  <button type="button" className="link-btn" onClick={skipRestOfExercise}>
+                    Skip to Next Exercise
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {currentExerciseLog && currentExerciseLog.sets.length > 0 && (
         <table className="set-table">

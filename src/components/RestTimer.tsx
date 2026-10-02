@@ -13,9 +13,14 @@ function formatClock(totalSeconds: number): string {
 interface Props {
   /** Bump this (e.g. after logging a set) to auto-start a countdown using the last-used duration. */
   autoStartSignal?: number
+  /** "ring" shows the countdown as a large progress ring with the presets underneath. */
+  variant?: 'box' | 'ring'
 }
 
-export function RestTimer({ autoStartSignal }: Props) {
+const RING_RADIUS = 44
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
+
+export function RestTimer({ autoStartSignal, variant = 'box' }: Props) {
   const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
   // The countdown is driven by a real end timestamp rather than a decrementing counter - a plain
   // tick-based counter drifts (or stalls entirely) once the interval below gets throttled or paused,
@@ -23,6 +28,7 @@ export function RestTimer({ autoStartSignal }: Props) {
   // Deriving the remaining time from `endAt` means it's always correct the instant it's recomputed,
   // no matter how long ticks were paused for.
   const [endAt, setEndAt] = useState<number | null>(null)
+  const [duration, setDuration] = useState(lastDuration)
   const [nowTick, setNowTick] = useState(() => Date.now())
   const [customOpen, setCustomOpen] = useState(false)
   const [customMinutes, setCustomMinutes] = useState('')
@@ -82,6 +88,7 @@ export function RestTimer({ autoStartSignal }: Props) {
   function start(seconds: number) {
     primeAlertSound()
     setLastDuration(seconds)
+    setDuration(seconds)
     setEndAt(Date.now() + seconds * 1000)
     setNowTick(Date.now())
   }
@@ -108,6 +115,7 @@ export function RestTimer({ autoStartSignal }: Props) {
     startedForSignal.current = autoStartSignal
     primeAlertSound()
     const now = Date.now()
+    setDuration(lastDuration)
     setEndAt(now + lastDuration * 1000)
     setNowTick(now)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,63 +149,103 @@ export function RestTimer({ autoStartSignal }: Props) {
     playAlertSound()
   }, [endAt, secondsLeft])
 
+  const lastMatchesPreset = PRESETS.includes(lastDuration)
+  const presetControls = (
+    <>
+      {PRESETS.map((p) => (
+        <button
+          key={p}
+          type="button"
+          className={p === lastDuration ? 'choice-btn rest-timer-preset rest-timer-next' : 'choice-btn rest-timer-preset'}
+          onClick={() => start(p)}
+          title={p === lastDuration ? 'Auto-starts at this duration after logging a set' : undefined}
+        >
+          {p === lastDuration && <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>}
+          {formatClock(p)}
+        </button>
+      ))}
+      <div className="rest-timer-custom-wrap">
+        <button
+          type="button"
+          className={!lastMatchesPreset ? 'choice-btn rest-timer-preset rest-timer-next' : 'choice-btn rest-timer-preset'}
+          onClick={() => setCustomOpen((open) => !open)}
+          title={!lastMatchesPreset ? `Auto-starts at ${formatClock(lastDuration)} after logging a set` : undefined}
+        >
+          {!lastMatchesPreset && <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>}
+          Custom
+        </button>
+        {customOpen && (
+          <div className="rest-timer-custom-popover">
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              placeholder="Min"
+              className="rest-timer-custom-input"
+              autoFocus
+              value={customMinutes}
+              onChange={(e) => setCustomMinutes(e.target.value)}
+            />
+            <span className="muted">:</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={59}
+              placeholder="Sec"
+              className="rest-timer-custom-input"
+              value={customSeconds}
+              onChange={(e) => setCustomSeconds(e.target.value)}
+            />
+            <button type="button" className="choice-btn" onClick={startCustom}>
+              Start
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  )
+
+  if (variant === 'ring') {
+    const done = secondsLeft === 0
+    const fraction = secondsLeft === null ? 0 : Math.min(1, secondsLeft / Math.max(1, duration))
+    return (
+      <div className="rest-ring-wrap">
+        <div className={done ? 'rest-ring rest-ring-done' : 'rest-ring'}>
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle className="rest-ring-track" cx="50" cy="50" r={RING_RADIUS} />
+            <circle
+              className="rest-ring-progress"
+              cx="50"
+              cy="50"
+              r={RING_RADIUS}
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={RING_CIRCUMFERENCE * (1 - fraction)}
+            />
+          </svg>
+          <div className="rest-ring-label">
+            <span className="rest-ring-time">{formatClock(secondsLeft ?? lastDuration)}</span>
+            <span className="muted">{secondsLeft === null ? 'rest' : done ? 'done' : 'resting'}</span>
+          </div>
+        </div>
+        {secondsLeft !== null && (
+          <button type="button" className="link-btn rest-ring-cancel" onClick={() => setEndAt(null)}>
+            {done ? 'Dismiss' : 'Cancel'}
+          </button>
+        )}
+        <div className="rest-timer-row rest-ring-presets">
+          {presetControls}
+        </div>
+      </div>
+    )
+  }
+
   if (secondsLeft === null) {
-    const lastMatchesPreset = PRESETS.includes(lastDuration)
     return (
       <div className="rest-timer">
         <div className="rest-timer-row">
           <span className="muted">Rest timer:</span>
-          {PRESETS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              className={p === lastDuration ? 'choice-btn rest-timer-preset rest-timer-next' : 'choice-btn rest-timer-preset'}
-              onClick={() => start(p)}
-              title={p === lastDuration ? 'Auto-starts at this duration after logging a set' : undefined}
-            >
-              {p === lastDuration && <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>}
-              {formatClock(p)}
-            </button>
-          ))}
-          <div className="rest-timer-custom-wrap">
-            <button
-              type="button"
-              className={!lastMatchesPreset ? 'choice-btn rest-timer-preset rest-timer-next' : 'choice-btn rest-timer-preset'}
-              onClick={() => setCustomOpen((open) => !open)}
-              title={!lastMatchesPreset ? `Auto-starts at ${formatClock(lastDuration)} after logging a set` : undefined}
-            >
-              {!lastMatchesPreset && <span className="rest-timer-next-arrow" aria-hidden="true">&#9654;</span>}
-              Custom
-            </button>
-            {customOpen && (
-              <div className="rest-timer-custom-popover">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  placeholder="Min"
-                  className="rest-timer-custom-input"
-                  autoFocus
-                  value={customMinutes}
-                  onChange={(e) => setCustomMinutes(e.target.value)}
-                />
-                <span className="muted">:</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  max={59}
-                  placeholder="Sec"
-                  className="rest-timer-custom-input"
-                  value={customSeconds}
-                  onChange={(e) => setCustomSeconds(e.target.value)}
-                />
-                <button type="button" className="choice-btn" onClick={startCustom}>
-                  Start
-                </button>
-              </div>
-            )}
-          </div>
+          {presetControls}
         </div>
       </div>
     )
