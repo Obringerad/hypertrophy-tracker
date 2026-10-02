@@ -8,6 +8,7 @@ import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
 import { LastTimeSets } from './LastTimeSets'
 import { useSettings } from '../context/SettingsContext'
+import { MAX_SETS_PER_EXERCISE } from '../lib/limits'
 
 export interface QueueItem {
   exerciseId: string
@@ -44,8 +45,9 @@ interface Props {
 function buildQueue(planDay: PlanDay): QueueItem[] {
   const queue: QueueItem[] = []
   for (const pe of planDay.exercises) {
-    for (let i = 1; i <= pe.targetSets; i++) {
-      queue.push({ exerciseId: pe.exerciseId, setNumber: i, targetSets: pe.targetSets })
+    const targetSets = Math.min(pe.targetSets, MAX_SETS_PER_EXERCISE)
+    for (let i = 1; i <= targetSets; i++) {
+      queue.push({ exerciseId: pe.exerciseId, setNumber: i, targetSets })
     }
   }
   return queue
@@ -157,6 +159,7 @@ export function ActiveWorkout({
     if (!current) return
     const exerciseId = current.exerciseId
     setQueue((prev) => {
+      if (prev.filter((q) => q.exerciseId === exerciseId).length >= MAX_SETS_PER_EXERCISE) return prev
       const lastIdx = prev.map((q) => q.exerciseId).lastIndexOf(exerciseId)
       const newTotal = prev.filter((q) => q.exerciseId === exerciseId).length + 1
       const updated = prev.map((q) => (q.exerciseId === exerciseId ? { ...q, targetSets: newTotal } : q))
@@ -317,7 +320,17 @@ export function ActiveWorkout({
               >
                 − Set
               </button>
-              <button type="button" className="link-btn" onClick={addPlannedSet} title="Add a set to this exercise">
+              <button
+                type="button"
+                className="link-btn"
+                onClick={addPlannedSet}
+                disabled={current.targetSets >= MAX_SETS_PER_EXERCISE}
+                title={
+                  current.targetSets >= MAX_SETS_PER_EXERCISE
+                    ? `Up to ${MAX_SETS_PER_EXERCISE} sets per exercise`
+                    : "Add a set to this exercise"
+                }
+              >
                 + Set
               </button>
             </div>

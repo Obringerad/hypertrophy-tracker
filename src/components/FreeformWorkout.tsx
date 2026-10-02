@@ -8,6 +8,7 @@ import { RestTimer } from './RestTimer'
 import { NumberStepper } from './NumberStepper'
 import { LastTimeSets } from './LastTimeSets'
 import { useSettings } from '../context/SettingsContext'
+import { MAX_SETS_PER_EXERCISE } from '../lib/limits'
 
 export interface FreeformWorkoutProgress {
   logged: LoggedExercise[]
@@ -93,6 +94,7 @@ export function FreeformWorkout({
   }, [activeExerciseId])
 
   const activeLog = logged.find((l) => l.exerciseId === activeExerciseId)
+  const atSetLimit = (activeLog?.sets.length ?? 0) >= MAX_SETS_PER_EXERCISE
   const priorBest = maxWeightEver(sessions, activeExerciseId, weightUnit)
 
   const filteredExercises = exercises.filter((e) => e.name.toLowerCase().includes(exerciseFilter.toLowerCase()))
@@ -103,7 +105,7 @@ export function FreeformWorkout({
   }
 
   function addSet() {
-    if (!activeExerciseId || setForm.reps <= 0) return
+    if (!activeExerciseId || setForm.reps <= 0 || atSetLimit) return
     setLogged((prev) => {
       const existing = prev.find((l) => l.exerciseId === activeExerciseId)
       const newSet: SetEntry = { ...setForm }
@@ -198,7 +200,7 @@ export function FreeformWorkout({
             </select>
           </div>
           <div className="set-dots" role="img" aria-label={`${activeLog?.sets.length ?? 0} sets logged`}>
-            {Array.from({ length: (activeLog?.sets.length ?? 0) + 1 }, (_, i) => {
+            {Array.from({ length: Math.min((activeLog?.sets.length ?? 0) + 1, MAX_SETS_PER_EXERCISE) }, (_, i) => {
               const done = i < (activeLog?.sets.length ?? 0)
               return (
                 <span key={i} className={done ? 'set-dot set-dot-done' : 'set-dot set-dot-current'}>
@@ -259,8 +261,8 @@ export function FreeformWorkout({
         </div>
 
         <div className="logger-actions">
-          <button type="button" className="primary logger-cta" onClick={addSet}>
-            Add Set
+          <button type="button" className="primary logger-cta" onClick={addSet} disabled={atSetLimit}>
+            {atSetLimit ? `Max ${MAX_SETS_PER_EXERCISE} sets reached` : "Add Set"}
           </button>
           <div className="logger-secondary-row">
             <span className="meta-text">

@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react'
 import type { Exercise, PlanDay } from '../types'
 import { catalogExercisesForMuscleGroup, findCatalogExerciseByName, type CatalogExercise } from '../lib/exerciseCatalog'
 import { useSettings } from '../context/SettingsContext'
+import { MAX_SETS_PER_EXERCISE } from '../lib/limits'
 import { MuscleGroupTag } from './MuscleGroupTag'
 import {
   DndContext,
@@ -72,8 +73,11 @@ function ExerciseRowContent({
           <input
             type="number"
             min={1}
+            max={MAX_SETS_PER_EXERCISE}
             value={targetSets}
-            onChange={(e) => onUpdateTargetSets(exerciseId, Math.max(1, Number(e.target.value)))}
+            onChange={(e) =>
+              onUpdateTargetSets(exerciseId, Math.min(MAX_SETS_PER_EXERCISE, Math.max(1, Number(e.target.value))))
+            }
           />
           <span className="muted">sets</span>
         </span>

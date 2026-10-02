@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
-const PRESETS = [60, 90, 120, 180]
+const PRESETS = [60, 120, 180]
 const LAST_DURATION_KEY = 'hypertrophy.lastRestSeconds'
 
 function formatClock(totalSeconds: number): string {
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function RestTimer({ autoStartSignal, variant = 'box' }: Props) {
-  const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 90)
+  const [lastDuration, setLastDuration] = useLocalStorage(LAST_DURATION_KEY, 120)
   // The countdown is driven by a real end timestamp rather than a decrementing counter - a plain
   // tick-based counter drifts (or stalls entirely) once the interval below gets throttled or paused,
   // which mobile browsers do aggressively while the screen is locked or the tab is backgrounded.
