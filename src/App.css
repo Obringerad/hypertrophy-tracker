@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: green;
+  background: purple;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -2611,4 +2611,21 @@ html[data-layout] .set-dot,
 
 html[data-layout='browser'] .set-dot {
   flex-basis: 1.5rem;
+}
+
+.rest-bar-wrap {
+  position: relative;
+}
+
+.rest-bar-presets .rest-timer-custom-wrap {
+  position: static;
+}
+
+.rest-bar-wrap .rest-timer-custom-popover {
+  left: 50%;
+  right: auto;
+  top: calc(100% + 0.25rem);
+  transform: translateX(-50%);
+  max-width: calc(100vw - 2rem);
+  box-sizing: border-box;
 }
