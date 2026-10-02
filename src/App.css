@@ -19,7 +19,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: blue;
+  background: green;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -2184,4 +2184,29 @@ button.primary.logger-cta {
   position: absolute;
   right: 0;
   top: 1.6rem;
+}
+
+.logger-context .recent-exercise-chips {
+  width: 100%;
+  margin: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.logger-context .recent-exercise-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.logger-context .exercise-picker {
+  width: 100%;
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+.logger-context .exercise-picker input,
+.logger-context .exercise-picker select {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
 }

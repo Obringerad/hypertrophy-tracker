@@ -136,93 +136,132 @@ export function FreeformWorkout({
     })
   }
 
+  const lastLoggedSet = activeLog?.sets[activeLog.sets.length - 1]
+  const repeatSource: SetEntry | undefined =
+    lastLoggedSet ??
+    (suggestion ? { weight: suggestion.suggestedWeight, reps: suggestion.suggestedReps, rpe: setForm.rpe } : undefined)
+  const repeatLabel = lastLoggedSet ? 'Same as last' : suggestion ? 'Use suggested' : 'No history yet'
+
   return (
     <div className="panel">
-      <div className="workout-sticky-header">
-        <h2>Freeform Workout</h2>
-        {recentIds.length > 0 && (
-          <div className="recent-exercise-chips">
-            {recentIds.map((id) => {
-              const ex = exercises.find((e) => e.id === id)
-              if (!ex) return null
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className={id === activeExerciseId ? 'choice-btn recent-exercise-chip active' : 'choice-btn recent-exercise-chip'}
-                  onClick={() => selectExercise(id)}
-                >
-                  {ex.name}
-                </button>
-              )
-            })}
-          </div>
-        )}
-        <div className="exercise-picker freeform-exercise-picker">
-          <input
-            type="text"
-            placeholder="Filter exercises..."
-            value={exerciseFilter}
-            onChange={(e) => setExerciseFilter(e.target.value)}
-          />
-          <select
-            value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
-            onChange={(e) => selectExercise(e.target.value)}
-          >
-            {!filteredExercises.some((e) => e.id === activeExerciseId) && (
-              <option value="" disabled>
-                Select an exercise
-              </option>
-            )}
-            {filteredExercises.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
+      <div className="logger-screen">
+        <div className="logger-topbar">
+          <button type="button" className="link-btn-danger" onClick={onCancel}>
+            Cancel Workout
+          </button>
+          <span className="meta-text">Freeform</span>
+          <span className="meta-text">
+            {logged.length} exercise{logged.length === 1 ? '' : 's'} logged
+          </span>
         </div>
 
-        {suggestion && <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} />}
-        {activeExerciseId && <LastTimeSets sessions={sessions} exerciseId={activeExerciseId} targetUnit={weightUnit} />}
-      </div>
+        <div className="logger-context">
+          {recentIds.length > 0 && (
+            <div className="recent-exercise-chips">
+              {recentIds.map((id) => {
+                const ex = exercises.find((e) => e.id === id)
+                if (!ex) return null
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={id === activeExerciseId ? 'choice-btn recent-exercise-chip active' : 'choice-btn recent-exercise-chip'}
+                    onClick={() => selectExercise(id)}
+                  >
+                    {ex.name}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+          <div className="exercise-picker freeform-exercise-picker">
+            <input
+              type="text"
+              placeholder="Filter exercises..."
+              value={exerciseFilter}
+              onChange={(e) => setExerciseFilter(e.target.value)}
+            />
+            <select
+              value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
+              onChange={(e) => selectExercise(e.target.value)}
+            >
+              {!filteredExercises.some((e) => e.id === activeExerciseId) && (
+                <option value="" disabled>
+                  Select an exercise
+                </option>
+              )}
+              {filteredExercises.map((ex) => (
+                <option key={ex.id} value={ex.id}>
+                  {ex.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {suggestion && (
+            <SuggestionCard suggestion={suggestion} weightUnit={weightUnit} onShowPlates={onShowPlates} compact />
+          )}
+          {activeExerciseId && <LastTimeSets sessions={sessions} exerciseId={activeExerciseId} targetUnit={weightUnit} />}
+          <RestTimer autoStartSignal={restSignal} variant="ring" />
+        </div>
 
-      <div className="set-form">
-        <label>
-          Weight
-          <NumberStepper
-            value={setForm.weight}
-            step={activeExercise?.weightIncrement ?? 2.5}
-            min={0}
-            onChange={(weight) => setSetForm({ ...setForm, weight })}
-          />
-        </label>
-        <label>
-          Reps
-          <NumberStepper
-            value={setForm.reps}
-            step={1}
-            min={0}
-            inputMode="numeric"
-            onChange={(reps) => setSetForm({ ...setForm, reps })}
-          />
-        </label>
-        <label>
-          RPE
-          <NumberStepper
-            value={setForm.rpe}
-            step={1}
-            min={1}
-            max={10}
-            inputMode="numeric"
-            onChange={(rpe) => setSetForm({ ...setForm, rpe })}
-          />
-        </label>
-        <button type="button" onClick={addSet}>
-          Add Set
-        </button>
-      </div>
+        <div className="logger-grid">
+          <div className="logger-tile">
+            <span className="logger-tile-label">Weight ({weightUnit})</span>
+            <NumberStepper
+              value={setForm.weight}
+              step={activeExercise?.weightIncrement ?? 2.5}
+              min={0}
+              onChange={(weight) => setSetForm({ ...setForm, weight })}
+            />
+          </div>
+          <div className="logger-tile">
+            <span className="logger-tile-label">Reps</span>
+            <NumberStepper
+              value={setForm.reps}
+              step={1}
+              min={0}
+              inputMode="numeric"
+              onChange={(reps) => setSetForm({ ...setForm, reps })}
+            />
+          </div>
+          <div className="logger-tile">
+            <span className="logger-tile-label">RPE</span>
+            <NumberStepper
+              value={setForm.rpe}
+              step={1}
+              min={1}
+              max={10}
+              inputMode="numeric"
+              onChange={(rpe) => setSetForm({ ...setForm, rpe })}
+            />
+          </div>
+          <button
+            type="button"
+            className="logger-tile logger-tile-repeat"
+            onClick={() => repeatSource && setSetForm({ ...repeatSource })}
+          >
+            <span className="logger-tile-label">{repeatLabel}</span>
+            <span className="logger-repeat-icon">&#8635;</span>
+            <span className="logger-tile-label">
+              {repeatSource ? `${repeatSource.weight} x ${repeatSource.reps}` : '-'}
+            </span>
+          </button>
+        </div>
 
-      <RestTimer autoStartSignal={restSignal} />
+        <div className="logger-actions">
+          <button type="button" className="primary logger-cta" onClick={addSet}>
+            Add Set
+          </button>
+          <div className="logger-secondary-row">
+            <span className="meta-text">
+              {activeLog?.sets.length ?? 0} set{(activeLog?.sets.length ?? 0) === 1 ? '' : 's'} logged
+            </span>
+            <button type="button" className="choice-btn" onClick={finish} disabled={logged.length === 0}>
+              Finish Workout
+            </button>
+          </div>
+        </div>
+      </div>
 
       {activeLog && activeLog.sets.length > 0 && (
         <table className="set-table">
@@ -272,20 +311,6 @@ export function FreeformWorkout({
           rows={3}
         />
       </label>
-
-      <div className="session-summary">
-        <p className="meta-text">
-          {logged.length} exercise{logged.length === 1 ? '' : 's'} logged this session.
-        </p>
-        <div className="wizard-actions">
-          <button type="button" className="link-btn-danger" onClick={onCancel}>
-            Cancel Workout
-          </button>
-          <button type="button" className="primary" onClick={finish} disabled={logged.length === 0}>
-            Finish Workout
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
