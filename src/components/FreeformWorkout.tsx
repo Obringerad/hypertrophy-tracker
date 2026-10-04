@@ -71,6 +71,8 @@ export function FreeformWorkout({
   const [exerciseFilter, setExerciseFilter] = useState('')
   const [notes, setNotes] = useState(() => initialProgress?.notes ?? '')
   const [restSignal, setRestSignal] = useState(0)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(() => !!initialProgress?.notes)
 
   // Persist progress on every change so a backgrounded/reloaded tab can resume mid-workout.
   useEffect(() => {
@@ -102,6 +104,8 @@ export function FreeformWorkout({
 
   function selectExercise(id: string) {
     setActiveExerciseId(id)
+    setPickerOpen(false)
+    setExerciseFilter('')
   }
 
   function addSet() {
@@ -123,6 +127,10 @@ export function FreeformWorkout({
         .map((l) => (l.exerciseId === exerciseId ? { ...l, sets: l.sets.filter((_, i) => i !== index) } : l))
         .filter((l) => l.sets.length > 0),
     )
+  }
+
+  function undoLastSet() {
+    if (activeLog) removeSet(activeExerciseId, activeLog.sets.length - 1)
   }
 
   function finish() {
@@ -151,13 +159,21 @@ export function FreeformWorkout({
           <button type="button" className="link-btn-danger" onClick={onCancel}>
             Cancel Workout
           </button>
-          <span className="meta-text">Freeform</span>
-          <span className="meta-text">
-            {logged.length} exercise{logged.length === 1 ? '' : 's'} logged
+          <span className="meta-text">Exercise {logged.length + (activeLog ? 0 : 1)}</span>
+          <span className="meta-text logger-topbar-set">
+            Set {Math.min((activeLog?.sets.length ?? 0) + 1, MAX_SETS_PER_EXERCISE)}
           </span>
         </div>
 
         <div className="logger-context">
+          <div className="logger-title-row">
+            <h2>{activeExercise?.name ?? 'Select an exercise'}</h2>
+            <div className="set-count-buttons">
+              <button type="button" className="link-btn" onClick={() => setPickerOpen((open) => !open)}>
+                {pickerOpen ? 'Close' : 'Change'}
+              </button>
+            </div>
+          </div>
           {recentIds.length > 0 && (
             <div className="recent-exercise-chips">
               {recentIds.map((id) => {
@@ -176,29 +192,31 @@ export function FreeformWorkout({
               })}
             </div>
           )}
-          <div className="exercise-picker freeform-exercise-picker">
-            <input
-              type="text"
-              placeholder="Filter exercises..."
-              value={exerciseFilter}
-              onChange={(e) => setExerciseFilter(e.target.value)}
-            />
-            <select
-              value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
-              onChange={(e) => selectExercise(e.target.value)}
-            >
-              {!filteredExercises.some((e) => e.id === activeExerciseId) && (
-                <option value="" disabled>
-                  Select an exercise
-                </option>
-              )}
-              {filteredExercises.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {pickerOpen && (
+            <div className="exercise-picker freeform-exercise-picker">
+              <input
+                type="text"
+                placeholder="Filter exercises..."
+                value={exerciseFilter}
+                onChange={(e) => setExerciseFilter(e.target.value)}
+              />
+              <select
+                value={filteredExercises.some((e) => e.id === activeExerciseId) ? activeExerciseId : ''}
+                onChange={(e) => selectExercise(e.target.value)}
+              >
+                {!filteredExercises.some((e) => e.id === activeExerciseId) && (
+                  <option value="" disabled>
+                    Select an exercise
+                  </option>
+                )}
+                {filteredExercises.map((ex) => (
+                  <option key={ex.id} value={ex.id}>
+                    {ex.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="set-dots" role="img" aria-label={`${activeLog?.sets.length ?? 0} sets logged`}>
             {Array.from({ length: Math.min((activeLog?.sets.length ?? 0) + 1, MAX_SETS_PER_EXERCISE) }, (_, i) => {
               const done = i < (activeLog?.sets.length ?? 0)
@@ -262,12 +280,16 @@ export function FreeformWorkout({
 
         <div className="logger-actions">
           <button type="button" className="primary logger-cta" onClick={addSet} disabled={atSetLimit}>
-            {atSetLimit ? `Max ${MAX_SETS_PER_EXERCISE} sets reached` : "Add Set"}
+            {atSetLimit ? `Max ${MAX_SETS_PER_EXERCISE} sets reached` : "Log Set"}
           </button>
           <div className="logger-secondary-row">
-            <span className="meta-text">
-              {activeLog?.sets.length ?? 0} set{(activeLog?.sets.length ?? 0) === 1 ? '' : 's'} logged
-            </span>
+            {activeLog && activeLog.sets.length > 0 ? (
+              <button type="button" className="link-btn" onClick={undoLastSet} title="Remove the last set you logged for this exercise">
+                &#8592; Undo Last Set
+              </button>
+            ) : (
+              <span />
+            )}
             <button type="button" className="choice-btn" onClick={finish} disabled={logged.length === 0}>
               Finish Workout
             </button>
@@ -314,15 +336,21 @@ export function FreeformWorkout({
         </table>
       )}
 
-      <label className="session-notes-field">
-        Notes (Optional)
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="How did it feel? Anything to remember for next time?"
-          rows={3}
-        />
-      </label>
+      {notesOpen || notes ? (
+        <label className="session-notes-field">
+          Notes (Optional)
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="How did it feel? Anything to remember for next time?"
+            rows={2}
+          />
+        </label>
+      ) : (
+        <button type="button" className="link-btn add-note-btn" onClick={() => setNotesOpen(true)}>
+          + Add a Note
+        </button>
+      )}
     </div>
   )
 }
