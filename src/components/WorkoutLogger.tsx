@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useWakeLock } from '../hooks/useWakeLock'
 import type { Exercise, LoggedExercise, WorkoutPlan, WorkoutSession } from '../types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { resolveTodaysPlanDay } from '../lib/planEngine'
 import { type WeightUnit } from '../lib/units'
+import { todayIso } from '../lib/dates'
 import { useSettings } from '../context/SettingsContext'
 import { WorkoutHome } from './WorkoutHome'
 import { ActiveWorkout, type QueueItem } from './ActiveWorkout'
@@ -38,10 +40,6 @@ interface WorkoutDraft {
 
 const DRAFT_KEY = 'hypertrophy.workoutDraft'
 
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
 /**
  * Clears the draft directly, bypassing React state. Finishing a workout also triggers a
  * parent-level tab change (App navigates to Plans/Home), which can unmount this component in
@@ -60,6 +58,7 @@ export function WorkoutLogger({ exercises, sessions, onSave, plan, activePlanId,
   const { weightUnit: liveWeightUnit } = useSettings()
   const [draft, setDraft] = useLocalStorage<WorkoutDraft | null>(DRAFT_KEY, null)
   const [started, setStarted] = useState(() => draft !== null)
+  useWakeLock(started)
   const [recovery, setRecovery] = useState(() => draft?.recovery ?? 3)
   const [date, setDate] = useState(() => draft?.date ?? todayIso())
   const [startedAt, setStartedAt] = useState<number | undefined>(() => draft?.startedAt)

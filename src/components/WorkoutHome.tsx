@@ -1,4 +1,5 @@
 import type { PlanDay, WorkoutPlan } from '../types'
+import { todayIso } from '../lib/dates'
 
 const RECOVERY_LABELS: Record<number, string> = {
   1: 'Wrecked',
@@ -23,10 +24,6 @@ interface Props {
   isToday: boolean
   /** Shown as a secondary option when this will be a freeform session and there's a prior one to repeat. */
   onRepeatLast?: () => void
-}
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10)
 }
 
 function formatChosenDate(iso: string): string {

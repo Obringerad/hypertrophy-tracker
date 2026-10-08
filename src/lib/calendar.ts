@@ -1,4 +1,5 @@
 import type { WorkoutPlan, WorkoutSession } from '../types'
+import { toLocalIso } from './dates'
 
 export interface CalendarDay {
   iso: string
@@ -15,13 +16,6 @@ interface BuildMonthCalendarOptions {
   plan?: WorkoutPlan
   /** All saved plans, used to resolve each session's plan-day label. */
   allPlans: WorkoutPlan[]
-}
-
-function toIso(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
 }
 
 function sessionLabel(session: WorkoutSession, allPlans: WorkoutPlan[], disambiguate: boolean): string {
@@ -47,12 +41,12 @@ export function buildMonthCalendar(
   }
 
   const disambiguate = !plan && allPlans.length > 1
-  const todayIso = toIso(new Date())
+  const todayIso = toLocalIso(new Date())
   const startWeekday = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
 
   function dayCell(d: Date, isCurrentMonth: boolean): CalendarDay {
-    const iso = toIso(d)
+    const iso = toLocalIso(d)
     const daySessions = sessionsByDate.get(iso) ?? []
     const isScheduled = plan?.scheduleType === 'fixed' && (plan.fixedDays ?? []).includes(d.getDay())
     return {

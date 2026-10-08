@@ -18,7 +18,7 @@ import { GuideTab } from './components/GuideTab'
 import { TabIcon, type TabIconName } from './components/TabIcon'
 import { SettingsProvider } from './context/SettingsContext'
 import { advancePlanRotation } from './lib/planEngine'
-import { formatDate } from './lib/dates'
+import { formatDate, todayIso } from './lib/dates'
 import './App.css'
 
 type Tab = 'home' | 'log' | 'history' | 'calendar' | 'plans' | 'exercises' | 'tools' | 'guide' | 'settings'
@@ -180,7 +180,7 @@ export default function App() {
       name: `${plan.name} (copy)`,
       days: plan.days.map((d) => ({ ...d, id: crypto.randomUUID() })),
       nextDayIndex: 0,
-      startDate: new Date().toISOString().slice(0, 10),
+      startDate: todayIso(),
     }
     setPlans((prev) => [...prev, newPlan])
     setSelectedPlanId(newPlan.id)

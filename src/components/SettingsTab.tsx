@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import type { Exercise, WorkoutPlan, WorkoutSession } from '../types'
 import { sessionUnit, type WeightUnit } from '../lib/units'
 import { validateBackupData } from '../lib/backupValidation'
+import { todayIso } from '../lib/dates'
 import { useSettings } from '../context/SettingsContext'
 import { ConfirmDialog } from './ConfirmDialog'
 
@@ -105,7 +106,7 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `hypertrophy-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `hypertrophy-backup-${todayIso()}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -116,7 +117,7 @@ export function SettingsTab({ exercises, sessions, plans, activePlanId, onImport
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `hypertrophy-data-${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = `hypertrophy-data-${todayIso()}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }

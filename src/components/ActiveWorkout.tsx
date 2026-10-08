@@ -99,8 +99,10 @@ export function ActiveWorkout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.exerciseId])
 
+  const noReps = !(form.reps > 0)
+
   function logSet() {
-    if (!current) return
+    if (!current || noReps) return
     const isLastSetOfExercise = current.setNumber >= current.targetSets
     const exerciseNumberForCurrent = planDay.exercises.findIndex((pe) => pe.exerciseId === current.exerciseId) + 1
     const isLastExerciseForCurrent = exerciseNumberForCurrent >= planDay.exercises.length
@@ -423,8 +425,8 @@ export function ActiveWorkout({
             </>
           ) : (
             <>
-              <button type="button" className="primary logger-cta" onClick={logSet}>
-                {logSetLabel}
+              <button type="button" className="primary logger-cta" onClick={logSet} disabled={noReps}>
+                {noReps ? 'Enter reps to log this set' : logSetLabel}
               </button>
               <div className="logger-secondary-row">
                 {stepIndex > 0 ? (

@@ -1,6 +1,7 @@
 import type { Exercise, PlanDay, WorkoutPlan } from '../types'
 import type { SplitTemplate, TemplateDay } from './splitTemplates'
 import { convertWeight, type WeightUnit } from './units'
+import { todayIso } from './dates'
 
 interface MaterializeOptions {
   name: string
@@ -79,7 +80,7 @@ export function materializePlan({
     daysPerWeek: scheduleType === 'flexible' ? daysPerWeek : undefined,
     days,
     nextDayIndex: 0,
-    startDate: new Date().toISOString().slice(0, 10),
+    startDate: todayIso(),
     durationWeeks,
   }
 

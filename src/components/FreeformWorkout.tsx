@@ -108,8 +108,10 @@ export function FreeformWorkout({
     setExerciseFilter('')
   }
 
+  const noReps = !(setForm.reps > 0)
+
   function addSet() {
-    if (!activeExerciseId || setForm.reps <= 0 || atSetLimit) return
+    if (!activeExerciseId || noReps || atSetLimit) return
     setLogged((prev) => {
       const existing = prev.find((l) => l.exerciseId === activeExerciseId)
       const newSet: SetEntry = { ...setForm }
@@ -279,8 +281,8 @@ export function FreeformWorkout({
         </div>
 
         <div className="logger-actions">
-          <button type="button" className="primary logger-cta" onClick={addSet} disabled={atSetLimit}>
-            {atSetLimit ? `Max ${MAX_SETS_PER_EXERCISE} sets reached` : "Log Set"}
+          <button type="button" className="primary logger-cta" onClick={addSet} disabled={atSetLimit || noReps}>
+            {atSetLimit ? `Max ${MAX_SETS_PER_EXERCISE} sets reached` : noReps ? 'Enter reps to log this set' : 'Log Set'}
           </button>
           <div className="logger-secondary-row">
             {activeLog && activeLog.sets.length > 0 ? (
